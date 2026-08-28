@@ -161,6 +161,7 @@ Tekshiriladi: barchasi, birma-bir.
 - Memory leaks: tozalanmagan `setInterval`, `addEventListener`, RxJS subscription-lar
 - Virtualizatsiya yo'q: 1000 ta DOM element = browser ICU-da
 
+
 **3. Data Fetching**
 - `useEffect + fetch` spaghetti kodi — React Query/SWR/RTK Query nomi eshitilmagan
 - Client-state va server-state aralashtirilgan, har render-da API call
