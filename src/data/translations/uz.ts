@@ -1,0 +1,242 @@
+import { TranslationSchema } from '../../types/language';
+
+export const uzTranslations: TranslationSchema = {
+  nav: {
+    about: 'Haqimda',
+    skills: 'Ko\'nikmalar',
+    projects: 'Loyihalar',
+    experience: 'Tajriba',
+    contact: 'Bog\'lanish',
+    resumeSpec: 'Rezyume / CV',
+    telegramCta: '@toyneden',
+  },
+  hero: {
+    badgeAvailable: 'Frilans va Doimiy Ish uchun Ochiq',
+    typewriter: [
+      'Python Backend Dasturchi',
+      'School 21 Data Science Talabasi',
+      'FastAPI va Django Mutaxassisi',
+      'Telegram Bot Arxitektori (aiogram 3.x)',
+      'Yuqori Tezlikdagi REST va Asinxron API\'lar',
+    ],
+    subtext:
+      'Mustahkam backend mikroservislari, yuqori yuklamali REST API\'lar va kengaytiriluvchi Telegram botlar yaratish. Ishlab chiqarish darajasidagi Python arxitekturasi va School 21 algoritmik ma\'lumotlar tahlili.',
+    exploreProjects: 'Loyihalarni Ko\'rish',
+    getInTouch: 'Aloqaga Chiqish',
+    statFreelance: 'Muvaffaqiyatli Frilans',
+    statSchool21: 'Data Science & Algoritmlar',
+    statPython: 'FastAPI / Django',
+    statLocation: 'O\'zbekiston (UTC+5)',
+  },
+  visualizer: {
+    telemetryTitle: 'Telemetriya Paneli',
+    runtimeTitle: 'Python Asinxron Dvigateli',
+    apiLatency: 'API Kechikishi',
+    latencyHealthy: 'A\'lo darajada',
+    asyncWorkers: 'Asinxron Workerlar',
+    workersActive: 'Faol',
+    subsystem: 'SUBSISTEMA',
+    engineProtocol: 'DVIGATEL / PROTOKOL',
+    status: 'HOLAT',
+    apiGateway: 'API Gateway',
+    dbCluster: 'MB Klasteri',
+    authSecurity: 'Autentifikatsiya & Xavfsizlik',
+    onlineStatus: 'ONLAYN',
+  },
+  terminal: {
+    titleBadge: 'MUHANDISLIK PROFILI & ARXITEKTURA',
+    heading: 'Backend Tizimlari & Algoritmik Asoslar',
+    subheading:
+      'Mustaqil tijoriy loyihalar, ishlab chiqarish tizimlari va School 21 intensiv muhandislik tajribasi.',
+    tabBio: 'bio_profile.md',
+    tabPhilosophy: 'architecture_philosophy.py',
+    tabStack: 'core_runtime.json',
+    bioP1:
+      'Men Bekzod Idiyev — ishonchli, yuqori yuklamalarga chidamli backend arxitekturasi, REST API\'lar va murakkab Telegram botlar ishlab chiqishga ixtisoslashgan Python Backend dasturchisiman.',
+    bioP2:
+      'Kwork frilans platformasida 7 dan ortiq tijoriy loyihalarni noldan muvaffaqiyatli topshirganman (Paynet CRM, ta\'lim botlari va savdo tizimlari).',
+    bioP3:
+      'Hozirda School 21 (Data Science & Systems Engineering) dasturida past darajadagi dasturlash, Unix/Linux, algoritmlar va ma\'lumotlar tahlilini chuqur o\'rganmoqdaman.',
+    philosophyP1:
+      'Toza kod va SOLID tamoyillari: Har bir modul kengaytiriluvchi va mustaqil bo\'lishi shart.',
+    philosophyP2:
+      'Asinxronlik (AsyncIO / aiogram 3.x / FastAPI): Katta hajmdagi so\'rovlarni minimal kechikish bilan qayta ishlash.',
+    philosophyP3:
+      'Ishonchli ma\'lumotlar bazasi: To\'g\'ri indekslash, normallashtirish va Redis kesh mexanizmlari.',
+    activeContracts: 'Muvaffaqiyatli Loyihalar',
+    responseTime: 'O\'rtacha Javob Vaqti',
+    codeQuality: 'Kod Sifati & Standartlar',
+  },
+  skills: {
+    titleBadge: 'TEXNIK STACK MATRITSASI',
+    heading: 'Texnologiyalar & Ko\'nikmalar',
+    subheading:
+      'Asinxron veb freymvorklar, relyatsion ma\'lumotlar bazalari, kesh tizimlari va DevOps vositalari.',
+    experienceLevel: 'Tajriba Darajasi',
+    categories: {
+      backendTitle: 'Backend Freymvorklar',
+      backendDesc: 'Veb API\'lar, mikroservislar va asinxron Telegram botlar',
+      dbTitle: 'Ma\'lumotlar Bazalari & Kesh',
+      dbDesc: 'Relyatsion modellar, so\'rovlarni optimallashtirish va xotira keshi',
+      devopsTitle: 'DevOps & Infratuzilma',
+      devopsDesc: 'Konteynerlashtirish, asinxron vazifalar navbati va Linux',
+      archTitle: 'Arxitektura & Xavfsizlik',
+      archDesc: 'Tizim dizayni, toza kod, JWT/OAuth2 va xavfsizlik protokollari',
+    },
+  },
+  projects: {
+    titleBadge: 'TIJORIY & AMALIY ISHLAR',
+    heading: 'Tanlangan Backend Loyihalari',
+    subheading:
+      'Ishlab chiqarish darajasidagi asinxron tizimlar, Telegram ekotizimlari va sun\'iy intellekt integratsiyalari.',
+    allFilter: 'Barcha Loyihalar',
+    viewCode: 'Kodni Ko\'rish',
+    liveDemo: 'Bot / Demo',
+    viewArchitecture: 'Arxitekturani Ko\'rish',
+    architectureTitle: 'Tizim Arxitekturasi',
+    keyFeaturesTitle: 'Asosiy Funksionallik',
+    techStackTitle: 'Ishlatilgan Texnologiyalar',
+    items: {
+      buddyTeam: {
+        category: 'AI & Moslashtirish Platformasi',
+        summary: 'Talabalar va mentorlarni sun\'iy intellekt tavsiyalari asosida bog\'lovchi yuqori samarali platforma.',
+        features: [
+          'Talabalar va mentorlarni ko\'nikma hamda maqsadlar bo\'yicha avtomatik moslashtiruvchi tizim.',
+          'Django REST Framework backend va Docker konteynerlashtirilgan deploy tizimi.',
+          'Google Gemini AI API integratsiyasi orqali intellektual tavsiyalar berish moduli.',
+        ],
+        architecture: 'REST API endpointlari, JWT autentifikatsiya va Docker mikroservislar izolyatsiyasi bilan toza arxitektura.',
+      },
+      esportsBot: {
+        category: 'Kibersport Telegram Ekotizimi',
+        summary: 'Turnirlarni avtomatlashtiruvchi, real vaqtda jadval generatsiya qiluvchi asinxron Telegram bot.',
+        features: [
+          'aiogram 3.x asosida turnir operatsiyalarini to\'liq avtomatlashtiruvchi asinxron bot.',
+          'Single/Double elimination formatlarini qo\'llab-quvvatlovchi dinamik turnir jadvali generatori.',
+          'Real vaqtda hisob-kitob, reyting yangilanishlari va administrator boshqaruv paneli.',
+        ],
+        architecture: 'aiogram 3.x asinxron hodisalar sikli, o\'yinlar holatini saqlash uchun Redis va FastAPI admin hooklari.',
+      },
+      peerLearn: {
+        category: 'P2P Ta\'lim Telegram Mini App',
+        summary: 'School 21 ekotizimi uchun jonli WebSockets bilan anonim mentor qidiruvchi Telegram Mini App.',
+        features: [
+          'School 21 o\'quv muhiti uchun anonim talaba-mentor ulanish platformasi.',
+          'Redis pub/sub bilan integratsiyalashgan ikki tomonlama real vaqt rejimidagi WebSockets chat.',
+          'Gamifikatsiya (XP/Coin), taqvim integratsiyasi va APScheduler orqali avtomatik eslatmalar.',
+        ],
+        architecture: 'FastAPI asinxron backend, WebSocket kanallari, Redis Pub/Sub va APScheduler navbat tizimi.',
+      },
+    },
+  },
+  timeline: {
+    titleBadge: 'KARYERA YO\'NALISHI & TA\'LIM',
+    heading: 'Ish Tajribasi & Ta\'lim Xronologiyasi',
+    subheading:
+      'Frilans shartnomalari, korporativ CRM tizimlari va School 21 kompyuter fanlari mutaxassisligi.',
+    workTitle: 'Ish Tajribasi',
+    workSubtitle: 'Tijoriy backend shartnomalari va frilans loyihalar',
+    eduTitle: 'Ta\'lim & Sertifikatlar',
+    eduSubtitle: 'Akademik muassasalar va dasturlash ta\'limi',
+    workItems: {
+      kwork: {
+        role: 'Frilans Backend Dasturchi',
+        company: 'Kwork (Frilans Birjasi)',
+        badge: '7+ Yakunlangan Loyiha',
+        period: '2026 – Hozirgacha',
+        responsibilities: [
+          '7 dan ortiq murakkab backend loyihalarni noldan to\'liq deploy holatigacha ishlab chiqdim va topshirdim.',
+          'Buyurtmachilar bilan to\'g\'ridan-to\'g\'ri talablarni aniqlash va texnik topshiriqlarni tuzish.',
+          'PostgreSQL va MySQL relyatsion modellarini loyihalash, indekslarni optimallashtirish.',
+          'Yuqori ishonchlilikka ega REST API va Telegram integratsiya vositalarini yaratish.',
+        ],
+      },
+      paynet: {
+        role: 'Backend Dasturchi',
+        company: 'Paynet CRM Tizimi',
+        badge: 'Korporativ CRM',
+        period: '2026',
+        responsibilities: [
+          'Mijozlar boshqaruvi va tranzaksiyalar tarixini kuzatuvchi asosiy biznes logikani ishlab chiqish.',
+          'Ko\'p darajali rollarga asoslangan ruxsat tizimi (RBAC) va xavfsiz API yaratish.',
+          'To\'lov shlyuzlari qayta chaqiruvlari (callback) va loglash tizimini integratsiya qilish.',
+        ],
+      },
+      rrrAcademy: {
+        role: 'Backend Dasturchi',
+        company: 'RRR Academy Telegram Bot',
+        badge: 'EdTech Avtomatizatsiya',
+        period: '2024',
+        responsibilities: [
+          'Kurslar katalogi, foydalanuvchilarni ro\'yxatga olish va vazifalarni tekshirish boti.',
+          'Eslatmalar va ommaviy xabarnomalar yuborish konveyerini ishlab chiqish.',
+        ],
+      },
+    },
+    eduItems: {
+      school21: {
+        institution: 'School 21',
+        period: '2025 – Hozirgacha',
+        field: 'Backend Tizimlar Muhandisligi & Data Science',
+        status: 'O\'qimoqda',
+        description: 'Chuqur peer-to-peer metodologiyasi: C/C++, Linux, algoritmlar va Data Science arxitekturasi.',
+      },
+      mohirdev: {
+        institution: 'Mohirdev Platformasi',
+        period: '2024 – 2025',
+        field: 'Intensiv Python Backend Kursi',
+        status: 'Yakunlangan',
+        description: 'Python ichki arxitekturasi, Django, FastAPI, PostgreSQL optimallashtirish, Docker va REST API dizayni.',
+      },
+      proUnity: {
+        institution: 'Pro Unity Academy',
+        period: '2024',
+        field: 'Backend Dasturlash Asoslari',
+        status: 'Yakunlangan',
+        description: 'OOP, ma\'lumotlar tuzilmalari, algoritmlar va relyatsion ma\'lumotlar bazalari.',
+      },
+      itCenter: {
+        institution: 'IT Center',
+        period: '2023',
+        field: 'Veb Dasturlash Asoslari',
+        status: 'Yakunlangan',
+        description: 'HTML5, CSS3, zamonaviy JavaScript DOM manipulatsiyasi va responsiv dizayn.',
+      },
+    },
+  },
+  contact: {
+    titleBadge: 'ALOQA INTERFEYSI',
+    heading: 'Backend Hamkorlikni Boshlash',
+    subheading:
+      'Frilans shartnomalari, doimiy ish takliflari yoki texnik konsultatsiyalar uchun bog\'laning.',
+    phoneLabel: 'Telefon',
+    emailLabel: 'Elektron Pochta',
+    telegramLabel: 'Telegram',
+    locationLabel: 'Buxoro (UTC+5)',
+    clientNameLabel: 'mijoz_ismi',
+    clientNamePlaceholder: 'masalan: Rustam Karimov',
+    emailInputLabel: 'javob_email',
+    emailInputPlaceholder: 'masalan: rustam@company.uz',
+    messageLabel: 'loyiha_texnik_tavsifi',
+    messagePlaceholder: 'Backend talablaringiz, API spetsifikatsiyasi yoki Telegram bot g\'oyangizni tasvirlang...',
+    sendBtn: 'POST /api/v1/contact/submit',
+    sendingNote: '* Bekzod Idiyevga to\'g\'ridan-to\'g\'ri asinxron yuborish',
+    successTitle: 'Xabaringiz Qabul Qilindi!',
+    successMsg: 'Status: 200 OK — Rahmat, sizning so\'rovingiz muvaffaqiyatli qabul qilindi.',
+    sendAnother: 'Yana So\'rov Yuborish',
+  },
+  resume: {
+    title: 'REZYUME / CV SPETSIFIKATSIYASI',
+    printPdf: 'Chop etish / PDF',
+    summaryTitle: 'Kasbiy Xulosa',
+    experienceTitle: 'Ish Tajribasi',
+    educationTitle: 'Ta\'lim & Malaka',
+    close: 'Yopish',
+  },
+  footer: {
+    roleDesc: 'Python Backend Dasturchi • School 21 Data Science Talabasi',
+    location: 'Buxoro, Samarqand viloyati, O\'zbekiston',
+    rightsReserved: 'Barcha huquqlar himoyalangan.',
+    techStackNote: 'Interaktiv WebGL 3D Yadro • FastAPI & Django Arxitekturasi',
+  },
+};

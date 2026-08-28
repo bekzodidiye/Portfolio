@@ -1,0 +1,6 @@
+{
+  "name": "Bekzod Idiyev Portfolio",
+  "description": "3D Interactive Python Backend Developer Portfolio for Bekzod Idiyev with Three.js Cyber Core, GSAP animations, and interactive terminal.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

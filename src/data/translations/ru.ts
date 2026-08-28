@@ -1,0 +1,242 @@
+import { TranslationSchema } from '../../types/language';
+
+export const ruTranslations: TranslationSchema = {
+  nav: {
+    about: 'Обо мне',
+    skills: 'Навыки',
+    projects: 'Проекты',
+    experience: 'Опыт',
+    contact: 'Контакты',
+    resumeSpec: 'Резюме / CV',
+    telegramCta: '@toyneden',
+  },
+  hero: {
+    badgeAvailable: 'Открыт для фриланса и постоянной работы',
+    typewriter: [
+      'Python Backend Разработчик',
+      'Студент Data Science в School 21',
+      'Специалист FastAPI и Django',
+      'Архитектор Telegram-ботов (aiogram 3.x)',
+      'Высоконагруженные REST и Async API',
+    ],
+    subtext:
+      'Разработка надежных микросервисов, высокопроизводительных REST API и масштабируемых Telegram-ботов. Сочетание промышленной архитектуры на Python с алгоритмической базой School 21.',
+    exploreProjects: 'Смотреть Проекты',
+    getInTouch: 'Связаться',
+    statFreelance: 'Проектов на Kwork',
+    statSchool21: 'Data Science & Core',
+    statPython: 'FastAPI / Django',
+    statLocation: 'Узбекистан (UTC+5)',
+  },
+  visualizer: {
+    telemetryTitle: 'Панель Телеметрии',
+    runtimeTitle: 'Python Asyncio Движок',
+    apiLatency: 'Задержка API',
+    latencyHealthy: 'Отлично',
+    asyncWorkers: 'Асинхронные Воркеры',
+    workersActive: 'Активны',
+    subsystem: 'ПОДСИСТЕМА',
+    engineProtocol: 'ДВИЖОК / ПРОТОКОЛ',
+    status: 'СТАТУС',
+    apiGateway: 'API Gateway',
+    dbCluster: 'Кластер БД',
+    authSecurity: 'Аутентификация & Защита',
+    onlineStatus: 'ОНЛАЙН',
+  },
+  terminal: {
+    titleBadge: 'ПРОФИЛЬ ИНЖЕНЕРА & АРХИТЕКТУРА',
+    heading: 'Backend Системы & Алгоритмический Базис',
+    subheading:
+      'Коммерческий фриланс-опыт, разработка продакшн-систем и интенсивная инженерная школа School 21.',
+    tabBio: 'bio_profile.md',
+    tabPhilosophy: 'architecture_philosophy.py',
+    tabStack: 'core_runtime.json',
+    bioP1:
+      'Я — Бекзод Идиев, Python Backend разработчик, специализирующийся на надежных backend-архитектурах, быстрых REST API и сложных Telegram-ботах.',
+    bioP2:
+      'Успешно выполнил и сдал под ключ более 7 коммерческих проектов на бирже Kwork (Paynet CRM, образовательные боты, торговые утилиты).',
+    bioP3:
+      'В настоящее время углубляю знания в низкоуровневой разработке, Linux/Unix и алгоритмах Data Science в School 21.',
+    philosophyP1:
+      'Чистая архитектура и SOLID: каждый модуль изолирован, легко тестируется и масштабируется.',
+    philosophyP2:
+      'Async-First подход (AsyncIO / aiogram 3.x / FastAPI): обработка высоких нагрузок с минимальным временем отклика.',
+    philosophyP3:
+      'Надежные базы данных: грамотное индексирование, нормализация и кэширование через Redis.',
+    activeContracts: 'Сданных Проектов',
+    responseTime: 'Средний Отклик',
+    codeQuality: 'Стандарты Кода',
+  },
+  skills: {
+    titleBadge: 'МАТРИЦА ТЕХНИЧЕСКИХ НАВЫКОВ',
+    heading: 'Технологический Стек & Компетенции',
+    subheading:
+      'Асинхронные веб-фреймворки, реляционные базы данных, кэширование и DevOps автоматизация.',
+    experienceLevel: 'Уровень Владения',
+    categories: {
+      backendTitle: 'Backend Фреймворки',
+      backendDesc: 'Продакшн API, микросервисы и асинхронные Telegram-боты',
+      dbTitle: 'Базы Данных & Кэш',
+      dbDesc: 'Реляционное моделирование, оптимизация запросов и Redis',
+      devopsTitle: 'DevOps & Инфраструктура',
+      devopsDesc: 'Контейнеризация, очереди задач и администрирование Linux',
+      archTitle: 'Архитектура & Безопасность',
+      archDesc: 'Системный дизайн, паттерны, JWT/OAuth2 и протоколы защиты',
+    },
+  },
+  projects: {
+    titleBadge: 'КОММЕРЧЕСКИЕ И ПРАКТИЧЕСКИЕ РАБОТЫ',
+    heading: 'Избранные Backend Проекты',
+    subheading:
+      'Промышленные асинхронные сервисы, Telegram-экосистемы и интеграция искусственного интеллекта.',
+    allFilter: 'Все Проекты',
+    viewCode: 'Исходный Код',
+    liveDemo: 'Демо / Бот',
+    viewArchitecture: 'Архитектура',
+    architectureTitle: 'Архитектура Системы',
+    keyFeaturesTitle: 'Ключевой Функционал',
+    techStackTitle: 'Использованный Стек',
+    items: {
+      buddyTeam: {
+        category: 'Платформа Подбора & AI',
+        summary: 'Высокопроизводительная платформа мэтчинга менторов и студентов с рекомендательной системой на базе AI.',
+        features: [
+          'Автоматический мэтчинг студентов и менторов на основе навыков и поставленных целей.',
+          'Django REST Framework бэкенд в контейнеризированной среде Docker.',
+          'Интеграция с Google Gemini AI API для персонализированных рекомендаций.',
+        ],
+        architecture: 'Чистая архитектура с REST API, аутентификацией по JWT и изоляцией микросервисов в Docker.',
+      },
+      esportsBot: {
+        category: 'Telegram Экосистема Киберспорта',
+        summary: 'Асинхронный Telegram-бот для автоматизации киберспортивных турниров с генерацией турнирных сеток.',
+        features: [
+          'Асинхронный бот на aiogram 3.x, полностью автоматизирующий проведение турниров.',
+          'Динамический генератор турнирных сеток (Single/Double Elimination).',
+          'Подсчет очков в реальном времени, обновление лидерборда и панель администратора.',
+        ],
+        architecture: 'Событийно-ориентированный цикл aiogram 3.x, персистентность состояния матчей в Redis и хуки FastAPI.',
+      },
+      peerLearn: {
+        category: 'P2P Обучение Telegram Mini App',
+        summary: 'Telegram Mini App для анонимного поиска менторов с поддержкой WebSockets для School 21.',
+        features: [
+          'Анонимный поиск напарников для взаимного обучения по методологии School 21.',
+          'Двусторонний чат в реальном времени на WebSockets и Redis Pub/Sub.',
+          'Геймификация (XP/монеты), календарь занятий и фоновые напоминания через APScheduler.',
+        ],
+        architecture: 'FastAPI async бэкенд, каналы WebSockets, брокер Redis Pub/Sub и планировщик APScheduler.',
+      },
+    },
+  },
+  timeline: {
+    titleBadge: 'КАРЬЕРНЫЙ ПУТЬ & ОБРАЗОВАНИЕ',
+    heading: 'Хронология Опыта и Обучения',
+    subheading:
+      'Коммерческие контракты, разработка CRM-систем и специализация в School 21.',
+    workTitle: 'Опыт Работы',
+    workSubtitle: 'Коммерческие контракты и фриланс-разработка',
+    eduTitle: 'Образование & Сертификаты',
+    eduSubtitle: 'Академические учреждения и курсы разработки',
+    workItems: {
+      kwork: {
+        role: 'Freelance Backend Разработчик',
+        company: 'Kwork (Фриланс Биржа)',
+        badge: '7+ Сданных Проектов',
+        period: '2026 – Настоящее время',
+        responsibilities: [
+          'Самостоятельно спроектировал, протестировал и сдал более 7 сложных backend-проектов под ключ.',
+          'Прямое взаимодействие с заказчиками, формирование ТЗ и согласование этапов разработки.',
+          'Проектирование баз данных (PostgreSQL, MySQL), оптимизация индексов и сложных запросов.',
+          'Разработка REST API и инструментов интеграции с Telegram с обработкой ошибок.',
+        ],
+      },
+      paynet: {
+        role: 'Backend Разработчик',
+        company: 'Paynet CRM Система',
+        badge: 'Корпоративная CRM',
+        period: '2026',
+        responsibilities: [
+          'Архитектура ключевой бизнес-логики управления клиентами и аудита транзакций.',
+          'Многоуровневая ролевая модель доступа (RBAC) для защиты API endpoints.',
+          'Интеграция платежных шлюзов (callback verification) и структурированное логирование.',
+        ],
+      },
+      rrrAcademy: {
+        role: 'Backend Разработчик',
+        company: 'RRR Academy Telegram Bot',
+        badge: 'EdTech Автоматизация',
+        period: '2024',
+        responsibilities: [
+          'Бот автоматизации учебного процесса: каталог курсов, запись студентов и проверка заданий.',
+          'Создание конвейера фоновых уведомлений и рассылок.',
+        ],
+      },
+    },
+    eduItems: {
+      school21: {
+        institution: 'School 21',
+        period: '2025 – Настоящее время',
+        field: 'Системная Инженерия & Data Science',
+        status: 'Обучается',
+        description: 'Интенсивная peer-to-peer методология: углубленные алгоритмы, системное программирование, Linux и модели Data Science.',
+      },
+      mohirdev: {
+        institution: 'Платформа Mohirdev',
+        period: '2024 – 2025',
+        field: 'Интенсивный Python Backend',
+        status: 'Завершено',
+        description: 'Внутреннее устройство Python, фреймворки Django/FastAPI, оптимизация PostgreSQL, Docker и дизайн REST API.',
+      },
+      proUnity: {
+        institution: 'Pro Unity Academy',
+        period: '2024',
+        field: 'Фундаментальные Основы Backend',
+        status: 'Завершено',
+        description: 'ООП, структуры данных, алгоритмическое мышление и реляционные базы данных.',
+      },
+      itCenter: {
+        institution: 'IT Center',
+        period: '2023',
+        field: 'Основы Веб-разработки',
+        status: 'Завершено',
+        description: 'Базовые основы HTML5, CSS3, современный JavaScript и адаптивная верстка.',
+      },
+    },
+  },
+  contact: {
+    titleBadge: 'ИНТЕРФЕЙС СВЯЗИ',
+    heading: 'Начать Backend Сотрудничество',
+    subheading:
+      'Свяжитесь со мной для обсуждения фриланс-проектов, фуллтайм-вакансий или технических консультаций.',
+    phoneLabel: 'Телефон',
+    emailLabel: 'Почта',
+    telegramLabel: 'Telegram',
+    locationLabel: 'Бухара (UTC+5)',
+    clientNameLabel: 'имя_клиента',
+    clientNamePlaceholder: 'например: Александр Иванов',
+    emailInputLabel: 'email_для_ответа',
+    emailInputPlaceholder: 'например: alex@company.ru',
+    messageLabel: 'описание_задачи',
+    messagePlaceholder: 'Опишите ваши требования к backend, спецификацию API или идею Telegram-бота...',
+    sendBtn: 'POST /api/v1/contact/submit',
+    sendingNote: '* Прямая асинхронная отправка Бекзоду Идиеву',
+    successTitle: 'Сообщение Отправлено!',
+    successMsg: 'Status: 200 OK — Спасибо, ваше сообщение успешно доставлено.',
+    sendAnother: 'Отправить Еще Запрос',
+  },
+  resume: {
+    title: 'СПЕЦИФИКАЦИЯ РЕЗЮМЕ / CV',
+    printPdf: 'Печать / Сохранить в PDF',
+    summaryTitle: 'Профессиональное Резюме',
+    experienceTitle: 'Опыт Работы',
+    educationTitle: 'Образование & Квалификация',
+    close: 'Закрыть',
+  },
+  footer: {
+    roleDesc: 'Python Backend Разработчик • Студент Data Science в School 21',
+    location: 'Бухара, Самаркандский регион, Узбекистан',
+    rightsReserved: 'Все права защищены.',
+    techStackNote: 'Интерактивное WebGL 3D Ядро • Архитектура FastAPI & Django',
+  },
+};

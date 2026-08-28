@@ -1,0 +1,242 @@
+import { TranslationSchema } from '../../types/language';
+
+export const enTranslations: TranslationSchema = {
+  nav: {
+    about: 'About',
+    skills: 'Skills',
+    projects: 'Projects',
+    experience: 'Experience',
+    contact: 'Contact',
+    resumeSpec: 'Resume Spec',
+    telegramCta: '@toyneden',
+  },
+  hero: {
+    badgeAvailable: 'Available for Freelance & Full-Time Roles',
+    typewriter: [
+      'Python Backend Developer',
+      'Data Science Student @ School 21',
+      'FastAPI & Django Specialist',
+      'Telegram Bot Architect (aiogram 3.x)',
+      'High-Performance REST & Async APIs',
+    ],
+    subtext:
+      'Engineering robust backend microservices, high-throughput REST APIs, and scalable Telegram bots. Bridging production-grade Python architecture with School 21 algorithmic data science.',
+    exploreProjects: 'Explore Projects',
+    getInTouch: 'Get In Touch',
+    statFreelance: 'Freelance Delivered',
+    statSchool21: 'Data Science Core',
+    statPython: 'FastAPI / Django',
+    statLocation: 'Uzbekistan (UTC+5)',
+  },
+  visualizer: {
+    telemetryTitle: 'Telemetry Dashboard',
+    runtimeTitle: 'Python Async Engine',
+    apiLatency: 'API Latency',
+    latencyHealthy: 'Healthy',
+    asyncWorkers: 'Async Workers',
+    workersActive: 'Active',
+    subsystem: 'SUBSYSTEM',
+    engineProtocol: 'ENGINE / PROTOCOL',
+    status: 'STATUS',
+    apiGateway: 'API Gateway',
+    dbCluster: 'DB Cluster',
+    authSecurity: 'Auth & Security',
+    onlineStatus: 'ONLINE',
+  },
+  terminal: {
+    titleBadge: 'ENGINEERING PROFILE & ARCHITECTURE',
+    heading: 'Backend Systems & Algorithmic Foundations',
+    subheading:
+      'Commercial freelance track record, production systems engineering, and School 21 intensive computer science training.',
+    tabBio: 'bio_profile.md',
+    tabPhilosophy: 'architecture_philosophy.py',
+    tabStack: 'core_runtime.json',
+    bioP1:
+      'I am Bekzod Idiyev, a dedicated Python Backend Engineer specializing in resilient backend architectures, high-performance REST APIs, and complex Telegram bots.',
+    bioP2:
+      'Proven track record on Kwork freelance marketplace delivering 7+ commercial projects from ground zero to production (Paynet CRM, automated educational bots, trading utilities).',
+    bioP3:
+      'Currently advancing deep computer science fundamentals, low-level Linux/Unix architectures, and Data Science models through School 21 intensive methodology.',
+    philosophyP1:
+      'Clean Architecture & SOLID: Every module is built for isolation, testability, and painless scaling.',
+    philosophyP2:
+      'Async-First Execution (AsyncIO / aiogram 3.x / FastAPI): Serving high concurrent loads with minimal latency overhead.',
+    philosophyP3:
+      'Reliable Database Design: Strict normalization, indexed queries, and Redis caching layers.',
+    activeContracts: 'Delivered Projects',
+    responseTime: 'Average Response Time',
+    codeQuality: 'Code Standards',
+  },
+  skills: {
+    titleBadge: 'TECHNICAL STACK MATRIX',
+    heading: 'Core Competencies & Toolchain',
+    subheading:
+      'Asynchronous web frameworks, relational data modeling, caching strategies, and DevOps automation.',
+    experienceLevel: 'Experience Level',
+    categories: {
+      backendTitle: 'Backend Frameworks',
+      backendDesc: 'Production web APIs, microservices & asynchronous bots',
+      dbTitle: 'Databases & Caching',
+      dbDesc: 'Relational data modeling, query optimization & in-memory caches',
+      devopsTitle: 'DevOps & Infrastructure',
+      devopsDesc: 'Containerization, asynchronous task queues & real-time protocols',
+      archTitle: 'Architecture & Security',
+      archDesc: 'System design principles, secure auth protocols & clean patterns',
+    },
+  },
+  projects: {
+    titleBadge: 'COMMERCIAL & APPLIED WORK',
+    heading: 'Featured Backend Projects',
+    subheading:
+      'Production-grade asynchronous architectures, Telegram bot ecosystems, and intelligent AI integrations.',
+    allFilter: 'All Projects',
+    viewCode: 'View Code',
+    liveDemo: 'Bot / Demo',
+    viewArchitecture: 'View Architecture',
+    architectureTitle: 'System Architecture',
+    keyFeaturesTitle: 'Key Technical Features',
+    techStackTitle: 'Technologies Used',
+    items: {
+      buddyTeam: {
+        category: 'Matching & AI Platform',
+        summary: 'High-throughput student-mentor matching platform with automated AI recommendation engines.',
+        features: [
+          'Matching platform connecting students and mentors based on skill requirements and goals.',
+          'Django REST Framework backend coupled with containerized Docker deployment pipeline.',
+          'Automated recommendation system powered by Google Gemini AI API integration.',
+        ],
+        architecture: 'Clean Architecture with REST API endpoints, JWT authentication, and isolated Docker microservices containerization.',
+      },
+      esportsBot: {
+        category: 'Gaming Club Telegram Ecosystem',
+        summary: 'Asynchronous event-driven esports tournament engine with real-time bracket generation.',
+        features: [
+          'Asynchronous Telegram bot built with aiogram 3.x automating esports tournament operations.',
+          'Dynamic bracket generator supporting single/double elimination structures.',
+          'Real-time match scoring, leaderboard updates, and administrative management panel.',
+        ],
+        architecture: 'Asynchronous event loop with aiogram 3.x, Redis state persistence for tournament matches, and FastAPI administrative hooks.',
+      },
+      peerLearn: {
+        category: 'P2P Learning WebApp',
+        summary: 'Peer-to-peer anonymous mentor matching web app integrated into Telegram with live WebSockets.',
+        features: [
+          'Peer-to-peer anonymous mentor-mentee matching tailored for School 21 peer learning environment.',
+          'Real-time bidirectional chat implementation using WebSockets backed by Redis pub/sub.',
+          'Integrated XP/Coin gamification mechanics, calendar scheduling, and automated reminders via APScheduler.',
+        ],
+        architecture: 'FastAPI async backend, bidirectional WebSocket channels, Redis Pub/Sub broadcast engine, and APScheduler automated worker queues.',
+      },
+    },
+  },
+  timeline: {
+    titleBadge: 'CAREER TRAJECTORY & ACADEMICS',
+    heading: 'Experience & Education Timeline',
+    subheading:
+      'Chronological overview of commercial freelance deliveries, CRM engineering, and School 21 computer science specialization.',
+    workTitle: 'Work Experience',
+    workSubtitle: 'Commercial backend contracts & freelance track record',
+    eduTitle: 'Education & Credentials',
+    eduSubtitle: 'Academic institutions & computer science training',
+    workItems: {
+      kwork: {
+        role: 'Freelance Backend Developer',
+        company: 'Kwork (Freelance Market)',
+        badge: '7+ Delivered Projects',
+        period: '2026 – Present',
+        responsibilities: [
+          'Independently engineered, tested, and delivered over 7 complex backend applications from zero to deployment.',
+          'Facilitated direct client communication to capture requirements, define technical specifications, and establish milestone deliverables.',
+          'Designed normalized relational database schemas (PostgreSQL, MySQL) optimizing query performance and index structures.',
+          'Built custom REST APIs and Telegram integration tools with high availability and error-handling routines.',
+        ],
+      },
+      paynet: {
+        role: 'Backend Developer',
+        company: 'Paynet CRM System',
+        badge: 'Enterprise CRM',
+        period: '2026',
+        responsibilities: [
+          'Architected core business logic for customer management modules and transaction history monitoring.',
+          'Developed multi-tier role-based access control (RBAC) ensuring secure API endpoints.',
+          'Integrated third-party payment callback verification mechanisms and structured logging routines.',
+        ],
+      },
+      rrrAcademy: {
+        role: 'Backend Developer',
+        company: 'RRR Academy Telegram Bot',
+        badge: 'EdTech Automation',
+        period: '2024',
+        responsibilities: [
+          'Built automated educational management bot handling course catalog, user enrollments, and homework tracking.',
+          'Created automated push notification pipelines for scheduling alerts and broadcast messages.',
+        ],
+      },
+    },
+    eduItems: {
+      school21: {
+        institution: 'School 21',
+        period: '2025 – Present',
+        field: 'Backend Systems Engineering & Data Science',
+        status: 'In Progress',
+        description: 'Peer-to-peer intensive engineering methodology focusing on advanced algorithms, low-level architecture, Linux environments, and Data Science models.',
+      },
+      mohirdev: {
+        institution: 'Mohirdev Platform',
+        period: '2024 – 2025',
+        field: 'Intensive Backend Python Development',
+        status: 'Completed',
+        description: 'Deep dive into Python internals, Django/FastAPI frameworks, PostgreSQL indexing, ORM optimization, Docker, and REST API design.',
+      },
+      proUnity: {
+        institution: 'Pro Unity Academy',
+        period: '2024',
+        field: 'Core Backend Programming Fundamentals',
+        status: 'Completed',
+        description: 'Comprehensive study of OOP, data structures, algorithms, modular programming, and relational database queries.',
+      },
+      itCenter: {
+        institution: 'IT Center',
+        period: '2023',
+        field: 'Web Frontend Fundamentals',
+        status: 'Completed',
+        description: 'Foundations of HTML5, CSS3, modern JavaScript DOM manipulation, and responsive web design.',
+      },
+    },
+  },
+  contact: {
+    titleBadge: 'COMMUNICATION INTERFACE',
+    heading: 'Initiate Backend Collaboration',
+    subheading:
+      'Reach out directly for freelance contracts, full-time backend roles, or architecture consulting.',
+    phoneLabel: 'Phone',
+    emailLabel: 'Email',
+    telegramLabel: 'Telegram',
+    locationLabel: 'Bukhara (UTC+5)',
+    clientNameLabel: 'client_name',
+    clientNamePlaceholder: 'e.g. Alex Henderson',
+    emailInputLabel: 'reply_email',
+    emailInputPlaceholder: 'e.g. alex@company.com',
+    messageLabel: 'project_specification',
+    messagePlaceholder: 'Describe your backend requirements, API specifications, or bot ideas...',
+    sendBtn: 'POST /api/v1/contact/submit',
+    sendingNote: '* Direct asynchronous dispatch to Bekzod Idiyev',
+    successTitle: 'Message Dispatched!',
+    successMsg: 'Status: 200 OK — Thank you. Your transmission has been received.',
+    sendAnother: 'Send Another Request',
+  },
+  resume: {
+    title: 'RESUME / CV SPECIFICATION',
+    printPdf: 'Print / Save PDF',
+    summaryTitle: 'Professional Summary',
+    experienceTitle: 'Work Experience',
+    educationTitle: 'Education & Credentials',
+    close: 'Close',
+  },
+  footer: {
+    roleDesc: 'Python Backend Developer • School 21 Data Science Student',
+    location: 'Bukhara, Samarqand Region, Uzbekistan',
+    rightsReserved: 'All rights reserved.',
+    techStackNote: 'Interactive WebGL 3D Core • FastAPI & Django Architecture',
+  },
+};
