@@ -35,9 +35,14 @@ export const ContactSection: React.FC = () => {
   }, []);
 
   const handleCopy = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedItem(label);
-    setTimeout(() => setCopiedItem(null), 2000);
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        setCopiedItem(label);
+        setTimeout(() => setCopiedItem(null), 2000);
+      }).catch(() => {
+        setCopiedItem(null);
+      });
+    }
   };
 
   return (

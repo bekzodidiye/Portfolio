@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Download, FileText, Phone, Mail, MapPin, Send } from 'lucide-react';
 import { CANDIDATE_PROFILE, WORK_EXPERIENCE, EDUCATION_LIST } from '../data/portfolioData';
@@ -11,17 +11,56 @@ interface ResumeModalProps {
 
 export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => {
   const { t } = useLanguage();
+  const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isOpen) return;
+
+    // Handle ESC and Tab Focus Trap
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement) {
+            lastElement.focus();
+            e.preventDefault();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            e.preventDefault();
+          }
+        }
+      }
     };
+
     document.body.style.overflow = 'hidden';
     window.addEventListener('keydown', handleKeyDown);
+
+    // Initial focus on first interactive element or close button
+    const timer = setTimeout(() => {
+      if (modalRef.current) {
+        const closeBtn = modalRef.current.querySelector<HTMLElement>('#resume-modal-close-btn');
+        closeBtn?.focus();
+      }
+    }, 50);
+
     return () => {
       document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKeyDown);
+      clearTimeout(timer);
     };
   }, [isOpen, onClose]);
 
@@ -58,31 +97,39 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
   return createPortal(
     <div
       onClick={onClose}
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-slate-900/70 backdrop-blur-md animate-fadeIn"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-slate-900/70 backdrop-blur-md animate-fadeIn print:bg-white print:p-0"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="resume-modal-title"
     >
       <div
-        className="relative w-full max-w-3xl rounded-2xl border border-slate-200 p-6 sm:p-8 bg-white shadow-2xl max-h-[88vh] overflow-y-auto no-scrollbar"
+        ref={modalRef}
+        id="resume-printable-area"
+        className="relative w-full max-w-3xl rounded-2xl border border-slate-200 p-6 sm:p-8 bg-white shadow-2xl max-h-[88vh] overflow-y-auto no-scrollbar print:max-h-none print:shadow-none print:border-none print:w-full print:p-4"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button */}
+        {/* Close Button - Hidden in Print */}
         <button
+          id="resume-modal-close-btn"
           onClick={onClose}
           aria-label="Close Resume Modal"
-          className="absolute top-4 right-4 p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+          className="absolute top-4 right-4 p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer print:hidden"
         >
           <X className="w-5 h-5" />
         </button>
 
-        {/* Action Header */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-200">
+        {/* Action Header - Hidden in Print */}
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-200 print:hidden">
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-blue-600" />
-            <span className="text-sm font-mono font-bold text-slate-900">{t.resume.title}</span>
+            <span id="resume-modal-title" className="text-sm font-mono font-bold text-slate-900">
+              {t.resume.title}
+            </span>
           </div>
 
           <button
             onClick={handlePrint}
-            className="px-4 py-1.5 rounded-lg text-xs font-mono font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-all flex items-center gap-1.5 shadow-sm shadow-blue-500/25 cursor-pointer"
+            className="px-4 py-1.5 rounded-lg text-xs font-mono font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-all flex items-center gap-1.5 shadow-sm shadow-blue-500/25 cursor-pointer active:scale-95"
           >
             <Download className="w-3.5 h-3.5" />
             <span>{t.resume.printPdf}</span>
@@ -91,7 +138,7 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
 
         {/* Candidate Profile Header */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold font-mono text-slate-900">{CANDIDATE_PROFILE.name}</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold font-mono text-slate-900">{CANDIDATE_PROFILE.name}</h2>
           <p className="text-sm font-mono text-blue-600 font-semibold mb-1">{t.hero.typewriter[0]}</p>
           <p className="text-xs text-slate-500 mb-3">{t.hero.typewriter[1]}</p>
 
@@ -104,9 +151,9 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
         </div>
 
         {/* Summary */}
-        <div className="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200">
+        <div className="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200 print:bg-white print:border-slate-300">
           <h3 className="text-xs font-mono uppercase text-blue-700 font-bold tracking-wider mb-2">{t.resume.summaryTitle}</h3>
-          <p className="text-xs text-slate-700 leading-relaxed">{t.hero.subtext}</p>
+          <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">{t.hero.subtext}</p>
         </div>
 
         {/* Work Experience */}
@@ -116,7 +163,7 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
             {WORK_EXPERIENCE.map((exp) => {
               const locWork = getLocalizedWork(exp.id, exp.role, exp.companyOrPlatform, exp.responsibilities);
               return (
-                <div key={exp.id} className="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
+                <div key={exp.id} className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:border-slate-300">
                   <div className="flex justify-between items-center mb-1">
                     <h4 className="text-sm font-mono font-bold text-slate-900">{locWork.role} — <span className="text-blue-600">{locWork.company}</span></h4>
                     <span className="text-[11px] font-mono text-slate-500">{exp.period}</span>
@@ -142,7 +189,7 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
             {EDUCATION_LIST.map((edu) => {
               const locEdu = getLocalizedEdu(edu.id, edu.institution, edu.field);
               return (
-                <div key={edu.id} className="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                <div key={edu.id} className="p-3 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:border-slate-300">
                   <div className="flex justify-between items-center mb-1">
                     <h4 className="text-xs font-mono font-bold text-slate-900">{locEdu.institution}</h4>
                     <span className="text-[10px] font-mono text-slate-500">{edu.period}</span>

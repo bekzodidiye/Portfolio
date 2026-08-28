@@ -40,9 +40,14 @@ class BackendEngineer:
         return "Designing zero-downtime APIs & scalable Telegram engines."`;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(specCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(specCode).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }).catch(() => {
+        setCopied(false);
+      });
+    }
   };
 
   const handleCommand = (e: React.FormEvent) => {

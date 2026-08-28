@@ -15,19 +15,27 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume }) => {
   const [activeSection, setActiveSection] = useState('about');
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 40);
+    let ticking = false;
 
-      const sections = ['about', 'skills', 'projects', 'experience', 'contact'];
-      for (const section of sections) {
-        const el = document.getElementById(section);
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          if (rect.top <= 200 && rect.bottom >= 200) {
-            setActiveSection(section);
-            break;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 40);
+
+          const sections = ['about', 'skills', 'projects', 'experience', 'contact'];
+          for (const section of sections) {
+            const el = document.getElementById(section);
+            if (el) {
+              const rect = el.getBoundingClientRect();
+              if (rect.top <= 200 && rect.bottom >= 200) {
+                setActiveSection(section);
+                break;
+              }
+            }
           }
-        }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -43,21 +51,30 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume }) => {
   ];
 
   return (
-    <header
-      id="main-navbar"
-      className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-        scrolled
-          ? 'backdrop-blur-md bg-white/90 border-b border-slate-200/90 shadow-sm'
-          : 'backdrop-blur-sm bg-white/60 border-b border-slate-200/50'
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
-        {/* Brand Logo */}
-        <a
-          href="#"
-          id="nav-brand-logo"
-          className="flex items-center gap-2.5 group cursor-pointer shrink-0"
-        >
+    <>
+      {/* Accessible Skip to Content Link */}
+      <a
+        href="#hero"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg focus:shadow-lg focus:font-mono focus:text-xs focus:outline-none"
+      >
+        Skip to main content
+      </a>
+
+      <header
+        id="main-navbar"
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+          scrolled
+            ? 'backdrop-blur-md bg-white/90 border-b border-slate-200/90 shadow-sm'
+            : 'backdrop-blur-sm bg-white/60 border-b border-slate-200/50'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
+          {/* Brand Logo */}
+          <a
+            href="#"
+            id="nav-brand-logo"
+            className="flex items-center gap-2.5 group cursor-pointer shrink-0"
+          >
           <div className="w-9 h-9 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center group-hover:border-blue-500 group-hover:shadow-md transition-all">
             <Terminal className="w-5 h-5 text-blue-600" />
           </div>
@@ -169,6 +186,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume }) => {
           </div>
         </div>
       )}
-    </header>
+      </header>
+    </>
   );
 };

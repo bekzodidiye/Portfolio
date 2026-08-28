@@ -4,7 +4,7 @@ export const CANDIDATE_PROFILE: CandidateProfile = {
   name: 'Bekzod Idiyev',
   primaryTitle: 'Python Backend Developer',
   subTitle: 'Backend Engineering & Data Science Student @ School 21',
-  location: 'Bukhara, Samarqand Region, Uzbekistan',
+  location: 'Bukhara, Uzbekistan',
   phone: '+998 94 613 87 86',
   email: 'Bekzodidiye@gmail.com',
   github: 'https://github.com/bekzodidiye',

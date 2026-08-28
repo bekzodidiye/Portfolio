@@ -235,7 +235,7 @@ export const enTranslations: TranslationSchema = {
   },
   footer: {
     roleDesc: 'Python Backend Developer • School 21 Data Science Student',
-    location: 'Bukhara, Samarqand Region, Uzbekistan',
+    location: 'Bukhara, Uzbekistan',
     rightsReserved: 'All rights reserved.',
     techStackNote: 'Interactive WebGL 3D Core • FastAPI & Django Architecture',
   },

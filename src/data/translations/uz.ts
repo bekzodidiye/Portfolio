@@ -235,7 +235,7 @@ export const uzTranslations: TranslationSchema = {
   },
   footer: {
     roleDesc: 'Python Backend Dasturchi • School 21 Data Science Talabasi',
-    location: 'Buxoro, Samarqand viloyati, O\'zbekiston',
+    location: 'Buxoro, O\'zbekiston',
     rightsReserved: 'Barcha huquqlar himoyalangan.',
     techStackNote: 'Interaktiv WebGL 3D Yadro • FastAPI & Django Arxitekturasi',
   },

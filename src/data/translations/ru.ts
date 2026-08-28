@@ -235,7 +235,7 @@ export const ruTranslations: TranslationSchema = {
   },
   footer: {
     roleDesc: 'Python Backend Разработчик • Студент Data Science в School 21',
-    location: 'Бухара, Самаркандский регион, Узбекистан',
+    location: 'Бухара, Узбекистан',
     rightsReserved: 'Все права защищены.',
     techStackNote: 'Интерактивное WebGL 3D Ядро • Архитектура FastAPI & Django',
   },

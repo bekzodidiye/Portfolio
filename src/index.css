@@ -158,3 +158,25 @@
 .animate-pulse-glow {
   animation: pulse-glow 3s infinite ease-in-out;
 }
+
+/* Crisp Clean Print Stylesheet for Resume / CV */
+@media print {
+  body {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+  }
+
+  header, footer, #hero, #about, #skills, #projects, #experience, #contact, .fixed:not(#resume-printable-area) {
+    display: none !important;
+  }
+
+  #resume-printable-area {
+    position: static !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border: none !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    padding: 0 !important;
+  }
+}

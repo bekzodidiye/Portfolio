@@ -115,7 +115,24 @@ export function initSubtleThreeScene(container: HTMLElement): SubtleSceneControl
   onScroll();
 
   let animId: number;
+  let isRunning = true;
+
+  const handleVisibilityChange = () => {
+    if (document.hidden) {
+      isRunning = false;
+      cancelAnimationFrame(animId);
+    } else {
+      if (!isRunning) {
+        isRunning = true;
+        animate();
+      }
+    }
+  };
+
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+
   const animate = () => {
+    if (!isRunning) return;
     animId = requestAnimationFrame(animate);
 
     // Smooth Lerp Interpolations
@@ -168,7 +185,9 @@ export function initSubtleThreeScene(container: HTMLElement): SubtleSceneControl
 
   return {
     destroy: () => {
+      isRunning = false;
       cancelAnimationFrame(animId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('resize', onResize);
