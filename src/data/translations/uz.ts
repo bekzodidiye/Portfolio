@@ -54,7 +54,7 @@ export const uzTranslations: TranslationSchema = {
     bioP1:
       'Men Bekzod Idiyev — ishonchli, yuqori yuklamalarga chidamli backend arxitekturasi, REST API\'lar va murakkab Telegram botlar ishlab chiqishga ixtisoslashgan Python Backend dasturchisiman.',
     bioP2:
-      'Kwork frilans platformasida 7 dan ortiq tijoriy loyihalarni noldan muvaffaqiyatli topshirganman (Paynet CRM, ta\'lim botlari va savdo tizimlari).',
+      'Kwork frilans platformasida 8 dan ortiq tijoriy loyihalarni noldan muvaffaqiyatli topshirganman (Paynet CRM, ta\'lim botlari va savdo tizimlari).',
     bioP3:
       'Hozirda School 21 (Data Science & Systems Engineering) dasturida past darajadagi dasturlash, Unix/Linux, algoritmlar va ma\'lumotlar tahlilini chuqur o\'rganmoqdaman.',
     philosophyP1:
@@ -142,10 +142,10 @@ export const uzTranslations: TranslationSchema = {
       kwork: {
         role: 'Frilans Backend Dasturchi',
         company: 'Kwork (Frilans Birjasi)',
-        badge: '7+ Yakunlangan Loyiha',
+        badge: '8+ Yakunlangan Loyiha',
         period: '2026 – Hozirgacha',
         responsibilities: [
-          '7 dan ortiq murakkab backend loyihalarni noldan to\'liq deploy holatigacha ishlab chiqdim va topshirdim.',
+          '8 dan ortiq murakkab backend loyihalarni noldan to\'liq deploy holatigacha ishlab chiqdim va topshirdim.',
           'Buyurtmachilar bilan to\'g\'ridan-to\'g\'ri talablarni aniqlash va texnik topshiriqlarni tuzish.',
           'PostgreSQL va MySQL relyatsion modellarini loyihalash, indekslarni optimallashtirish.',
           'Yuqori ishonchlilikka ega REST API va Telegram integratsiya vositalarini yaratish.',

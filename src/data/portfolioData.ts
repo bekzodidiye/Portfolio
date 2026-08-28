@@ -12,8 +12,8 @@ export const CANDIDATE_PROFILE: CandidateProfile = {
   telegram: 'https://t.me/toyneden',
   telegramHandle: '@toyneden',
   summary:
-    'Results-oriented Python Backend Engineer with hands-on experience in building high-performance REST APIs, scalable Telegram bots, and complex CRM backend systems. Proficient in Django, FastAPI, and Flask frameworks. Demonstrates proven freelance experience on Kwork platform with 7+ successfully delivered client projects. Currently enhancing specialized knowledge in Data Science algorithms and production-level Backend Systems Engineering at School 21.',
-  freelanceCount: 7,
+    'Results-oriented Python Backend Engineer with hands-on experience in building high-performance REST APIs, scalable Telegram bots, and complex CRM backend systems. Proficient in Django, FastAPI, and Flask frameworks. Demonstrates proven freelance experience on Kwork platform with 8+ successfully delivered client projects. Currently enhancing specialized knowledge in Data Science algorithms and production-level Backend Systems Engineering at School 21.',
+  freelanceCount: 8,
 };
 
 export const FEATURED_PROJECTS: ProjectItem[] = [
@@ -76,9 +76,9 @@ export const WORK_EXPERIENCE: WorkExperienceItem[] = [
     role: 'Freelance Backend Developer',
     companyOrPlatform: 'Kwork (Freelance Market)',
     period: '2026 – Present',
-    badge: '7+ Delivered Projects',
+    badge: '8+ Delivered Projects',
     responsibilities: [
-      'Independently engineered, tested, and delivered over 7 complex backend applications from zero to deployment.',
+      'Independently engineered, tested, and delivered over 8 complex backend applications from zero to deployment.',
       'Facilitated direct client communication to capture requirements, define technical specifications, and establish milestone deliverables.',
       'Designed normalized relational database schemas (PostgreSQL, MySQL) optimizing query performance and index structures.',
       'Built custom REST APIs and Telegram integration tools with high availability and error-handling routines.',

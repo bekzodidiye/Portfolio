@@ -78,7 +78,7 @@ export const HeroSection: React.FC = () => {
           <div className="hero-reveal grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full max-w-xl">
             <div className="bg-white/90 p-3 rounded-xl border border-slate-200 shadow-sm hover:border-blue-300 hover:shadow-md transition-all">
               <span className="block text-xl font-bold font-mono text-blue-600">
-                <AnimatedCounter target={7} suffix="+" duration={1000} />
+                <AnimatedCounter target={CANDIDATE_PROFILE.freelanceCount} suffix="+" duration={1000} />
               </span>
               <span className="text-[11px] text-slate-500 font-mono">{t.hero.statFreelance}</span>
             </div>

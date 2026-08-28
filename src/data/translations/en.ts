@@ -54,7 +54,7 @@ export const enTranslations: TranslationSchema = {
     bioP1:
       'I am Bekzod Idiyev, a dedicated Python Backend Engineer specializing in resilient backend architectures, high-performance REST APIs, and complex Telegram bots.',
     bioP2:
-      'Proven track record on Kwork freelance marketplace delivering 7+ commercial projects from ground zero to production (Paynet CRM, automated educational bots, trading utilities).',
+      'Proven track record on Kwork freelance marketplace delivering 8+ commercial projects from ground zero to production (Paynet CRM, automated educational bots, trading utilities).',
     bioP3:
       'Currently advancing deep computer science fundamentals, low-level Linux/Unix architectures, and Data Science models through School 21 intensive methodology.',
     philosophyP1:
@@ -142,10 +142,10 @@ export const enTranslations: TranslationSchema = {
       kwork: {
         role: 'Freelance Backend Developer',
         company: 'Kwork (Freelance Market)',
-        badge: '7+ Delivered Projects',
+        badge: '8+ Delivered Projects',
         period: '2026 – Present',
         responsibilities: [
-          'Independently engineered, tested, and delivered over 7 complex backend applications from zero to deployment.',
+          'Independently engineered, tested, and delivered over 8 complex backend applications from zero to deployment.',
           'Facilitated direct client communication to capture requirements, define technical specifications, and establish milestone deliverables.',
           'Designed normalized relational database schemas (PostgreSQL, MySQL) optimizing query performance and index structures.',
           'Built custom REST APIs and Telegram integration tools with high availability and error-handling routines.',
