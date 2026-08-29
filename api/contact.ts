@@ -79,7 +79,7 @@ export default async function handler(req: any, res: any) {
     const telegramHtmlMessage = `🚀 <b>YANGI PORTFOLIO XABARI (LEAD)</b>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 👤 <b>Yuboruvchi:</b> ${escapeHtml(trimmedName)}
-📧 <b>Email:</b> <code>${escapeHtml(trimmedEmail)}</code>
+📧 <b>Email:</b> <a href="mailto:${escapeHtml(trimmedEmail)}">${escapeHtml(trimmedEmail)}</a>
 🕒 <b>Vaqt:</b> ${timestamp} (Toshkent / UTC+5)
 🌐 <b>Sayt tili:</b> ${escapeHtml((language || 'uz').toUpperCase())}
 📱 <b>Qurilma:</b> ${deviceType}
@@ -90,19 +90,21 @@ ${escapeHtml(trimmedMessage)}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚡ <i>Bekzod Idiyev Vercel Secure Gateway v2.0</i>`;
 
-    // 6. Secure Server-to-Telegram Dispatch with Interactive Buttons
+    // 6. Secure Server-to-Telegram Dispatch with Interactive Buttons (HTTP/HTTPS only for Telegram Bot API)
+    const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(trimmedEmail)}&su=${encodeURIComponent('Bekzod Idiyev — Portfolio Javobi')}`;
+
     const contactInlineKeyboard = {
       inline_keyboard: [
         [
-          { text: '✉️ Emailga Javob Yozish', url: `mailto:${encodeURIComponent(trimmedEmail)}?subject=Bekzod%20Idiyev%20—%20Portfolio%20Javobi` },
+          { text: '✉️ Gmail orqali Javob Yozish', url: gmailComposeUrl },
         ],
         [
           { text: '🌐 Portfolioni Ko\'rish', url: 'https://bekzod-idiyev-portfolio.vercel.app' },
-
           { text: '🐙 GitHub Profil', url: 'https://github.com/bekzodidiye' },
         ],
       ],
     };
+
 
     const telegramResponse = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',

@@ -211,10 +211,12 @@ ${escapeHtml(message || '')}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚡ <i>Bekzod Idiyev Portfolio Dev Gateway</i>`;
 
+            const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email || '')}&su=${encodeURIComponent('Bekzod Idiyev — Portfolio Javobi')}`;
+
             const contactInlineKeyboard = {
               inline_keyboard: [
                 [
-                  { text: '✉️ Emailga Javob Yozish', url: `mailto:${encodeURIComponent(email || '')}?subject=Bekzod%20Idiyev%20—%20Portfolio%20Javobi` },
+                  { text: '✉️ Gmail orqali Javob Yozish', url: gmailComposeUrl },
                 ],
                 [
                   { text: '🌐 Portfolioni Ko\'rish', url: 'https://bekzod-idiyev-portfolio.vercel.app' },
@@ -222,6 +224,7 @@ ${escapeHtml(message || '')}
                 ],
               ],
             };
+
 
             const tgRes = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
               method: 'POST',
