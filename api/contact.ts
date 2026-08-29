@@ -88,7 +88,8 @@ export default async function handler(req: any, res: any) {
 💬 <b>Xabar:</b>
 ${escapeHtml(trimmedMessage)}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚡ <i>Bekzod Idiyev Vercel Secure Gateway v2.0</i>`;
+⚡ <i>Javob berish: ushbu xabarga <b>Reply</b> qiling yoki pastdagi tugmani bosing!</i>
+#email_${trimmedEmail}`;
 
     // 6. Secure Server-to-Telegram Dispatch with Interactive Buttons (HTTP/HTTPS only for Telegram Bot API)
     const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(trimmedEmail)}&su=${encodeURIComponent('Bekzod Idiyev — Portfolio Javobi')}`;
@@ -96,14 +97,18 @@ ${escapeHtml(trimmedMessage)}
     const contactInlineKeyboard = {
       inline_keyboard: [
         [
-          { text: '✉️ Gmail orqali Javob Yozish', url: gmailComposeUrl },
+          { text: '📧 Botdan Emailga Javob Yozish', callback_data: `reply_email_${trimmedEmail}` },
         ],
         [
+          { text: '✉️ Gmail Web orqali Ochish', url: gmailComposeUrl },
           { text: '🌐 Portfolioni Ko\'rish', url: 'https://bekzod-idiyev-portfolio.vercel.app' },
+        ],
+        [
           { text: '🐙 GitHub Profil', url: 'https://github.com/bekzodidiye' },
         ],
       ],
     };
+
 
 
     const telegramResponse = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {

@@ -1,3 +1,5 @@
+import nodemailer from 'nodemailer';
+
 export const config = {
   runtime: 'nodejs',
 };
@@ -23,6 +25,96 @@ let botStats = {
   serverStartTime: new Date().toISOString(),
 };
 let pendingAdminReplyTarget: string | number | null = null;
+let pendingAdminEmailTarget: string | null = null;
+
+// Email Sender Helper
+async function sendEmailFromBot(options: { to: string; subject: string; text: string; clientName?: string }): Promise<{ success: boolean; error?: string }> {
+  const { to, subject, text, clientName } = options;
+  const smtpUser = process.env.SMTP_USER || process.env.EMAIL_USER || 'bekzodidiyev89@gmail.com';
+  const smtpPass = process.env.SMTP_PASS || process.env.EMAIL_PASS || process.env.GMAIL_APP_PASSWORD;
+  const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const smtpPort = Number(process.env.SMTP_PORT) || 465;
+
+  if (!smtpPass) {
+    return {
+      success: false,
+      error: 'SMTP_PASS (Gmail App Password) sozlanmagan. .env yoki Vercel sozlamalariga SMTP_PASS qo\'shing.',
+    };
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpPort === 465,
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+    });
+
+    const formattedHtml = `
+    <!DOCTYPE html>
+    <html lang="uz">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0d1117; color: #c9d1d9; margin: 0; padding: 20px; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #161b22; border: 1px solid #30363d; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+        .header { background: linear-gradient(135deg, #1f6feb, #0969da); padding: 24px; color: #ffffff; text-align: center; }
+        .header h1 { margin: 0; font-size: 22px; font-weight: 700; }
+        .header p { margin: 6px 0 0 0; font-size: 13px; opacity: 0.9; }
+        .content { padding: 28px 24px; color: #e6edf3; }
+        .greeting { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #58a6ff; }
+        .message-box { background-color: #0d1117; border-left: 4px solid #58a6ff; padding: 16px 18px; border-radius: 6px; margin: 18px 0; font-size: 15px; color: #f0f6fc; white-space: pre-wrap; word-wrap: break-word; }
+        .footer { padding: 20px 24px; background-color: #090d13; border-top: 1px solid #21262d; text-align: center; font-size: 12px; color: #8b949e; }
+        .footer a { color: #58a6ff; text-decoration: none; margin: 0 8px; }
+        .badge { display: inline-block; background-color: #238636; color: #ffffff; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 12px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="badge">Rasmiy Javob</div>
+          <h1>BEKZOD IDIYEV</h1>
+          <p>Python Backend Architect & Systems Engineer</p>
+        </div>
+        <div class="content">
+          <div class="greeting">Assalomu alaykum, ${clientName || 'Hurmatli hamkor'}!</div>
+          <p>Portfolio saytim orqali qoldirgan murojaatingiz uchun minnatdorchilik bildiraman.</p>
+          <div class="message-box">${escapeHtml(text)}</div>
+          <p>Savollaringiz bo'lsa, ushbu xatga to'g'ridan-to'g'ri javob yozishingiz yoki Telegram orqali bog'lanishingiz mumkin.</p>
+        </div>
+        <div class="footer">
+          <p><b>Bekzod Idiyev</b> • Python Backend Developer</p>
+          <p>
+            <a href="https://t.me/toyneden">✈️ Telegram: @toyneden</a> • 
+            <a href="https://bekzod-idiyev-portfolio.vercel.app">🌐 Portfolio</a> • 
+            <a href="https://github.com/bekzodidiye">🐙 GitHub</a>
+          </p>
+          <p style="margin-top: 10px; color: #484f58;">Ushbu xat portfolio xizmati orqali avtomatlashtirilgan tarzda yuborildi.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    `;
+
+    await transporter.sendMail({
+      from: `"Bekzod Idiyev" <${smtpUser}>`,
+      to,
+      subject: subject || 'Re: Bekzod Idiyev — Portfolio Murojaati Bo\'yicha Javob',
+      text,
+      html: formattedHtml,
+      replyTo: smtpUser,
+    });
+
+    return { success: true };
+  } catch (err: any) {
+    console.error('Nodemailer error:', err);
+    return { success: false, error: err.message || 'Email yuborishda xatolik yuz berdi.' };
+  }
+}
 
 function getMainReplyKeyboard() {
   return {
@@ -83,7 +175,6 @@ Quyidagi menyulardan birini tanlang:`;
 }
 
 export default async function handler(req: any, res: any) {
-  // Always acknowledge non-POST methods
   if (req.method !== 'POST') {
     return res.status(200).json({ ok: true, message: 'Telegram Webhook Gateway Active' });
   }
@@ -141,10 +232,26 @@ export default async function handler(req: any, res: any) {
       let responseText = '';
       let replyMarkup: any = null;
 
+      // Handle Direct Email Reply Initiation
+      if (data.startsWith('reply_email_')) {
+        const targetEmail = data.replace('reply_email_', '');
+        pendingAdminEmailTarget = targetEmail;
+        pendingAdminReplyTarget = null;
+
+        await sendTg('sendMessage', {
+          chat_id: chatId,
+          text: `📧 <b>Emailga (<code>${targetEmail}</code>) javob xati yozish:</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\nMarhamat, yubormoqchi bo'lgan javob matningizni shu yerga yozing. U avtomatik ravishda ushbu email manzilga rasmiy xat sifatida yuboriladi:\n\n<i>(Bekor qilish uchun /cancel deb yozing)</i>`,
+          parse_mode: 'HTML',
+        });
+        await sendTg('answerCallbackQuery', { callback_query_id: cb.id });
+        return res.status(200).json({ ok: true });
+      }
+
       // Handle Direct Bot Reply Initiation
       if (data.startsWith('reply_user_')) {
         const targetUserId = data.replace('reply_user_', '');
         pendingAdminReplyTarget = targetUserId;
+        pendingAdminEmailTarget = null;
 
         await sendTg('sendMessage', {
           chat_id: chatId,
@@ -310,36 +417,81 @@ Mahalliy kompyuter yoki VPS'da Python bot orqali <code>/admin</code> menyusidan 
 
       botUserIds.add(chatId);
 
-      // --- ADMIN REPLY HANDLING (Native Reply or Stored Target) ---
+      // --- ADMIN REPLY HANDLING (Email OR Telegram User) ---
       if (isAdmin) {
-        let replyTarget: string | number | null = null;
+        // 1. Check for cancel
+        if (text === '/cancel') {
+          pendingAdminReplyTarget = null;
+          pendingAdminEmailTarget = null;
+          await sendTg('sendMessage', {
+            chat_id: chatId,
+            text: '❌ <b>Javob yozish bekor qilindi.</b>',
+            parse_mode: 'HTML',
+          });
+          return res.status(200).json({ ok: true });
+        }
 
-        // Check if Admin is using Telegram's native "Reply" feature
+        // 2. Detect Email Target (via native reply or stored target)
+        let targetEmail: string | null = null;
+        if (msg.reply_to_message?.text) {
+          const repText = msg.reply_to_message.text;
+          const emailMatch = repText.match(/#email_([^\s\n]+)/) || repText.match(/Email:\s*<a href="mailto:([^">]+)">/) || repText.match(/Email:\s*<code>([^<]+)<\/code>/);
+          if (emailMatch && emailMatch[1]) {
+            targetEmail = emailMatch[1].trim();
+          }
+        }
+        if (!targetEmail && pendingAdminEmailTarget) {
+          targetEmail = pendingAdminEmailTarget;
+        }
+
+        // If target is an EMAIL address, send email!
+        if (targetEmail) {
+          pendingAdminEmailTarget = null;
+          const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(targetEmail)}&su=${encodeURIComponent('Re: Bekzod Idiyev — Portfolio Javobi')}&body=${encodeURIComponent(text)}`;
+
+          const emailResult = await sendEmailFromBot({
+            to: targetEmail,
+            subject: 'Re: Bekzod Idiyev — Portfolio Murojaati Bo\'yicha Javob',
+            text,
+          });
+
+          if (emailResult.success) {
+            await sendTg('sendMessage', {
+              chat_id: chatId,
+              text: `✅ <b>Email xati muvaffaqiyatli yuborildi!</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n📧 <b>Qabul qiluvchi:</b> <code>${escapeHtml(targetEmail)}</code>\n📄 <b>Mavzu:</b> Re: Bekzod Idiyev — Portfolio Murojaati\n\n💬 <b>Yuborilgan javob matni:</b>\n"${escapeHtml(text)}"`,
+              parse_mode: 'HTML',
+            });
+          } else {
+            await sendTg('sendMessage', {
+              chat_id: chatId,
+              text: `⚠️ <b>Server orqali email yuborilmadi:</b> ${escapeHtml(emailResult.error || '')}\n\n💡 <i>Hech qisi yo'q! Quyidagi 1-klikli havola orqali Gmail'da ochib yuborishingiz mumkin:</i>`,
+              parse_mode: 'HTML',
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: '✉️ Gmail orqali 1-klikda Yuborish', url: gmailUrl }],
+                ],
+              },
+            });
+          }
+
+          return res.status(200).json({ ok: true });
+        }
+
+        // 3. Detect Telegram User Target (via native reply or stored target)
+        let replyTargetUser: string | number | null = null;
         if (msg.reply_to_message?.text) {
           const repliedText = msg.reply_to_message.text;
           const userTagMatch = repliedText.match(/#user_(\d+)/) || repliedText.match(/User ID:\s*(\d+)/i) || repliedText.match(/<code>(\d+)<\/code>/);
           if (userTagMatch && userTagMatch[1]) {
-            replyTarget = userTagMatch[1];
+            replyTargetUser = userTagMatch[1];
           }
         }
-
-        // Fallback to button-initiated reply target
-        if (!replyTarget && pendingAdminReplyTarget) {
-          replyTarget = pendingAdminReplyTarget;
+        if (!replyTargetUser && pendingAdminReplyTarget) {
+          replyTargetUser = pendingAdminReplyTarget;
         }
 
-        if (replyTarget) {
-          if (text === '/cancel') {
-            pendingAdminReplyTarget = null;
-            await sendTg('sendMessage', {
-              chat_id: chatId,
-              text: '❌ <b>Javob yozish bekor qilindi.</b>',
-              parse_mode: 'HTML',
-            });
-            return res.status(200).json({ ok: true });
-          }
-
-          // Send reply directly to the target user
+        if (replyTargetUser) {
+          pendingAdminReplyTarget = null;
           const userReceiveMsg = `👨‍💻 <b>BEKZOD IDIYEV SIZGA JAVOB YOZDI:</b>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${escapeHtml(text)}
@@ -347,17 +499,15 @@ ${escapeHtml(text)}
 💬 <i>Qo'shimcha savol yoki taklifingiz bo'lsa, shunchaki shu yerga yozishingiz mumkin.</i>`;
 
           const sendResult = await sendTg('sendMessage', {
-            chat_id: replyTarget,
+            chat_id: replyTargetUser,
             text: userReceiveMsg,
             parse_mode: 'HTML',
           });
 
-          pendingAdminReplyTarget = null;
-
           if (sendResult?.ok) {
             await sendTg('sendMessage', {
               chat_id: chatId,
-              text: `✅ <b>Javobingiz foydalanuvchiga (ID: <code>${replyTarget}</code>) muvaffaqiyatli yetkazildi!</b>\n\n💬 <i>Yuborilgan javob:</i>\n"${escapeHtml(text)}"`,
+              text: `✅ <b>Javobingiz foydalanuvchiga (ID: <code>${replyTargetUser}</code>) muvaffaqiyatli yetkazildi!</b>\n\n💬 <i>Yuborilgan javob:</i>\n"${escapeHtml(text)}"`,
               parse_mode: 'HTML',
             });
           } else {
@@ -604,7 +754,6 @@ Rahmat! Tez orada siz bilan bog'lanaman. 🚀`,
     return res.status(200).json({ ok: true });
   } catch (e: any) {
     console.error('Webhook safe catch exception:', e);
-    // Always return 200 OK to Telegram so it doesn't fail the webhook
     return res.status(200).json({ ok: true, error: e?.message });
   }
 }
