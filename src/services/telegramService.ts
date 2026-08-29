@@ -1,3 +1,5 @@
+import { VisitorTelemetryData } from './visitorTelemetry';
+
 export interface ContactPayload {
   name: string;
   email: string;
@@ -14,6 +16,7 @@ export interface TelegramSendResult {
 }
 
 const RATE_LIMIT_KEY = 'portfolio_last_contact_ts';
+const VISITOR_LOGGED_KEY = 'portfolio_visitor_telemetry_sent';
 const COOLDOWN_SECONDS = 45;
 
 /**
@@ -50,7 +53,8 @@ export function generateDirectTelegramUrl(payload: ContactPayload): string {
  * Escapes HTML characters for Telegram Bot API HTML parse mode
  */
 function escapeHtml(str: string): string {
-  return str
+  if (!str) return '';
+  return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
@@ -123,8 +127,8 @@ export async function sendTelegramLead(payload: ContactPayload): Promise<Telegra
   }
 
   // 4. Secondary Path: Direct Client-Side Fetch to Telegram API
-  const botToken = import.meta.env.VITE_TELEGRAM_BOT_TOKEN;
-  const chatId = import.meta.env.VITE_TELEGRAM_CHAT_ID;
+  const botToken = (import.meta as any).env?.VITE_TELEGRAM_BOT_TOKEN;
+  const chatId = (import.meta as any).env?.VITE_TELEGRAM_CHAT_ID;
 
   if (botToken && chatId && botToken !== 'YOUR_TELEGRAM_BOT_TOKEN' && chatId !== 'YOUR_TELEGRAM_CHAT_ID') {
     const timestamp = new Intl.DateTimeFormat('uz-UZ', {
@@ -202,4 +206,138 @@ ${escapeHtml(payload.message)}
     error: 'Telegram Botga ulanib bo\'lmadi. To\'g\'ridan-to\'g\'ri Telegram profilingiz orqali yozishingiz mumkin.',
     directTelegramUrl: directUrl,
   };
+}
+
+/**
+ * Send Visitor Identification & Telemetry Notification
+ */
+export async function sendVisitorNotification(
+  telemetry: VisitorTelemetryData
+): Promise<TelegramSendResult> {
+  // Prevent duplicate spam within session if already logged with the same name
+  try {
+    const sessionKey = `visitor_sent_${telemetry.visitorName}_${telemetry.visitorRole || ''}`;
+    if (sessionStorage.getItem(sessionKey)) {
+      return { success: true, message: 'Already recorded in this session.' };
+    }
+    sessionStorage.setItem(sessionKey, 'true');
+  } catch {
+    // ignore
+  }
+
+  // 1. Primary: Call /api/visitor (Vercel Serverless or Vite dev server)
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+
+    const apiRes = await fetch('/api/visitor', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(telemetry),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timer);
+
+    if (apiRes.ok) {
+      try {
+        localStorage.setItem(VISITOR_LOGGED_KEY, Date.now().toString());
+      } catch {
+        // ignore
+      }
+      return { success: true, message: 'Visitor logged.' };
+    }
+  } catch (err) {
+    console.warn('/api/visitor unreachable, attempting client direct dispatch...', err);
+  }
+
+  // 2. Secondary: Client Direct Dispatch
+  const botToken = (import.meta as any).env?.VITE_TELEGRAM_BOT_TOKEN;
+  const chatId = (import.meta as any).env?.VITE_TELEGRAM_CHAT_ID;
+
+  if (botToken && chatId && botToken !== 'YOUR_TELEGRAM_BOT_TOKEN' && chatId !== 'YOUR_TELEGRAM_CHAT_ID') {
+    const locationParts = [telemetry.country, telemetry.city, telemetry.region].filter(Boolean);
+    const locationLine =
+      locationParts.length > 0 ? locationParts.join(', ') : '🌍 Aniqlanmagan (Global)';
+
+    const roleText = telemetry.visitorRole
+      ? `\n🎯 <b>Maqsad / Rol:</b> ${escapeHtml(telemetry.visitorRole)}`
+      : '';
+    const anonBadge = telemetry.isAnonymous ? ' <i>(Anonim)</i>' : '';
+    const netDetails = [telemetry.networkType, telemetry.networkSpeed, telemetry.rtt]
+      .filter(Boolean)
+      .join(' • ');
+    const netLine = netDetails ? `\n  • <b>Tarmoq:</b> ${escapeHtml(netDetails)}` : '';
+    const ispLine = telemetry.isp ? `\n  • <b>Provayder:</b> ${escapeHtml(telemetry.isp)}` : '';
+    const hwDetails = [
+      telemetry.cpuCores,
+      telemetry.deviceMemory,
+      telemetry.pixelRatio ? `DPR: ${telemetry.pixelRatio}` : '',
+    ]
+      .filter(Boolean)
+      .join(' | ');
+    const utmLine = telemetry.utmSource
+      ? `\n  • <b>UTM Kampaniya:</b> <code>${escapeHtml(telemetry.utmSource)}</code>`
+      : '';
+
+    const directHtmlMessage = `👁️ <b>YANGI TASHRIF BUYURUVCHI (PORTFOLIO)</b>
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+👤 <b>Mehmon:</b> <b>${escapeHtml(telemetry.visitorName || 'Anonim Tashrif Buyuruvchi')}</b>${anonBadge}${roleText}
+
+🌍 <b>Geolokatsiya & Tarmoq:</b>
+  • <b>IP:</b> <code>${escapeHtml(telemetry.ip || 'Client Direct')}</code>
+  • <b>Manzil:</b> ${escapeHtml(locationLine)}${ispLine}${netLine}
+
+📱 <b>Qurilma & Dasturiy Muhit:</b>
+  • <b>Qurilma:</b> ${escapeHtml(telemetry.deviceType || '💻 Kompyuter')}
+  • <b>OS:</b> ${escapeHtml(telemetry.os || 'Noma\'lum OS')}
+  • <b>Brauzer:</b> ${escapeHtml(telemetry.browser || 'Noma\'lum Brauzer')}
+  • <b>Ekran:</b> <code>${escapeHtml(telemetry.screenResolution || 'Noma\'lum')}</code> (Oyna: ${escapeHtml(telemetry.viewportSize || '')})
+  • <b>Uskuna:</b> ${escapeHtml(hwDetails || 'Standart')}
+
+🧭 <b>Tashrif Manbasi & Kontekst:</b>
+  • <b>Qayerdan keldi:</b> ${escapeHtml(telemetry.referrerSource || 'To\'g\'ridan-to\'g\'ri')}
+  • <b>Sayt Tili:</b> 🌐 ${(telemetry.siteLanguage || 'uz').toUpperCase()} (Brauzer: ${escapeHtml(telemetry.browserLanguage || 'uz-UZ')})
+  • <b>Timezone:</b> ⏱️ ${escapeHtml(telemetry.timezone || 'Asia/Tashkent')}${utmLine}
+  • <b>Sahifa:</b> <code>${escapeHtml(telemetry.landingUrl || '/')}</code>
+  • <b>Vaqt:</b> 🕒 ${telemetry.timestamp} (Toshkent / UTC+5)
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ <i>Bekzod Idiyev Portfolio Telemetry Gateway</i>`;
+
+    try {
+      const clientController = new AbortController();
+      const clientTimeout = setTimeout(() => clientController.abort(), 8000);
+
+      const clientResponse = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: directHtmlMessage,
+          parse_mode: 'HTML',
+          disable_web_page_preview: true,
+        }),
+        signal: clientController.signal,
+      });
+
+      clearTimeout(clientTimeout);
+
+      if (clientResponse.ok) {
+        try {
+          localStorage.setItem(VISITOR_LOGGED_KEY, Date.now().toString());
+        } catch {
+          // ignore
+        }
+        return { success: true, message: 'Visitor logged successfully via client direct.' };
+      }
+    } catch (e) {
+      console.error('Client direct visitor dispatch failed:', e);
+    }
+  }
+
+  return { success: false, error: 'Unable to dispatch visitor notification.' };
 }

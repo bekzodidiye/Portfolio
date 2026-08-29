@@ -239,4 +239,26 @@ export const enTranslations: TranslationSchema = {
     rightsReserved: 'All rights reserved.',
     techStackNote: 'Interactive WebGL 3D Core • FastAPI & Django Architecture',
   },
+  visitorModal: {
+    badge: 'WELCOME • GUEST PROTOCOL',
+    title: 'Welcome to My Portfolio!',
+    subtitle: 'Great to meet you! Before exploring the engineering works, please introduce yourself:',
+    nameLabel: 'Your Name or Organization',
+    namePlaceholder: 'e.g., Alex Johnson (Tech Lead, Google) or Sarah',
+    roleLabel: 'Purpose of Visit / Your Role:',
+    roles: {
+      recruiter: '🏢 Recruiter / HR',
+      client: '🚀 Client / Project Lead',
+      developer: '💻 Developer / Colleague',
+      guest: '👋 General Visitor',
+    },
+    submitBtn: 'Enter Portfolio →',
+    skipBtn: 'Continue Anonymously',
+    submitting: 'Connecting...',
+    welcomeBack: 'Welcome back',
+    toastIntro: 'Welcome, {name}! Enjoy exploring the portfolio.',
+    toastAnon: 'Welcome! Enjoy exploring the portfolio.',
+    badgeStatus: 'Visitor Profile',
+  },
 };
+

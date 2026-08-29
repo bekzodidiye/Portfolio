@@ -11,9 +11,11 @@ import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
 import { ResumeModal } from './components/ResumeModal';
 import { ScrollProgressBar } from './components/ScrollProgressBar';
+import { VisitorWelcomeModal } from './components/VisitorWelcomeModal';
 
 function PortfolioApp() {
   const [isResumeOpen, setIsResumeOpen] = useState(false);
+  const [isVisitorModalOpen, setIsVisitorModalOpen] = useState<boolean | undefined>(undefined);
 
   return (
     <div className="relative min-h-screen bg-[#FAFCFF] text-slate-900 selection:bg-blue-600/15 selection:text-blue-700">
@@ -25,7 +27,10 @@ function PortfolioApp() {
 
       {/* Foreground Content Stack */}
       <div className="relative z-10 flex flex-col min-h-screen">
-        <Navbar onOpenResume={() => setIsResumeOpen(true)} />
+        <Navbar
+          onOpenResume={() => setIsResumeOpen(true)}
+          onOpenVisitorModal={() => setIsVisitorModalOpen(true)}
+        />
         <main className="flex-1">
           <HeroSection />
           <TerminalAbout />
@@ -41,6 +46,12 @@ function PortfolioApp() {
       <ResumeModal
         isOpen={isResumeOpen}
         onClose={() => setIsResumeOpen(false)}
+      />
+
+      {/* Visitor Identification & Welcome Protocol Modal */}
+      <VisitorWelcomeModal
+        isOpenOverride={isVisitorModalOpen}
+        onCloseOverride={() => setIsVisitorModalOpen(false)}
       />
     </div>
   );

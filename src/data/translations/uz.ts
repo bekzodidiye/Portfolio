@@ -239,4 +239,26 @@ export const uzTranslations: TranslationSchema = {
     rightsReserved: 'Barcha huquqlar himoyalangan.',
     techStackNote: 'Interaktiv WebGL 3D Yadro • FastAPI & Django Arxitekturasi',
   },
+  visitorModal: {
+    badge: 'XUSH KELIBSIZ • TANISHUV PROTOKOLI',
+    title: 'Portfolioga Xush Kelibsiz!',
+    subtitle: 'Tanishganimdan xursandman. Sayt bilan to\'liq tanishishdan oldin o\'zingizni tanishtiring:',
+    nameLabel: 'Ismingiz yoki Kompaniyangiz nomi',
+    namePlaceholder: 'Masalan: Azizbek (Tech Lead, EPAM) yoki Farhod',
+    roleLabel: 'Tashrif maqsadi / Qaysi sohada qiziqyapsiz?',
+    roles: {
+      recruiter: '🏢 Ish beruvchi / HR',
+      client: '🚀 Buyurtmachi / Mijoz',
+      developer: '💻 Dasturchi / Hamkasb',
+      guest: '👋 Shunchaki mehmon',
+    },
+    submitBtn: 'Portfolioga Kirish →',
+    skipBtn: 'Anonim Davom Etish',
+    submitting: 'Ulanmoqda...',
+    welcomeBack: 'Qaytganingiz bilan',
+    toastIntro: 'Xush kelibsiz, {name}! Portfolio bilan tanishishingiz mumkin.',
+    toastAnon: 'Xush kelibsiz! Portfolio bilan tanishishingiz mumkin.',
+    badgeStatus: 'Tashrif buyuruvchi',
+  },
 };
+

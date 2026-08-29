@@ -6,9 +6,10 @@ import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface NavbarProps {
   onOpenResume?: () => void;
+  onOpenVisitorModal?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenResume }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, onOpenVisitorModal }) => {
   const { t } = useLanguage();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -111,6 +112,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume }) => {
           {/* 3-Language Switcher */}
           <LanguageSwitcher />
 
+          {onOpenVisitorModal && (
+            <button
+              onClick={onOpenVisitorModal}
+              id="nav-visitor-btn"
+              title={t.visitorModal.badgeStatus}
+              className="hidden lg:flex px-2.5 py-1.5 text-xs font-mono font-medium rounded-lg text-slate-600 hover:text-blue-600 bg-slate-100/80 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 transition-all items-center gap-1.5 cursor-pointer"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>{t.visitorModal.badgeStatus}</span>
+            </button>
+          )}
+
           {onOpenResume && (
             <button
               onClick={onOpenResume}
@@ -145,6 +158,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume }) => {
         </div>
       </div>
 
+
       {/* Mobile Dropdown */}
       {mobileMenuOpen && (
         <div
@@ -164,6 +178,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume }) => {
             </a>
           ))}
           <div className="pt-3 border-t border-slate-200 flex flex-col gap-2">
+            {onOpenVisitorModal && (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenVisitorModal();
+                }}
+                className="py-2.5 px-4 text-center font-mono text-xs font-semibold rounded-lg bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center gap-2"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>{t.visitorModal.badgeStatus}</span>
+              </button>
+            )}
             {onOpenResume && (
               <button
                 onClick={() => {
@@ -175,6 +201,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume }) => {
                 {t.nav.resumeSpec}
               </button>
             )}
+
             <a
               href={CANDIDATE_PROFILE.telegram}
               target="_blank"

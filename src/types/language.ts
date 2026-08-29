@@ -204,4 +204,26 @@ export interface TranslationSchema {
     rightsReserved: string;
     techStackNote: string;
   };
+  visitorModal: {
+    badge: string;
+    title: string;
+    subtitle: string;
+    nameLabel: string;
+    namePlaceholder: string;
+    roleLabel: string;
+    roles: {
+      recruiter: string;
+      client: string;
+      developer: string;
+      guest: string;
+    };
+    submitBtn: string;
+    skipBtn: string;
+    submitting: string;
+    welcomeBack: string;
+    toastIntro: string;
+    toastAnon: string;
+    badgeStatus: string;
+  };
 }
+

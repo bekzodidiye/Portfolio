@@ -239,4 +239,26 @@ export const ruTranslations: TranslationSchema = {
     rightsReserved: 'Все права защищены.',
     techStackNote: 'Интерактивное WebGL 3D Ядро • Архитектура FastAPI & Django',
   },
+  visitorModal: {
+    badge: 'ДОБРО ПОЖАЛОВАТЬ • ПРОТОКОЛ ЗНАКОМСТВА',
+    title: 'Добро пожаловать в Портфолио!',
+    subtitle: 'Рад знакомству! Перед просмотром инженерных проектов, пожалуйста, представьтесь:',
+    nameLabel: 'Ваше Имя или Название Компании',
+    namePlaceholder: 'Например: Азизбек (Tech Lead, EPAM) или Тимур',
+    roleLabel: 'Цель визита / Кто вы:',
+    roles: {
+      recruiter: '🏢 Рекрутер / HR',
+      client: '🚀 Заказчик / Клиент',
+      developer: '💻 Разработчик / Коллега',
+      guest: '👋 Гость / Посетитель',
+    },
+    submitBtn: 'Войти в Портфолио →',
+    skipBtn: 'Продолжить Анонимно',
+    submitting: 'Подключение...',
+    welcomeBack: 'С возвращением',
+    toastIntro: 'Добро пожаловать, {name}! Приятного просмотра портфолио.',
+    toastAnon: 'Добро пожаловать! Приятного просмотра портфолио.',
+    badgeStatus: 'Профиль Гостя',
+  },
 };
+
