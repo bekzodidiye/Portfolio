@@ -15,13 +15,14 @@ const GITHUB_URL = 'https://github.com/bekzodidiye';
 const ADMIN_CHAT_ID = '5678281376';
 const FALLBACK_BOT_TOKEN = '8708309461:AAGAh4Pz_Rfr4jHN8qRtkq9MbtEpT3Q5Hfc';
 
-// In-Memory Stats & Logs for Serverless Warm State
+// In-Memory state for warm serverless instances
 let botUserIds = new Set<number | string>([ADMIN_CHAT_ID]);
 let botStats = {
   totalInteractions: 1,
   totalMessagesForwarded: 0,
   serverStartTime: new Date().toISOString(),
 };
+let pendingAdminReplyTarget: string | number | null = null;
 
 function getMainReplyKeyboard() {
   return {
@@ -140,6 +141,21 @@ export default async function handler(req: any, res: any) {
       let responseText = '';
       let replyMarkup: any = null;
 
+      // Handle Direct Bot Reply Initiation
+      if (data.startsWith('reply_user_')) {
+        const targetUserId = data.replace('reply_user_', '');
+        pendingAdminReplyTarget = targetUserId;
+
+        await sendTg('sendMessage', {
+          chat_id: chatId,
+          text: `✍️ <b>Foydalanuvchiga (ID: <code>${targetUserId}</code>) to'g'ridan-to'g'ri javob yozish:</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\nMarhamat, yubormoqchi bo'lgan javob matningizni shu yerga yozing:\n\n<i>(Bekor qilish uchun /cancel deb yozing)</i>`,
+          parse_mode: 'HTML',
+        });
+        await sendTg('answerCallbackQuery', { callback_query_id: cb.id });
+        return res.status(200).json({ ok: true });
+      }
+
+      // Projects Callbacks
       if (data === 'proj_buddy') {
         responseText = `🚀 <b>BUDDY TEAM — AI MENTOR & TEAM MATCHMAKING</b>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -286,12 +302,75 @@ Mahalliy kompyuter yoki VPS'da Python bot orqali <code>/admin</code> menyusidan 
       const text = msg.text || '';
       const from = msg.from || {};
       const name = from.first_name || 'Foydalanuvchi';
+      const isAdmin = String(chatId) === String(adminId) || String(chatId) === ADMIN_CHAT_ID;
 
       if (!chatId) {
         return res.status(200).json({ ok: true });
       }
 
       botUserIds.add(chatId);
+
+      // --- ADMIN REPLY HANDLING (Native Reply or Stored Target) ---
+      if (isAdmin) {
+        let replyTarget: string | number | null = null;
+
+        // Check if Admin is using Telegram's native "Reply" feature
+        if (msg.reply_to_message?.text) {
+          const repliedText = msg.reply_to_message.text;
+          const userTagMatch = repliedText.match(/#user_(\d+)/) || repliedText.match(/User ID:\s*(\d+)/i) || repliedText.match(/<code>(\d+)<\/code>/);
+          if (userTagMatch && userTagMatch[1]) {
+            replyTarget = userTagMatch[1];
+          }
+        }
+
+        // Fallback to button-initiated reply target
+        if (!replyTarget && pendingAdminReplyTarget) {
+          replyTarget = pendingAdminReplyTarget;
+        }
+
+        if (replyTarget) {
+          if (text === '/cancel') {
+            pendingAdminReplyTarget = null;
+            await sendTg('sendMessage', {
+              chat_id: chatId,
+              text: '❌ <b>Javob yozish bekor qilindi.</b>',
+              parse_mode: 'HTML',
+            });
+            return res.status(200).json({ ok: true });
+          }
+
+          // Send reply directly to the target user
+          const userReceiveMsg = `👨‍💻 <b>BEKZOD IDIYEV SIZGA JAVOB YOZDI:</b>
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+${escapeHtml(text)}
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+💬 <i>Qo'shimcha savol yoki taklifingiz bo'lsa, shunchaki shu yerga yozishingiz mumkin.</i>`;
+
+          const sendResult = await sendTg('sendMessage', {
+            chat_id: replyTarget,
+            text: userReceiveMsg,
+            parse_mode: 'HTML',
+          });
+
+          pendingAdminReplyTarget = null;
+
+          if (sendResult?.ok) {
+            await sendTg('sendMessage', {
+              chat_id: chatId,
+              text: `✅ <b>Javobingiz foydalanuvchiga (ID: <code>${replyTarget}</code>) muvaffaqiyatli yetkazildi!</b>\n\n💬 <i>Yuborilgan javob:</i>\n"${escapeHtml(text)}"`,
+              parse_mode: 'HTML',
+            });
+          } else {
+            await sendTg('sendMessage', {
+              chat_id: chatId,
+              text: `⚠️ <b>Javob yetkazilmadi.</b> Foydalanuvchi botni bloklagan yoki xatolik yuz berdi: ${sendResult?.description || 'Noma\'lum'}`,
+              parse_mode: 'HTML',
+            });
+          }
+
+          return res.status(200).json({ ok: true });
+        }
+      }
 
       // /start or /help
       if (text.startsWith('/start') || text.startsWith('/help')) {
@@ -461,7 +540,6 @@ Matnni shunchaki shu yerga yozing:`,
 
       // Admin Panel (/admin)
       if (text === '/admin') {
-        const isAdmin = String(chatId) === String(adminId) || String(chatId) === ADMIN_CHAT_ID;
         if (!isAdmin) {
           await sendTg('sendMessage', {
             chat_id: chatId,
@@ -482,9 +560,9 @@ Matnni shunchaki shu yerga yozing:`,
         return res.status(200).json({ ok: true });
       }
 
-      // Forward general message to Bekzod Admin
+      // Forward general message to Bekzod Admin with Quick Action Buttons
       botStats.totalMessagesForwarded += 1;
-      const adminLeadMsg = `🚀 <b>YANGI BOT XABARI (INCOMING DIRECT LEAD)</b>
+      const adminLeadMsg = `🚀 <b>YANGI BOT XABARI (INCOMING LEAD)</b>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 👤 <b>Yuboruvchi:</b> ${escapeHtml(name)} ${from.last_name ? escapeHtml(from.last_name) : ''}
 🆔 <b>User ID:</b> <code>${chatId}</code>
@@ -494,16 +572,18 @@ Matnni shunchaki shu yerga yozing:`,
 💬 <b>Xabar Matni:</b>
 ${escapeHtml(text)}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚡ <i>Bekzod Idiyev Telegram Bot Webhook Gateway</i>`;
+⚡ <i>Javob berish: ushbu xabarga <b>Reply</b> qiling yoki pastdagi tugmani bosing!</i>
+#user_${chatId}`;
 
-      // Forward to Bekzod
+      // Forward to Bekzod with Direct Bot Reply and Telegram Profile buttons
       await sendTg('sendMessage', {
         chat_id: adminId,
         text: adminLeadMsg,
         parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
-            [{ text: '💬 Javob Yozish', url: `tg://user?id=${chatId}` }],
+            [{ text: '💬 Botdan To\'g\'ridan-to\'g\'ri Javob Yozish', callback_data: `reply_user_${chatId}` }],
+            [{ text: '✈️ Telegram Profiliga O\'tish', url: `tg://user?id=${chatId}` }],
           ],
         },
       });

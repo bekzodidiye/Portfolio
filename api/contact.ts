@@ -47,17 +47,16 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    // 3. Server-side Secret Tokens (Never sent to client)
-    const botToken = process.env.TELEGRAM_BOT_TOKEN || process.env.VITE_TELEGRAM_BOT_TOKEN;
-    const chatId = process.env.TELEGRAM_CHAT_ID || process.env.VITE_TELEGRAM_CHAT_ID;
+    // 3. Server-side Secret Tokens (with safe fallback)
+    const botToken =
+      process.env.TELEGRAM_BOT_TOKEN ||
+      process.env.VITE_TELEGRAM_BOT_TOKEN ||
+      '8708309461:AAGAh4Pz_Rfr4jHN8qRtkq9MbtEpT3Q5Hfc';
+    const chatId =
+      process.env.TELEGRAM_CHAT_ID ||
+      process.env.VITE_TELEGRAM_CHAT_ID ||
+      '5678281376';
 
-    if (!botToken || !chatId) {
-      console.error('Server error: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is missing.');
-      return res.status(500).json({
-        ok: false,
-        error: 'Serverda Telegram Bot sozlamalari topilmadi.',
-      });
-    }
 
     // 4. Client Metadata
 

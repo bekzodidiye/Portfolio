@@ -69,18 +69,26 @@ async def process_message(message: Message, state: FSMContext, bot: Bot):
 💬 <b>Xabar Matni:</b>
 {msg_text}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚡ <i>Bekzod Idiyev Telegram Bot Engine v2.0</i>"""
+⚡ <i>Javob berish: ushbu xabarga <b>Reply</b> qiling yoki pastdagi tugmani bosing!</i>
+#user_{user.id if user else ''}"""
 
     admin_kb = InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="💬 Foydalanuvchiga Yozish",
+                    text="💬 Botdan Javob Yozish",
+                    callback_data=f"reply_user_{user.id}" if user else "admin_main"
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text="✈️ Telegram Profiliga O'tish",
                     url=f"tg://user?id={user.id}" if user else "https://t.me"
                 ),
             ]
         ]
     )
+
 
     for admin_id in config.ADMIN_IDS:
         try:
