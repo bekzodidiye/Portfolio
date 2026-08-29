@@ -211,6 +211,18 @@ ${escapeHtml(message || '')}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚡ <i>Bekzod Idiyev Portfolio Dev Gateway</i>`;
 
+            const contactInlineKeyboard = {
+              inline_keyboard: [
+                [
+                  { text: '✉️ Emailga Javob Yozish', url: `mailto:${encodeURIComponent(email || '')}?subject=Bekzod%20Idiyev%20—%20Portfolio%20Javobi` },
+                ],
+                [
+                  { text: '🌐 Portfolioni Ko\'rish', url: 'https://bekzod-idiyev.vercel.app' },
+                  { text: '🐙 GitHub Profil', url: 'https://github.com/bekzodidiye' },
+                ],
+              ],
+            };
+
             const tgRes = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -219,6 +231,7 @@ ${escapeHtml(message || '')}
                 text: cleanText,
                 parse_mode: 'HTML',
                 disable_web_page_preview: true,
+                reply_markup: contactInlineKeyboard,
               }),
             });
 
@@ -237,7 +250,87 @@ ${escapeHtml(message || '')}
           }
         });
       });
+
+      // 3. Webhook Gateway Dev Handler
+      server.middlewares.use('/api/webhook', async (req: any, res: any) => {
+        if (req.method !== 'POST') {
+          res.statusCode = 200;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ ok: true, message: 'Telegram Webhook Gateway Active' }));
+          return;
+        }
+
+        let body = '';
+        req.on('data', (chunk: any) => {
+          body += chunk;
+        });
+
+        req.on('end', async () => {
+          try {
+            const botToken =
+              env.TELEGRAM_BOT_TOKEN ||
+              env.VITE_TELEGRAM_BOT_TOKEN ||
+              process.env.TELEGRAM_BOT_TOKEN ||
+              process.env.VITE_TELEGRAM_BOT_TOKEN;
+
+            if (!botToken) {
+              res.statusCode = 500;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ ok: false, error: 'TELEGRAM_BOT_TOKEN is missing' }));
+              return;
+            }
+
+            const update = JSON.parse(body || '{}');
+            const PORTFOLIO_URL = 'https://bekzod-idiyev.vercel.app';
+
+            const sendTg = async (method: string, payload: any) => {
+              return fetch(`https://api.telegram.org/bot${botToken}/${method}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+              });
+            };
+
+            if (update.message) {
+              const msg = update.message;
+              const chatId = msg.chat?.id;
+              const text = msg.text || '';
+              const name = msg.from?.first_name || 'Foydalanuvchi';
+
+              if (chatId) {
+                if (text.startsWith('/start') || text.startsWith('/help')) {
+                  const welcomeText = `🚀 <b>Assalomu alaykum, ${escapeHtml(name)}!</b>\n\nMen <b>Bekzod Idiyev</b>ning rasmiy portfolio botiman.\nPython Backend Dasturchi & School 21 Data Science Talabasi.\n\nQuyidagi menyulardan birini tanlang yoki to'g'ridan-to'g'ri 3D Portfolioni oching:`;
+                  await sendTg('sendMessage', {
+                    chat_id: chatId,
+                    text: welcomeText,
+                    parse_mode: 'HTML',
+                    reply_markup: {
+                      keyboard: [
+                        [{ text: '🚀 3D Portfolioni Ochish (Web App)', web_app: { url: PORTFOLIO_URL } }],
+                        [{ text: '👨‍💻 Men Haqimda' }, { text: '📂 Loyihalarim' }],
+                        [{ text: '🛠️ Stack & Texnologiyalar' }, { text: '📄 Rezyume / CV' }],
+                        [{ text: '✍️ Xabar Qoldirish' }, { text: '🌐 Tilni O\'zgartirish' }],
+                      ],
+                      resize_keyboard: true,
+                      is_persistent: true,
+                    },
+                  });
+                }
+              }
+            }
+
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ ok: true }));
+          } catch (err: any) {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ ok: true }));
+          }
+        });
+      });
     },
+
   };
 }
 

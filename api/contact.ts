@@ -89,7 +89,19 @@ ${escapeHtml(trimmedMessage)}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚡ <i>Bekzod Idiyev Vercel Secure Gateway v2.0</i>`;
 
-    // 6. Secure Server-to-Telegram Dispatch
+    // 6. Secure Server-to-Telegram Dispatch with Interactive Buttons
+    const contactInlineKeyboard = {
+      inline_keyboard: [
+        [
+          { text: '✉️ Emailga Javob Yozish', url: `mailto:${encodeURIComponent(trimmedEmail)}?subject=Bekzod%20Idiyev%20—%20Portfolio%20Javobi` },
+        ],
+        [
+          { text: '🌐 Portfolioni Ko\'rish', url: 'https://bekzod-idiyev.vercel.app' },
+          { text: '🐙 GitHub Profil', url: 'https://github.com/bekzodidiye' },
+        ],
+      ],
+    };
+
     const telegramResponse = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: {
@@ -100,8 +112,10 @@ ${escapeHtml(trimmedMessage)}
         text: telegramHtmlMessage,
         parse_mode: 'HTML',
         disable_web_page_preview: true,
+        reply_markup: contactInlineKeyboard,
       }),
     });
+
 
     if (!telegramResponse.ok) {
       const errorDetail = await telegramResponse.json().catch(() => ({}));

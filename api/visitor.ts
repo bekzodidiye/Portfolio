@@ -126,6 +126,21 @@ export default async function handler(req: any, res: any) {
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚡ <i>Bekzod Idiyev Portfolio Telemetry v2.0</i>`;
 
+    // Construct interactive inline keyboard buttons for instant action
+    const mapQuery = encodeURIComponent(`${city || ''} ${country || ''}`.trim() || finalIp);
+    const inlineKeyboard = {
+      inline_keyboard: [
+        [
+          { text: '🌐 Portfolioni Ochish', url: landingUrl || 'https://bekzod-idiyev.vercel.app' },
+          { text: '🐙 GitHub Profil', url: 'https://github.com/bekzodidiye' },
+        ],
+        [
+          { text: '📍 Xaritada Ko\'rish', url: `https://www.google.com/maps/search/?api=1&query=${mapQuery}` },
+          { text: '💬 Telegram (@toyneden)', url: 'https://t.me/toyneden' },
+        ],
+      ],
+    };
+
     const telegramResponse = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: {
@@ -136,8 +151,10 @@ export default async function handler(req: any, res: any) {
         text: telegramHtmlMessage,
         parse_mode: 'HTML',
         disable_web_page_preview: true,
+        reply_markup: inlineKeyboard,
       }),
     });
+
 
     if (!telegramResponse.ok) {
       const errorDetail = await telegramResponse.json().catch(() => ({}));

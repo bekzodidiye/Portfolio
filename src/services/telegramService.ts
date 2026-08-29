@@ -306,6 +306,22 @@ export async function sendVisitorNotification(
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚡ <i>Bekzod Idiyev Portfolio Telemetry Gateway</i>`;
 
+    const mapQuery = encodeURIComponent(
+      `${telemetry.city || ''} ${telemetry.country || ''}`.trim() || telemetry.ip || ''
+    );
+    const inlineKeyboard = {
+      inline_keyboard: [
+        [
+          { text: '🌐 Portfolioni Ochish', url: telemetry.landingUrl || 'https://bekzod-idiyev.vercel.app' },
+          { text: '🐙 GitHub Profil', url: 'https://github.com/bekzodidiye' },
+        ],
+        [
+          { text: '📍 Xaritada Ko\'rish', url: `https://www.google.com/maps/search/?api=1&query=${mapQuery}` },
+          { text: '💬 Telegram (@toyneden)', url: 'https://t.me/toyneden' },
+        ],
+      ],
+    };
+
     try {
       const clientController = new AbortController();
       const clientTimeout = setTimeout(() => clientController.abort(), 8000);
@@ -320,11 +336,13 @@ export async function sendVisitorNotification(
           text: directHtmlMessage,
           parse_mode: 'HTML',
           disable_web_page_preview: true,
+          reply_markup: inlineKeyboard,
         }),
         signal: clientController.signal,
       });
 
       clearTimeout(clientTimeout);
+
 
       if (clientResponse.ok) {
         try {
