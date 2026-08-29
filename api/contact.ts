@@ -60,6 +60,7 @@ export default async function handler(req: any, res: any) {
     }
 
     // 4. Client Metadata
+
     const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket?.remoteAddress || 'Unknown IP';
     const userAgent = (req.headers['user-agent'] as string) || 'Unknown Client';
     const deviceType = /android|iphone|ipad|ipod/i.test(userAgent) ? '📱 Mobile' : '💻 Desktop';
@@ -73,6 +74,22 @@ export default async function handler(req: any, res: any) {
       minute: '2-digit',
       second: '2-digit',
     }).format(new Date());
+
+    // Save to Admin Store
+    try {
+      const { recordContactLog } = await import('./adminStore');
+      recordContactLog({
+        name: trimmedName,
+        email: trimmedEmail,
+        message: trimmedMessage,
+        deviceType,
+        timestamp,
+      });
+    } catch {
+      // ignore
+    }
+
+
 
     // 5. Construct Clean, Robust HTML Telegram Message (Immune to Markdown formatting errors)
     const telegramHtmlMessage = `🚀 <b>YANGI PORTFOLIO XABARI (LEAD)</b>

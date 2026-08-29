@@ -1,7 +1,7 @@
 import json
 import sqlite3
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 from datetime import datetime
 
 DB_PATH = Path(__file__).resolve().parent.parent / "bot_database.sqlite"
@@ -76,18 +76,45 @@ def get_all_user_ids() -> List[int]:
     conn.close()
     return [r[0] for r in rows]
 
-def get_stats() -> Dict[str, int]:
+def get_stats() -> Dict[str, Any]:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT COUNT(*) FROM users")
     total_users = cursor.fetchone()[0]
     cursor.execute("SELECT COUNT(*) FROM messages")
     total_messages = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT language, COUNT(*) FROM users GROUP BY language")
+    lang_stats = dict(cursor.fetchall())
+    
     conn.close()
     return {
         "total_users": total_users,
-        "total_messages": total_messages
+        "total_messages": total_messages,
+        "languages": lang_stats,
     }
+
+def get_recent_users(limit: int = 5) -> List[Dict[str, Any]]:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT user_id, username, full_name, language, last_active FROM users ORDER BY last_active DESC LIMIT ?", (limit,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [
+        {"user_id": r[0], "username": r[1], "full_name": r[2], "language": r[3], "last_active": r[4]}
+        for r in rows
+    ]
+
+def get_recent_messages(limit: int = 5) -> List[Dict[str, Any]]:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT user_id, user_name, contact_info, message_text, created_at FROM messages ORDER BY id DESC LIMIT ?", (limit,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [
+        {"user_id": r[0], "user_name": r[1], "contact_info": r[2], "message_text": r[3], "created_at": r[4]}
+        for r in rows
+    ]
 
 def record_feedback(user_id: int, user_name: str, contact_info: str, message_text: str):
     conn = sqlite3.connect(DB_PATH)
