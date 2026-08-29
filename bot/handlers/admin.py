@@ -12,10 +12,14 @@ router = Router()
 class BroadcastState(StatesGroup):
     waiting_for_broadcast_text = State()
 
+def is_admin(user_id: int) -> bool:
+    return user_id in config.ADMIN_IDS or str(user_id) in [str(a) for a in config.ADMIN_IDS]
+
 @router.message(Command("admin"))
 async def handle_admin(message: Message):
     user = message.from_user
-    if not user or user.id not in config.ADMIN_IDS:
+    if not user or not is_admin(user.id):
+        await message.answer("⛔ <b>Ruxsat etilmagan:</b> Bu buyruq faqat bot administratori uchun mo'ljallangan.", parse_mode="HTML")
         return
 
     stats = get_stats()
@@ -30,9 +34,10 @@ Quyidagi amallardan birini tanlang:"""
 
 @router.callback_query(F.data == "admin_stats")
 async def cb_admin_stats(callback: CallbackQuery):
-    if not callback.from_user or callback.from_user.id not in config.ADMIN_IDS:
+    if not callback.from_user or not is_admin(callback.from_user.id):
         await callback.answer("Ruxsat berilmagan.", show_alert=True)
         return
+
 
     stats = get_stats()
     stats_text = f"""📊 <b>JONLI STATISTIKA</b>

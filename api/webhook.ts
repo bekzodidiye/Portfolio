@@ -134,9 +134,30 @@ Quyidagi loyihalardan birini tanlang:
             [{ text: '🌐 Barcha Loyihalarni Ko\'rish', url: `${PORTFOLIO_URL}/#projects` }],
           ],
         };
+      } else if (data === 'admin_stats') {
+        responseText = `📊 <b>JONLI TIZIM STATISTIKASI</b>
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ <b>Webhook Gateway:</b> 🟢 24/7 Serverless (Vercel)
+🚀 <b>Arxitektura:</b> Python aiogram 3.x + TypeScript Serverless
+🌐 <b>Sayt Holati:</b> 200 OK (https://bekzod-idiyev-portfolio.vercel.app)
+🛡️ <b>Admin Auth:</b> <code>${chatId}</code> (Tasdiqlangan)`;
+
+        replyMarkup = {
+          inline_keyboard: [
+            [
+              { text: '🔄 Yangilash', callback_data: 'admin_stats' },
+              { text: '🌐 Portfolioni Tekshirish', url: PORTFOLIO_URL },
+            ],
+            [
+              { text: '🐙 GitHub Repozitoriya', url: 'https://github.com/bekzodidiye/Portfolio' },
+              { text: '✈️ Telegram Profil', url: 'https://t.me/toyneden' },
+            ],
+          ],
+        };
       } else if (data.startsWith('setlang_')) {
         responseText = `✅ Til muvaffaqiyatli tanlandi! Quyidagi menyudan foydalanishingiz mumkin.`;
       }
+
 
       if (responseText && chatId && messageId) {
         await sendTg('editMessageText', {
@@ -330,7 +351,49 @@ Matnni shunchaki shu yerga yozing:`,
         return res.status(200).json({ ok: true });
       }
 
+      // Admin Panel
+      if (text === '/admin') {
+        const isAdmin = String(chatId) === String(adminId) || String(chatId) === ADMIN_CHAT_ID;
+        if (!isAdmin) {
+          await sendTg('sendMessage', {
+            chat_id: chatId,
+            text: '⛔ <b>Ruxsat etilmagan:</b> Bu bo\'lim faqat bot administratori (Bekzod Idiyev) uchun mo\'ljallangan.',
+            parse_mode: 'HTML',
+          });
+          return res.status(200).json({ ok: true });
+        }
+
+        const adminPanelText = `👑 <b>BEKZOD IDIYEV — ADMIN BOSHQARUV PANELI</b>
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+🆔 <b>Admin ID:</b> <code>${chatId}</code>
+⚡ <b>Tizim Holati:</b> 🟢 Online (Vercel 24/7 Serverless Webhook)
+🌐 <b>Portfolio:</b> <code>${PORTFOLIO_URL}</code>
+🐙 <b>GitHub:</b> <code>${GITHUB_URL}</code>
+
+Quyidagi amallardan birini tanlang:`;
+
+        await sendTg('sendMessage', {
+          chat_id: chatId,
+          text: adminPanelText,
+          parse_mode: 'HTML',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                { text: '📊 Tizim & Serverless Holati', callback_data: 'admin_stats' },
+                { text: '🌐 Portfolioni Tekshirish', url: PORTFOLIO_URL },
+              ],
+              [
+                { text: '🐙 GitHub Repozitoriya', url: 'https://github.com/bekzodidiye/Portfolio' },
+                { text: '✈️ Telegram Profil (@toyneden)', url: 'https://t.me/toyneden' },
+              ],
+            ],
+          },
+        });
+        return res.status(200).json({ ok: true });
+      }
+
       // Forward general message to Bekzod Admin
+
       const timestamp = new Intl.DateTimeFormat('uz-UZ', {
         timeZone: 'Asia/Samarkand',
         year: 'numeric',
