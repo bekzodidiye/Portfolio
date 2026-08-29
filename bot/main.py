@@ -65,10 +65,17 @@ async def main():
     try:
         await dp.start_polling(bot, drop_pending_updates=True)
     finally:
+        try:
+            webhook_url = f"{config.PORTFOLIO_URL}/api/webhook"
+            await bot.set_webhook(webhook_url)
+            logger.info(f"Automatically restored Vercel webhook to: {webhook_url}")
+        except Exception as e:
+            logger.warning(f"Could not restore webhook: {e}")
         await bot.session.close()
 
 if __name__ == "__main__":
     try:
         asyncio.run(main())
     except (KeyboardInterrupt, SystemExit):
-        print("Bot stopped.")
+        print("Bot polling stopped. Vercel Serverless Webhook restored 24/7.")
+
