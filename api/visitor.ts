@@ -88,27 +88,8 @@ export default async function handler(req: any, res: any) {
     const locationLine =
       locationParts.length > 0 ? locationParts.join(', ') : '🌍 Aniqlanmagan (O\'zbekiston/Global)';
 
-    // Save to Admin Store for Admin Panel analytics
-    try {
-      const { recordVisitorLog } = await import('./adminStore');
-      recordVisitorLog({
-        name: visitorName || 'Anonim Mehmon',
-        role: visitorRole,
-        ip: finalIp,
-        country: country || 'O\'zbekiston',
-        city: city || 'Toshkent',
-        deviceType: deviceType || '💻 Desktop',
-        os: os || 'Noma\'lum',
-        browser: browser || 'Chrome',
-        referrerSource: referrerSource || 'Direct',
-        timestamp,
-      });
-    } catch {
-      // ignore
-    }
-
-
     // Build network info
+
     const netDetails = [networkType, networkSpeed, rtt].filter(Boolean).join(' • ');
     const netLine = netDetails ? `\n  • <b>Tarmoq:</b> ${escapeHtml(netDetails)}` : '';
     const ispLine = isp ? `\n  • <b>Provayder:</b> ${escapeHtml(isp)}` : '';

@@ -75,23 +75,8 @@ export default async function handler(req: any, res: any) {
       second: '2-digit',
     }).format(new Date());
 
-    // Save to Admin Store
-    try {
-      const { recordContactLog } = await import('./adminStore');
-      recordContactLog({
-        name: trimmedName,
-        email: trimmedEmail,
-        message: trimmedMessage,
-        deviceType,
-        timestamp,
-      });
-    } catch {
-      // ignore
-    }
-
-
-
     // 5. Construct Clean, Robust HTML Telegram Message (Immune to Markdown formatting errors)
+
     const telegramHtmlMessage = `🚀 <b>YANGI PORTFOLIO XABARI (LEAD)</b>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 👤 <b>Yuboruvchi:</b> ${escapeHtml(trimmedName)}
