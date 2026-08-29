@@ -312,7 +312,8 @@ export async function sendVisitorNotification(
     const inlineKeyboard = {
       inline_keyboard: [
         [
-          { text: '🌐 Portfolioni Ochish', url: telemetry.landingUrl || 'https://bekzod-idiyev.vercel.app' },
+          { text: '🌐 Portfolioni Ochish', url: telemetry.landingUrl || 'https://bekzod-idiyev-portfolio.vercel.app' },
+
           { text: '🐙 GitHub Profil', url: 'https://github.com/bekzodidiye' },
         ],
         [

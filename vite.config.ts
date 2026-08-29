@@ -217,7 +217,7 @@ ${escapeHtml(message || '')}
                   { text: '✉️ Emailga Javob Yozish', url: `mailto:${encodeURIComponent(email || '')}?subject=Bekzod%20Idiyev%20—%20Portfolio%20Javobi` },
                 ],
                 [
-                  { text: '🌐 Portfolioni Ko\'rish', url: 'https://bekzod-idiyev.vercel.app' },
+                  { text: '🌐 Portfolioni Ko\'rish', url: 'https://bekzod-idiyev-portfolio.vercel.app' },
                   { text: '🐙 GitHub Profil', url: 'https://github.com/bekzodidiye' },
                 ],
               ],
@@ -281,7 +281,7 @@ ${escapeHtml(message || '')}
             }
 
             const update = JSON.parse(body || '{}');
-            const PORTFOLIO_URL = 'https://bekzod-idiyev.vercel.app';
+            const PORTFOLIO_URL = 'https://bekzod-idiyev-portfolio.vercel.app';
 
             const sendTg = async (method: string, payload: any) => {
               return fetch(`https://api.telegram.org/bot${botToken}/${method}`, {

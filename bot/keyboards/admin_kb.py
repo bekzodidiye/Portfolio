@@ -8,7 +8,8 @@ def get_admin_keyboard() -> InlineKeyboardMarkup:
                 InlineKeyboardButton(text="📢 Xabar Tarqatish", callback_data="admin_broadcast"),
             ],
             [
-                InlineKeyboardButton(text="🌐 Portfolioni Tekshirish", url="https://bekzod-idiyev.vercel.app"),
+                InlineKeyboardButton(text="🌐 Portfolioni Tekshirish", url="https://bekzod-idiyev-portfolio.vercel.app"),
+
                 InlineKeyboardButton(text="🐙 GitHub Repozitoriya", url="https://github.com/bekzodidiye/Portfolio"),
             ]
         ]

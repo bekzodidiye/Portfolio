@@ -96,7 +96,8 @@ ${escapeHtml(trimmedMessage)}
           { text: '✉️ Emailga Javob Yozish', url: `mailto:${encodeURIComponent(trimmedEmail)}?subject=Bekzod%20Idiyev%20—%20Portfolio%20Javobi` },
         ],
         [
-          { text: '🌐 Portfolioni Ko\'rish', url: 'https://bekzod-idiyev.vercel.app' },
+          { text: '🌐 Portfolioni Ko\'rish', url: 'https://bekzod-idiyev-portfolio.vercel.app' },
+
           { text: '🐙 GitHub Profil', url: 'https://github.com/bekzodidiye' },
         ],
       ],

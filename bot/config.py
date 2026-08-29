@@ -14,7 +14,8 @@ class BotConfig(BaseSettings):
     ADMIN_IDS: list[int] = [5678281376]
     
     # Portfolio WebApp URL
-    PORTFOLIO_URL: str = "https://bekzod-idiyev.vercel.app"
+    PORTFOLIO_URL: str = "https://bekzod-idiyev-portfolio.vercel.app"
+
     GITHUB_URL: str = "https://github.com/bekzodidiye"
     TELEGRAM_CHANNEL: str = "https://t.me/toyneden"
     

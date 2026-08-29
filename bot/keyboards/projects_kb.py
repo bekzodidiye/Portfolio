@@ -13,7 +13,7 @@ def get_projects_inline_keyboard() -> InlineKeyboardMarkup:
                 InlineKeyboardButton(text="📚 PeerLearn Mini App", callback_data="proj_peerlearn"),
             ],
             [
-                InlineKeyboardButton(text="🌐 Barcha Loyihalarni Ko'rish", url="https://bekzod-idiyev.vercel.app/#projects"),
+                InlineKeyboardButton(text="🌐 Barcha Loyihalarni Ko'rish", url="https://bekzod-idiyev-portfolio.vercel.app/#projects"),
             ],
         ]
     )
@@ -23,8 +23,9 @@ def get_single_project_keyboard(github_url: str = "https://github.com/bekzodidiy
         inline_keyboard=[
             [
                 InlineKeyboardButton(text="🐙 GitHub Kodini Ko'rish", url=github_url),
-                InlineKeyboardButton(text="🌐 Veb Portfolioda Ko'rish", url="https://bekzod-idiyev.vercel.app/#projects"),
+                InlineKeyboardButton(text="🌐 Veb Portfolioda Ko'rish", url="https://bekzod-idiyev-portfolio.vercel.app/#projects"),
             ],
+
             [
                 InlineKeyboardButton(text="⬅️ Loyihalar Ro'yxatiga Qaytish", callback_data="proj_list"),
             ]

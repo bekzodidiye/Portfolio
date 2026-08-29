@@ -131,7 +131,8 @@ export default async function handler(req: any, res: any) {
     const inlineKeyboard = {
       inline_keyboard: [
         [
-          { text: '🌐 Portfolioni Ochish', url: landingUrl || 'https://bekzod-idiyev.vercel.app' },
+          { text: '🌐 Portfolioni Ochish', url: landingUrl || 'https://bekzod-idiyev-portfolio.vercel.app' },
+
           { text: '🐙 GitHub Profil', url: 'https://github.com/bekzodidiye' },
         ],
         [

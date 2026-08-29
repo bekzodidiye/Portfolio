@@ -10,7 +10,8 @@ function escapeHtml(str: string): string {
     .replace(/>/g, '&gt;');
 }
 
-const PORTFOLIO_URL = 'https://bekzod-idiyev.vercel.app';
+const PORTFOLIO_URL = 'https://bekzod-idiyev-portfolio.vercel.app';
+
 const GITHUB_URL = 'https://github.com/bekzodidiye';
 const ADMIN_CHAT_ID = '5678281376';
 
