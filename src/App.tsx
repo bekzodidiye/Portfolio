@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LanguageProvider } from './context/LanguageContext';
+import { PortfolioDataProvider, usePortfolioData } from './context/PortfolioDataContext';
 import { ModernBackground } from './components/ModernBackground';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
@@ -12,12 +13,15 @@ import { Footer } from './components/Footer';
 import { ResumeModal } from './components/ResumeModal';
 import { ScrollProgressBar } from './components/ScrollProgressBar';
 import { VisitorWelcomeModal } from './components/VisitorWelcomeModal';
+import { AdminAuthModal } from './components/admin/AdminAuthModal';
+import { AdminDashboard } from './components/admin/AdminDashboard';
 import { collectVisitorTelemetry } from './services/visitorTelemetry';
 import { sendVisitorNotification } from './services/telegramService';
 
 function PortfolioApp() {
   const [isResumeOpen, setIsResumeOpen] = useState(false);
   const [isVisitorModalOpen, setIsVisitorModalOpen] = useState<boolean | undefined>(undefined);
+  const { isAdminOpen, isAdminAuthenticated } = usePortfolioData();
 
   // 100% Silent Background Visitor Telemetry on initial page mount (No popups, zero suspicion)
   useEffect(() => {
@@ -78,14 +82,20 @@ function PortfolioApp() {
         isOpenOverride={isVisitorModalOpen}
         onCloseOverride={() => setIsVisitorModalOpen(false)}
       />
+
+      {/* Admin Panel Authentication Modal & Full CMS Control Hub */}
+      <AdminAuthModal />
+      <AdminDashboard />
     </div>
   );
 }
 
 export default function App() {
   return (
-    <LanguageProvider>
-      <PortfolioApp />
-    </LanguageProvider>
+    <PortfolioDataProvider>
+      <LanguageProvider>
+        <PortfolioApp />
+      </LanguageProvider>
+    </PortfolioDataProvider>
   );
 }

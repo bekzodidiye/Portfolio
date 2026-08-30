@@ -1,10 +1,11 @@
 import React from 'react';
-import { Terminal, Github, Linkedin, Send, ArrowUp } from 'lucide-react';
-import { CANDIDATE_PROFILE } from '../data/portfolioData';
+import { Terminal, Github, Linkedin, Send, ArrowUp, ShieldCheck } from 'lucide-react';
+import { usePortfolioData } from '../context/PortfolioDataContext';
 import { useLanguage } from '../context/LanguageContext';
 
 export const Footer: React.FC = () => {
   const { t } = useLanguage();
+  const { candidateProfile, setIsAdminOpen } = usePortfolioData();
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -27,14 +28,14 @@ export const Footer: React.FC = () => {
             {t.footer.roleDesc}
           </p>
           <p className="text-[11px] text-slate-500 mt-1">
-            {t.footer.location}
+            {candidateProfile.location}
           </p>
         </div>
 
         {/* Quick Social Links */}
         <div className="flex items-center gap-3">
           <a
-            href={CANDIDATE_PROFILE.github}
+            href={candidateProfile.github}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="GitHub"
@@ -43,7 +44,7 @@ export const Footer: React.FC = () => {
             <Github className="w-4 h-4" />
           </a>
           <a
-            href={CANDIDATE_PROFILE.linkedin}
+            href={candidateProfile.linkedin}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="LinkedIn"
@@ -52,7 +53,7 @@ export const Footer: React.FC = () => {
             <Linkedin className="w-4 h-4" />
           </a>
           <a
-            href={CANDIDATE_PROFILE.telegram}
+            href={candidateProfile.telegram}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Telegram"
@@ -61,9 +62,17 @@ export const Footer: React.FC = () => {
             <Send className="w-4 h-4" />
           </a>
           <button
+            onClick={() => setIsAdminOpen(true)}
+            aria-label="Admin Control Hub"
+            title="Admin Boshqaruv Markazi (Ctrl+Shift+A)"
+            className="p-2.5 rounded-lg bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-500 hover:text-blue-600 transition-all cursor-pointer shadow-sm"
+          >
+            <ShieldCheck className="w-4 h-4" />
+          </button>
+          <button
             onClick={scrollToTop}
             aria-label="Scroll To Top"
-            className="p-2.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 transition-all cursor-pointer ml-2 shadow-sm"
+            className="p-2.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 transition-all cursor-pointer ml-1 shadow-sm"
           >
             <ArrowUp className="w-4 h-4" />
           </button>
@@ -72,7 +81,17 @@ export const Footer: React.FC = () => {
 
       {/* Copyright & Architecture notice */}
       <div className="max-w-7xl mx-auto mt-8 pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between text-[11px] font-mono text-slate-500 gap-2">
-        <p>© {new Date().getFullYear()} Bekzod Idiyev. {t.footer.rightsReserved}</p>
+        <p className="flex items-center gap-2">
+          <span>© {new Date().getFullYear()} {candidateProfile.name}. {t.footer.rightsReserved}</span>
+          <span>•</span>
+          <button
+            onClick={() => setIsAdminOpen(true)}
+            className="text-slate-500 hover:text-blue-600 transition-colors inline-flex items-center gap-1"
+          >
+            <ShieldCheck className="w-3 h-3" />
+            <span>Admin</span>
+          </button>
+        </p>
         <p className="flex items-center gap-1">
           {t.footer.techStackNote}
         </p>

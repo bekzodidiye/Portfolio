@@ -1,6 +1,6 @@
 import React from 'react';
 import { Layers } from 'lucide-react';
-import { SKILL_CATEGORIES } from '../data/portfolioData';
+import { usePortfolioData } from '../context/PortfolioDataContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useGsapReveal } from '../hooks/useGsapReveal';
 import { useGsapDepthParallax } from '../hooks/useGsapDepthParallax';
@@ -8,6 +8,7 @@ import { SkillTiltCard } from './SkillTiltCard';
 
 export const SkillsSection: React.FC = () => {
   const { t } = useLanguage();
+  const { skillCategories } = usePortfolioData();
   const sectionRef = useGsapReveal<HTMLElement>({
     y: 35,
     duration: 0.85,
@@ -66,15 +67,15 @@ export const SkillsSection: React.FC = () => {
         </div>
 
         <div ref={parallaxGridRef} className="skills-reveal grid grid-cols-1 md:grid-cols-2 gap-6 perspective-3d">
-          {SKILL_CATEGORIES.map((category, idx) => {
+          {skillCategories.map((category, idx) => {
             const loc = getLocalizedCategory(idx);
             return (
               <SkillTiltCard
                 key={category.title}
                 category={category}
                 index={idx}
-                localizedTitle={loc.title}
-                localizedDesc={loc.desc}
+                localizedTitle={loc.title || category.title}
+                localizedDesc={loc.desc || category.description}
                 isVisible={true}
               />
             );

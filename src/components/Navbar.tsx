@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Terminal, Send, Menu, X, Code2, Bot } from 'lucide-react';
-import { CANDIDATE_PROFILE } from '../data/portfolioData';
+import { Terminal, Send, Menu, X, Code2, Bot, ShieldCheck } from 'lucide-react';
+import { usePortfolioData } from '../context/PortfolioDataContext';
 import { useLanguage } from '../context/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
 
@@ -11,6 +11,7 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, onOpenVisitorModal }) => {
   const { t } = useLanguage();
+  const { candidateProfile, setIsAdminOpen } = usePortfolioData();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('about');
@@ -126,7 +127,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, onOpenVisitorModal
 
           {/* Telegram Bot Quick Launcher */}
           <a
-            href={CANDIDATE_PROFILE.botUrl || 'https://t.me/my_portfolio_support_bot'}
+            href={candidateProfile.botUrl || 'https://t.me/my_portfolio_support_bot'}
             target="_blank"
             rel="noopener noreferrer"
             id="nav-bot-btn"
@@ -136,6 +137,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, onOpenVisitorModal
             <Bot className="w-3.5 h-3.5 text-emerald-600" />
             <span className="hidden xl:inline">AI Bot</span>
           </a>
+
+          {/* Admin Panel Launch Button */}
+          <button
+            onClick={() => setIsAdminOpen(true)}
+            id="nav-admin-btn"
+            title="Admin Boshqaruv Markazi (Ctrl+Shift+A)"
+            className="p-1.5 sm:px-2 sm:py-1.5 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 border border-slate-200 hover:border-blue-300 transition-all items-center gap-1 cursor-pointer flex"
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+            <span className="text-xs font-mono font-semibold hidden md:inline">Admin</span>
+          </button>
 
           {onOpenResume && (
             <button
@@ -149,7 +161,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, onOpenVisitorModal
           )}
 
           <a
-            href={CANDIDATE_PROFILE.telegram}
+            href={candidateProfile.telegram}
             target="_blank"
             rel="noopener noreferrer"
             id="nav-telegram-cta"
@@ -203,6 +215,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, onOpenVisitorModal
                 <span>{t.visitorModal.badgeStatus}</span>
               </button>
             )}
+
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setIsAdminOpen(true);
+              }}
+              className="py-2.5 px-4 text-center font-mono text-xs font-semibold rounded-lg bg-blue-600/10 border border-blue-300 text-blue-700 flex items-center justify-center gap-2"
+            >
+              <ShieldCheck className="w-4 h-4 text-blue-600" />
+              <span>Admin Boshqaruv Markazi</span>
+            </button>
+
             {onOpenResume && (
               <button
                 onClick={() => {
@@ -216,12 +240,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, onOpenVisitorModal
             )}
 
             <a
-              href={CANDIDATE_PROFILE.telegram}
+              href={candidateProfile.telegram}
               target="_blank"
               rel="noopener noreferrer"
               className="py-2.5 px-4 text-center font-mono text-xs font-semibold rounded-lg bg-blue-600 text-white shadow-sm shadow-blue-500/30"
             >
-              Telegram: @toyneden
+              Telegram: {candidateProfile.telegramHandle}
             </a>
           </div>
         </div>

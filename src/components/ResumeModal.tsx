@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Download, FileText, Phone, Mail, MapPin, Send } from 'lucide-react';
-import { CANDIDATE_PROFILE, WORK_EXPERIENCE, EDUCATION_LIST } from '../data/portfolioData';
+import { usePortfolioData } from '../context/PortfolioDataContext';
 import { useLanguage } from '../context/LanguageContext';
 
 interface ResumeModalProps {
@@ -11,6 +11,7 @@ interface ResumeModalProps {
 
 export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => {
   const { t } = useLanguage();
+  const { candidateProfile, workExperience, educationList } = usePortfolioData();
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -138,29 +139,29 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
 
         {/* Candidate Profile Header */}
         <div className="mb-6">
-          <h2 className="text-2xl sm:text-3xl font-bold font-mono text-slate-900">{CANDIDATE_PROFILE.name}</h2>
-          <p className="text-sm font-mono text-blue-600 font-semibold mb-1">{t.hero.typewriter[0]}</p>
-          <p className="text-xs text-slate-500 mb-3">{t.hero.typewriter[1]}</p>
+          <h2 className="text-2xl sm:text-3xl font-bold font-mono text-slate-900">{candidateProfile.name}</h2>
+          <p className="text-sm font-mono text-blue-600 font-semibold mb-1">{candidateProfile.primaryTitle}</p>
+          <p className="text-xs text-slate-500 mb-3">{candidateProfile.subTitle}</p>
 
           <div className="flex flex-wrap gap-4 text-xs font-mono text-slate-600">
-            <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-amber-600" /> {CANDIDATE_PROFILE.location}</span>
-            <span className="flex items-center gap-1"><Phone className="w-3.5 h-3.5 text-blue-600" /> {CANDIDATE_PROFILE.phone}</span>
-            <span className="flex items-center gap-1"><Mail className="w-3.5 h-3.5 text-indigo-600" /> {CANDIDATE_PROFILE.email}</span>
-            <span className="flex items-center gap-1"><Send className="w-3.5 h-3.5 text-blue-600" /> {CANDIDATE_PROFILE.telegramHandle}</span>
+            <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-amber-600" /> {candidateProfile.location}</span>
+            <span className="flex items-center gap-1"><Phone className="w-3.5 h-3.5 text-blue-600" /> {candidateProfile.phone}</span>
+            <span className="flex items-center gap-1"><Mail className="w-3.5 h-3.5 text-indigo-600" /> {candidateProfile.email}</span>
+            <span className="flex items-center gap-1"><Send className="w-3.5 h-3.5 text-blue-600" /> {candidateProfile.telegramHandle}</span>
           </div>
         </div>
 
         {/* Summary */}
         <div className="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200 print:bg-white print:border-slate-300">
           <h3 className="text-xs font-mono uppercase text-blue-700 font-bold tracking-wider mb-2">{t.resume.summaryTitle}</h3>
-          <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">{t.hero.subtext}</p>
+          <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">{candidateProfile.summary || t.hero.subtext}</p>
         </div>
 
         {/* Work Experience */}
         <div className="mb-6">
           <h3 className="text-xs font-mono uppercase text-amber-700 font-bold tracking-wider mb-3">{t.resume.experienceTitle}</h3>
           <div className="space-y-4">
-            {WORK_EXPERIENCE.map((exp) => {
+            {workExperience.map((exp) => {
               const locWork = getLocalizedWork(exp.id, exp.role, exp.companyOrPlatform, exp.responsibilities);
               return (
                 <div key={exp.id} className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:border-slate-300">
@@ -186,7 +187,7 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
         <div className="mb-6">
           <h3 className="text-xs font-mono uppercase text-indigo-700 font-bold tracking-wider mb-3">{t.resume.educationTitle}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {EDUCATION_LIST.map((edu) => {
+            {educationList.map((edu) => {
               const locEdu = getLocalizedEdu(edu.id, edu.institution, edu.field);
               return (
                 <div key={edu.id} className="p-3 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:border-slate-300">

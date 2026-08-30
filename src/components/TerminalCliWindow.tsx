@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
-import { CANDIDATE_PROFILE } from '../data/portfolioData';
+import { usePortfolioData } from '../context/PortfolioDataContext';
 import { useLanguage } from '../context/LanguageContext';
 
 export const TerminalCliWindow: React.FC = () => {
   const { t, language } = useLanguage();
+  const { candidateProfile, setIsAdminOpen } = usePortfolioData();
   const [copied, setCopied] = useState(false);
   const [inputVal, setInputVal] = useState('');
   const [cliHistory, setCliHistory] = useState<Array<{ cmd: string; output: string }>>([
@@ -17,10 +18,10 @@ export const TerminalCliWindow: React.FC = () => {
   const specCode = `"""
 bekzod_engineer_spec.py
 =============================================================================
-Candidate: ${CANDIDATE_PROFILE.name}
-Role: ${CANDIDATE_PROFILE.primaryTitle}
-Education: ${CANDIDATE_PROFILE.subTitle}
-Location: ${CANDIDATE_PROFILE.location}
+Candidate: ${candidateProfile.name}
+Role: ${candidateProfile.primaryTitle}
+Education: ${candidateProfile.subTitle}
+Location: ${candidateProfile.location}
 Status: AVAILABLE_FOR_HIRE = True
 Language: ${language.toUpperCase()}
 =============================================================================
@@ -31,12 +32,12 @@ from typing import List, Dict
 
 @dataclass
 class BackendEngineer:
-    name: str = "${CANDIDATE_PROFILE.name}"
-    title: str = "${CANDIDATE_PROFILE.primaryTitle}"
-    education: str = "${CANDIDATE_PROFILE.subTitle}"
-    base_location: str = "${CANDIDATE_PROFILE.location}"
-    telegram_bot: str = "${CANDIDATE_PROFILE.botUsername || '@my_portfolio_support_bot'}"
-    kwork_deliveries: int = ${CANDIDATE_PROFILE.freelanceCount}
+    name: str = "${candidateProfile.name}"
+    title: str = "${candidateProfile.primaryTitle}"
+    education: str = "${candidateProfile.subTitle}"
+    base_location: str = "${candidateProfile.location}"
+    telegram_bot: str = "${candidateProfile.botUsername || '@my_portfolio_support_bot'}"
+    kwork_deliveries: int = ${candidateProfile.freelanceCount}
 
     def execute_mission(self) -> str:
         return "Designing zero-downtime APIs & scalable Telegram engines."`;
@@ -61,13 +62,17 @@ class BackendEngineer:
     switch (trimmed) {
       case 'help':
         output = language === 'uz'
-          ? 'Mavjud buyruqlar: cat spec, whoami, skills, projects, bot, contact, clear, python --version'
+          ? 'Mavjud buyruqlar: cat spec, whoami, skills, projects, bot, admin, contact, clear, python --version'
           : language === 'ru'
-          ? 'Доступные команды: cat spec, whoami, skills, projects, bot, contact, clear, python --version'
-          : 'Available commands: cat spec, whoami, skills, projects, bot, contact, clear, python --version';
+          ? 'Доступные команды: cat spec, whoami, skills, projects, bot, admin, contact, clear, python --version'
+          : 'Available commands: cat spec, whoami, skills, projects, bot, admin, contact, clear, python --version';
+        break;
+      case 'admin':
+        setIsAdminOpen(true);
+        output = '👑 Launching Admin Control Center... (PIN authentication required)';
         break;
       case 'whoami':
-        output = `${CANDIDATE_PROFILE.name} — ${t.hero.typewriter[0]} & ${t.hero.typewriter[1]}`;
+        output = `${candidateProfile.name} — ${candidateProfile.primaryTitle}`;
         break;
       case 'skills':
         output = 'FastAPI, Django, PostgreSQL, Redis, Docker, aiogram 3.x, WebSockets, Clean Architecture';
@@ -77,10 +82,10 @@ class BackendEngineer:
         break;
       case 'bot':
       case 'telegram-bot':
-        output = `🤖 Official Interactive Telegram Assistant: ${CANDIDATE_PROFILE.botUsername || '@my_portfolio_support_bot'} (${CANDIDATE_PROFILE.botUrl || 'https://t.me/my_portfolio_support_bot'})`;
+        output = `🤖 Official Interactive Telegram Assistant: ${candidateProfile.botUsername || '@my_portfolio_support_bot'} (${candidateProfile.botUrl || 'https://t.me/my_portfolio_support_bot'})`;
         break;
       case 'contact':
-        output = `Bot: ${CANDIDATE_PROFILE.botUsername} | Telegram: ${CANDIDATE_PROFILE.telegramHandle} | Email: ${CANDIDATE_PROFILE.email} | Phone: ${CANDIDATE_PROFILE.phone}`;
+        output = `Bot: ${candidateProfile.botUsername} | Telegram: ${candidateProfile.telegramHandle} | Email: ${candidateProfile.email} | Phone: ${candidateProfile.phone}`;
         break;
       case 'python --version':
         output = 'Python 3.12.3 (CPython Linux x86_64, High-Performance AsyncIO)';
@@ -88,7 +93,7 @@ class BackendEngineer:
       case 'stats':
       case 'visitors':
       case 'analytics':
-        output = `📊 PORTFOLIO LIVE TELEMETRY: 24/7 Serverless Visitor Gateway Active | Real-time GPS Alerts connected to Telegram Bot (${CANDIDATE_PROFILE.botUsername || '@my_portfolio_support_bot'}). Admin panel: Type /admin in Telegram bot.`;
+        output = `📊 PORTFOLIO LIVE TELEMETRY: 24/7 Serverless Visitor Gateway Active | Real-time GPS Alerts connected to Telegram Bot (${candidateProfile.botUsername || '@my_portfolio_support_bot'}). Admin panel: Type /admin in Telegram bot or type 'admin' here.`;
         break;
       case 'clear':
         setCliHistory([]);
@@ -146,12 +151,12 @@ class BackendEngineer:
             <span className="text-purple-400">from</span> <span className="text-blue-300">typing</span> <span className="text-purple-400">import</span> <span className="text-amber-300">List, Dict</span>{'\n\n'}
             <span className="text-amber-400">@dataclass</span>{'\n'}
             <span className="text-purple-400">class</span> <span className="text-cyan-300 font-bold">BackendEngineer</span>:{'\n'}
-            {'    '}name: <span className="text-blue-300">str</span> = <span className="text-emerald-400">"{CANDIDATE_PROFILE.name}"</span>{'\n'}
-            {'    '}title: <span className="text-blue-300">str</span> = <span className="text-emerald-400">"{CANDIDATE_PROFILE.primaryTitle}"</span>{'\n'}
-            {'    '}education: <span className="text-blue-300">str</span> = <span className="text-emerald-400">"{CANDIDATE_PROFILE.subTitle}"</span>{'\n'}
-            {'    '}base_location: <span className="text-blue-300">str</span> = <span className="text-emerald-400">"{CANDIDATE_PROFILE.location}"</span>{'\n'}
-            {'    '}telegram_bot: <span className="text-blue-300">str</span> = <span className="text-emerald-400">"{CANDIDATE_PROFILE.botUsername || '@my_portfolio_support_bot'}"</span>{'\n'}
-            {'    '}kwork_deliveries: <span className="text-blue-300">int</span> = <span className="text-amber-400">{CANDIDATE_PROFILE.freelanceCount}</span>{'\n\n'}
+            {'    '}name: <span className="text-blue-300">str</span> = <span className="text-emerald-400">"{candidateProfile.name}"</span>{'\n'}
+            {'    '}title: <span className="text-blue-300">str</span> = <span className="text-emerald-400">"{candidateProfile.primaryTitle}"</span>{'\n'}
+            {'    '}education: <span className="text-blue-300">str</span> = <span className="text-emerald-400">"{candidateProfile.subTitle}"</span>{'\n'}
+            {'    '}base_location: <span className="text-blue-300">str</span> = <span className="text-emerald-400">"{candidateProfile.location}"</span>{'\n'}
+            {'    '}telegram_bot: <span className="text-blue-300">str</span> = <span className="text-emerald-400">"{candidateProfile.botUsername || '@my_portfolio_support_bot'}"</span>{'\n'}
+            {'    '}kwork_deliveries: <span className="text-blue-300">int</span> = <span className="text-amber-400">{candidateProfile.freelanceCount}</span>{'\n\n'}
             {'    '}<span className="text-purple-400">def</span> <span className="text-blue-400">execute_mission</span>(self) -&gt; <span className="text-blue-300">str</span>:{'\n'}
             {'        '}<span className="text-purple-400">return</span> <span className="text-emerald-300">"Designing zero-downtime APIs & scalable Telegram engines."</span>
           </code>

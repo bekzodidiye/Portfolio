@@ -1,6 +1,6 @@
 import React from 'react';
 import { Phone, Mail, Send, Copy, Check, Clock, Bot, ArrowUpRight } from 'lucide-react';
-import { CANDIDATE_PROFILE } from '../data/portfolioData';
+import { usePortfolioData } from '../context/PortfolioDataContext';
 import { SpotlightCard } from './SpotlightCard';
 
 interface ContactQuickCardsProps {
@@ -22,6 +22,8 @@ export const ContactQuickCards: React.FC<ContactQuickCardsProps> = ({
   telegramLabel,
   locationLabel,
 }) => {
+  const { candidateProfile } = usePortfolioData();
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 mb-10 perspective-3d">
       {/* 1. Phone */}
@@ -33,12 +35,12 @@ export const ContactQuickCards: React.FC<ContactQuickCardsProps> = ({
           <div className="min-w-0">
             <span className="block text-[10px] font-mono text-slate-500 uppercase tracking-wider">{phoneLabel}</span>
             <p className="text-xs font-mono font-semibold text-slate-900 truncate whitespace-nowrap">
-              {CANDIDATE_PROFILE.phone}
+              {candidateProfile.phone}
             </p>
           </div>
         </div>
         <button
-          onClick={() => onCopy(CANDIDATE_PROFILE.phone, 'phone')}
+          onClick={() => onCopy(candidateProfile.phone, 'phone')}
           className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors flex-shrink-0 cursor-pointer ml-1"
           title="Copy Phone"
           aria-label="Copy Phone"
@@ -55,13 +57,13 @@ export const ContactQuickCards: React.FC<ContactQuickCardsProps> = ({
           </div>
           <div className="min-w-0">
             <span className="block text-[10px] font-mono text-slate-500 uppercase tracking-wider">{emailLabel}</span>
-            <p className="text-xs font-mono font-semibold text-slate-900 truncate" title={CANDIDATE_PROFILE.email}>
-              {CANDIDATE_PROFILE.email}
+            <p className="text-xs font-mono font-semibold text-slate-900 truncate" title={candidateProfile.email}>
+              {candidateProfile.email}
             </p>
           </div>
         </div>
         <button
-          onClick={() => onCopy(CANDIDATE_PROFILE.email, 'email')}
+          onClick={() => onCopy(candidateProfile.email, 'email')}
           className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors flex-shrink-0 cursor-pointer ml-1"
           title="Copy Email"
           aria-label="Copy Email"
@@ -79,12 +81,12 @@ export const ContactQuickCards: React.FC<ContactQuickCardsProps> = ({
           <div className="min-w-0">
             <span className="block text-[10px] font-mono text-slate-500 uppercase tracking-wider">{telegramLabel}</span>
             <p className="text-xs font-mono font-semibold text-slate-900 truncate">
-              {CANDIDATE_PROFILE.telegramHandle}
+              {candidateProfile.telegramHandle}
             </p>
           </div>
         </div>
         <a
-          href={CANDIDATE_PROFILE.telegram}
+          href={candidateProfile.telegram}
           target="_blank"
           rel="noopener noreferrer"
           className="p-1.5 rounded-lg bg-blue-50/60 hover:bg-blue-600 text-blue-600 hover:text-white transition-all flex-shrink-0 cursor-pointer ml-1"
@@ -107,12 +109,12 @@ export const ContactQuickCards: React.FC<ContactQuickCardsProps> = ({
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             </div>
             <p className="text-xs font-mono font-semibold text-slate-900 truncate" title="@my_portfolio_support_bot">
-              {CANDIDATE_PROFILE.botUsername || '@my_portfolio_support_bot'}
+              {candidateProfile.botUsername || '@my_portfolio_support_bot'}
             </p>
           </div>
         </div>
         <a
-          href={CANDIDATE_PROFILE.botUrl || 'https://t.me/my_portfolio_support_bot'}
+          href={candidateProfile.botUrl || 'https://t.me/my_portfolio_support_bot'}
           target="_blank"
           rel="noopener noreferrer"
           className="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm flex-shrink-0 cursor-pointer ml-1"

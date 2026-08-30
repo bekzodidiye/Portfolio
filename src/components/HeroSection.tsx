@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowRight, Terminal, Send, Bot } from 'lucide-react';
-import { CANDIDATE_PROFILE } from '../data/portfolioData';
+import { usePortfolioData } from '../context/PortfolioDataContext';
 import { HeroSystemVisualizer } from './HeroSystemVisualizer';
 import { useLanguage } from '../context/LanguageContext';
 import { MagneticButton } from './MagneticButton';
@@ -9,6 +9,7 @@ import { useGsapReveal } from '../hooks/useGsapReveal';
 
 export const HeroSection: React.FC = () => {
   const { t } = useLanguage();
+  const { candidateProfile } = usePortfolioData();
   const sectionRef = useGsapReveal<HTMLElement>({
     y: 30,
     duration: 0.8,
@@ -34,7 +35,7 @@ export const HeroSection: React.FC = () => {
 
           {/* Primary Name */}
           <h1 className="hero-reveal text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-4 font-sans">
-            {CANDIDATE_PROFILE.name}
+            {candidateProfile.name}
           </h1>
 
           {/* Brief Subtext */}
@@ -66,7 +67,7 @@ export const HeroSection: React.FC = () => {
 
             <MagneticButton strength={0.35}>
               <a
-                href={CANDIDATE_PROFILE.botUrl || 'https://t.me/my_portfolio_support_bot'}
+                href={candidateProfile.botUrl || 'https://t.me/my_portfolio_support_bot'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-4 py-3 rounded-xl font-mono text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 hover:border-emerald-300 transition-all flex items-center gap-2 cursor-pointer active:scale-95 shadow-sm"
@@ -79,14 +80,14 @@ export const HeroSection: React.FC = () => {
 
             <MagneticButton strength={0.35}>
               <a
-                href={CANDIDATE_PROFILE.telegram}
+                href={candidateProfile.telegram}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-3 rounded-xl font-mono text-slate-700 hover:text-blue-600 bg-slate-100 hover:bg-blue-50 border border-slate-200 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
                 title="Telegram DM"
               >
                 <Send className="w-4 h-4 text-blue-600" />
-                <span className="text-xs font-mono font-medium hidden sm:inline">@toyneden</span>
+                <span className="text-xs font-mono font-medium hidden sm:inline">{candidateProfile.telegramHandle}</span>
               </a>
             </MagneticButton>
           </div>
@@ -95,7 +96,7 @@ export const HeroSection: React.FC = () => {
           <div className="hero-reveal grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full max-w-xl">
             <div className="bg-white/90 p-3 rounded-xl border border-slate-200 shadow-sm hover:border-blue-300 hover:shadow-md transition-all">
               <span className="block text-xl font-bold font-mono text-blue-600">
-                <AnimatedCounter target={CANDIDATE_PROFILE.freelanceCount} suffix="+" duration={1000} />
+                <AnimatedCounter target={candidateProfile.freelanceCount} suffix="+" duration={1000} />
               </span>
               <span className="text-[11px] text-slate-500 font-mono">{t.hero.statFreelance}</span>
             </div>

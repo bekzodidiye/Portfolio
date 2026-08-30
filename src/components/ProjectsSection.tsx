@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Sparkles } from 'lucide-react';
-import { FEATURED_PROJECTS } from '../data/portfolioData';
+import { usePortfolioData } from '../context/PortfolioDataContext';
 import { ProjectItem } from '../types/portfolio';
 import { ProjectModal } from './ProjectModal';
 import { ProjectCard } from './ProjectCard';
@@ -10,6 +10,7 @@ import { useGsapDepthParallax } from '../hooks/useGsapDepthParallax';
 
 export const ProjectsSection: React.FC = () => {
   const { t } = useLanguage();
+  const { featuredProjects } = usePortfolioData();
   const sectionRef = useGsapReveal<HTMLElement>({
     y: 40,
     duration: 0.85,
@@ -27,8 +28,9 @@ export const ProjectsSection: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
 
   const getLocalizedProject = (project: ProjectItem) => {
-    let loc = t.projects.items.buddyTeam;
+    let loc = (t.projects.items as any)[project.id];
     if (project.id === 'portfolio-bot') loc = t.projects.items.portfolioBot;
+    else if (project.id === 'buddy-team') loc = t.projects.items.buddyTeam;
     else if (project.id === 'esports-bot') loc = t.projects.items.esportsBot;
     else if (project.id === 'peerlearn-app') loc = t.projects.items.peerLearn;
 
@@ -58,9 +60,9 @@ export const ProjectsSection: React.FC = () => {
           </p>
         </div>
 
-        {/* 2x2 Clean Card Grid with GSAP ScrollTrigger 3D Depth Parallax */}
+        {/* Dynamic Card Grid with GSAP ScrollTrigger 3D Depth Parallax */}
         <div ref={parallaxGridRef} className="grid grid-cols-1 md:grid-cols-2 gap-6 perspective-3d">
-          {FEATURED_PROJECTS.map((rawProject, idx) => {
+          {featuredProjects.map((rawProject, idx) => {
             const project = getLocalizedProject(rawProject);
             return (
               <ProjectCard

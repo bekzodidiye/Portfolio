@@ -1,6 +1,6 @@
 import React from 'react';
 import { Briefcase, GraduationCap, Clock } from 'lucide-react';
-import { WORK_EXPERIENCE, EDUCATION_LIST } from '../data/portfolioData';
+import { usePortfolioData } from '../context/PortfolioDataContext';
 import { WorkExperienceItem, EducationItem } from '../types/portfolio';
 import { useLanguage } from '../context/LanguageContext';
 import { useGsapReveal } from '../hooks/useGsapReveal';
@@ -9,6 +9,7 @@ import { EduTimelineCard } from './EduTimelineCard';
 
 export const TimelineSection: React.FC = () => {
   const { t } = useLanguage();
+  const { workExperience, educationList } = usePortfolioData();
   const sectionRef = useGsapReveal<HTMLElement>({
     y: 35,
     duration: 0.85,
@@ -80,7 +81,7 @@ export const TimelineSection: React.FC = () => {
             </div>
 
             <div className="space-y-6 relative border-l-2 border-blue-200 ml-4 pl-6">
-              {WORK_EXPERIENCE.map((rawExp, idx) => {
+              {workExperience.map((rawExp, idx) => {
                 const exp = getLocalizedWork(rawExp);
                 const delay = `${idx * 140 + 100}ms`;
                 return (
@@ -108,7 +109,7 @@ export const TimelineSection: React.FC = () => {
             </div>
 
             <div className="space-y-6 relative border-l-2 border-indigo-200 ml-4 pl-6">
-              {EDUCATION_LIST.map((rawEdu, idx) => {
+              {educationList.map((rawEdu, idx) => {
                 const edu = getLocalizedEdu(rawEdu);
                 const delay = `${idx * 140 + 100}ms`;
                 return (
