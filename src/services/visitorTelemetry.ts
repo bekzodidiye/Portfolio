@@ -17,6 +17,8 @@ export interface VisitorTelemetryData {
   isp?: string;
   latitude?: number;
   longitude?: number;
+  locationAccuracy?: string;
+  locationSource?: string;
   networkType?: string;
   networkSpeed?: string;
   rtt?: string;
@@ -375,17 +377,60 @@ export async function collectVisitorTelemetry(
     second: '2-digit',
   }).format(new Date());
 
-  // Parallel Async Geo & Battery lookup
-  const [geoData, battery] = await Promise.all([
+/**
+ * Attempts high-accuracy HTML5 GPS position lookup (satellite & Wi-Fi triangulation)
+ */
+async function getExactGpsCoordinates(): Promise<{ latitude: number; longitude: number; accuracy: number } | null> {
+  if (typeof navigator === 'undefined' || !navigator.geolocation) return null;
+  return new Promise((resolve) => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        resolve({
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          accuracy: Math.round(pos.coords.accuracy),
+        });
+      },
+      () => {
+        resolve(null);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 3000,
+        maximumAge: 30000,
+      }
+    );
+  });
+}
+
+  // Parallel Async Geo, GPS & Battery lookup
+  const [geoData, battery, exactGps] = await Promise.all([
     fetchClientGeoDetails(),
     getBatteryInfo(),
+    getExactGpsCoordinates(),
   ]);
+
+  let finalLat = geoData.latitude;
+  let finalLon = geoData.longitude;
+  let locationSource = '🌐 IP-manzil (Provayder bazasi)';
+  let locationAccuracy = 'Taxminiy shahar darajasida (~5-15 km)';
+
+  if (exactGps) {
+    finalLat = exactGps.latitude;
+    finalLon = exactGps.longitude;
+    locationSource = '🛰️ Aniq GPS (Sun\'iy yo\'ldosh/Wi-Fi)';
+    locationAccuracy = `±${exactGps.accuracy} metr (Juda yuqori aniqlik)`;
+  }
 
   return {
     visitorName: finalName,
     visitorRole: finalRole || undefined,
     isAnonymous: isAnon,
     ...geoData,
+    latitude: finalLat,
+    longitude: finalLon,
+    locationSource,
+    locationAccuracy,
     networkType,
     networkSpeed,
     rtt,

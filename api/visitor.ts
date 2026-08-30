@@ -114,7 +114,9 @@ export default async function handler(req: any, res: any) {
     if (finalLat && finalLon) {
       googleMapsDirectUrl = `https://www.google.com/maps?q=${finalLat},${finalLon}`;
       yandexMapsDirectUrl = `https://yandex.com/maps/?ll=${finalLon},${finalLat}&z=14`;
-      mapTextLine = `\n  • <b>Aniq Xarita (GPS/IP):</b> <a href="${googleMapsDirectUrl}">📍 Google Xaritada Ko'rish (${finalLat.toFixed(4)}, ${finalLon.toFixed(4)})</a>`;
+      const accuracyText = data.locationAccuracy ? ` (${escapeHtml(data.locationAccuracy)})` : '';
+      const sourceText = data.locationSource ? ` [${escapeHtml(data.locationSource)}]` : '';
+      mapTextLine = `\n  • <b>Xarita (Koordinatalar):</b> <a href="${googleMapsDirectUrl}">📍 Google Xaritani Ochish (${finalLat.toFixed(4)}, ${finalLon.toFixed(4)})</a>${sourceText}${accuracyText}`;
     } else {
       const mapFallbackQuery = encodeURIComponent(`${finalCity || ''} ${finalCountry || ''}`.trim() || finalIp);
       googleMapsDirectUrl = `https://www.google.com/maps/search/?api=1&query=${mapFallbackQuery}`;
