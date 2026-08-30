@@ -285,13 +285,29 @@ export async function sendVisitorNotification(
       ? `\n  • <b>UTM Kampaniya:</b> <code>${escapeHtml(telemetry.utmSource)}</code>`
       : '';
 
+    // Build map link line
+    let mapTextLine = '';
+    let googleMapsDirectUrl = '';
+    let yandexMapsDirectUrl = '';
+
+    if (telemetry.latitude && telemetry.longitude) {
+      googleMapsDirectUrl = `https://www.google.com/maps?q=${telemetry.latitude},${telemetry.longitude}`;
+      yandexMapsDirectUrl = `https://yandex.com/maps/?ll=${telemetry.longitude},${telemetry.latitude}&z=14`;
+      mapTextLine = `\n  • <b>Aniq Xarita (GPS/IP):</b> <a href="${googleMapsDirectUrl}">📍 Google Xaritada Ko'rish (${telemetry.latitude.toFixed(4)}, ${telemetry.longitude.toFixed(4)})</a>`;
+    } else {
+      const mapFallbackQuery = encodeURIComponent(`${telemetry.city || ''} ${telemetry.country || ''}`.trim() || telemetry.ip || '');
+      googleMapsDirectUrl = `https://www.google.com/maps/search/?api=1&query=${mapFallbackQuery}`;
+      yandexMapsDirectUrl = `https://yandex.com/maps/?text=${mapFallbackQuery}`;
+      mapTextLine = `\n  • <b>Xarita:</b> <a href="${googleMapsDirectUrl}">📍 Google Xaritada Qidirish</a>`;
+    }
+
     const directHtmlMessage = `👁️ <b>YANGI TASHRIF BUYURUVCHI (PORTFOLIO)</b>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 👤 <b>Mehmon:</b> <b>${escapeHtml(telemetry.visitorName || 'Anonim Tashrif Buyuruvchi')}</b>${anonBadge}${roleText}
 
 🌍 <b>Geolokatsiya & Tarmoq:</b>
   • <b>IP:</b> <code>${escapeHtml(telemetry.ip || 'Client Direct')}</code>
-  • <b>Manzil:</b> ${escapeHtml(locationLine)}${ispLine}${netLine}
+  • <b>Manzil:</b> ${escapeHtml(locationLine)}${mapTextLine}${ispLine}${netLine}
 
 📱 <b>Qurilma & Dasturiy Muhit:</b>
   • <b>Qurilma:</b> ${escapeHtml(telemetry.deviceType || '💻 Kompyuter')}
@@ -309,18 +325,17 @@ export async function sendVisitorNotification(
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚡ <i>Bekzod Idiyev Portfolio Telemetry Gateway</i>`;
 
-    const mapQuery = encodeURIComponent(
-      `${telemetry.city || ''} ${telemetry.country || ''}`.trim() || telemetry.ip || ''
-    );
     const inlineKeyboard = {
       inline_keyboard: [
         [
-          { text: '🌐 Portfolioni Ochish', url: telemetry.landingUrl || 'https://bekzod-idiyev-portfolio.vercel.app' },
-
-          { text: '🐙 GitHub Profil', url: 'https://github.com/bekzodidiye' },
+          { text: '📍 Aniq Xaritani Ochish (Google Maps)', url: googleMapsDirectUrl },
         ],
         [
-          { text: '📍 Xaritada Ko\'rish', url: `https://www.google.com/maps/search/?api=1&query=${mapQuery}` },
+          { text: '🗺️ Yandex Xaritada Ko\'rish', url: yandexMapsDirectUrl },
+          { text: '🌐 Portfolioni Ochish', url: telemetry.landingUrl || 'https://bekzod-idiyev-portfolio.vercel.app' },
+        ],
+        [
+          { text: '🐙 GitHub Profil', url: 'https://github.com/bekzodidiye' },
           { text: '💬 Telegram (@toyneden)', url: 'https://t.me/toyneden' },
         ],
       ],
@@ -339,11 +354,24 @@ export async function sendVisitorNotification(
           chat_id: chatId,
           text: directHtmlMessage,
           parse_mode: 'HTML',
-          disable_web_page_preview: true,
+          disable_web_page_preview: false,
           reply_markup: inlineKeyboard,
         }),
         signal: clientController.signal,
       });
+
+      if (telemetry.latitude && telemetry.longitude) {
+        fetch(`https://api.telegram.org/bot${botToken}/sendLocation`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            latitude: telemetry.latitude,
+            longitude: telemetry.longitude,
+            disable_notification: true,
+          }),
+        }).catch(() => {});
+      }
 
       clearTimeout(clientTimeout);
 

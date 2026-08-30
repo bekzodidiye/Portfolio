@@ -15,6 +15,8 @@ export interface VisitorTelemetryData {
   city?: string;
   region?: string;
   isp?: string;
+  latitude?: number;
+  longitude?: number;
   networkType?: string;
   networkSpeed?: string;
   rtt?: string;
@@ -178,6 +180,7 @@ export function getCountryFlagEmoji(countryCode?: string): string {
  * Fast Geo & IP Lookup with 2.5s strict timeout
  */
 async function fetchClientGeoDetails(): Promise<Partial<VisitorTelemetryData>> {
+  // 1. Try ipapi.co (HTTPS, detailed GPS coordinates)
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 2500);
@@ -190,7 +193,7 @@ async function fetchClientGeoDetails(): Promise<Partial<VisitorTelemetryData>> {
 
     if (res && res.ok) {
       const data = await res.json().catch(() => null);
-      if (data) {
+      if (data && data.ip) {
         const flag = getCountryFlagEmoji(data.country_code);
         return {
           ip: data.ip,
@@ -199,17 +202,45 @@ async function fetchClientGeoDetails(): Promise<Partial<VisitorTelemetryData>> {
           city: data.city || undefined,
           region: data.region || undefined,
           isp: data.org || data.asn || undefined,
+          latitude: typeof data.latitude === 'number' ? data.latitude : parseFloat(data.latitude) || undefined,
+          longitude: typeof data.longitude === 'number' ? data.longitude : parseFloat(data.longitude) || undefined,
         };
       }
     }
   } catch {
-    // Silent failover to serverless IP detection
+    // Silent failover
   }
 
-  // Backup lightweight lookup
+  // 2. Backup fast IP Geo provider: ipwho.is (HTTPS, free, high precision)
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 2000);
+    const res = await fetch('https://ipwho.is/', { signal: controller.signal }).catch(() => null);
+    clearTimeout(timer);
+    if (res && res.ok) {
+      const data = await res.json().catch(() => null);
+      if (data && data.success !== false && data.ip) {
+        const flag = getCountryFlagEmoji(data.country_code);
+        return {
+          ip: data.ip,
+          country: `${flag} ${data.country || 'Uzbekistan'}`,
+          countryCode: data.country_code,
+          city: data.city || undefined,
+          region: data.region || undefined,
+          isp: data.connection?.isp || data.connection?.org || undefined,
+          latitude: typeof data.latitude === 'number' ? data.latitude : parseFloat(data.latitude) || undefined,
+          longitude: typeof data.longitude === 'number' ? data.longitude : parseFloat(data.longitude) || undefined,
+        };
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  // 3. Ultra lightweight fallback: api.country.is
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 1500);
     const res = await fetch('https://api.country.is/', { signal: controller.signal }).catch(() => null);
     clearTimeout(timer);
     if (res && res.ok) {

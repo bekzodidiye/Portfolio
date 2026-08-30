@@ -29,6 +29,8 @@ export default async function handler(req: any, res: any) {
       city,
       region,
       isp,
+      latitude,
+      longitude,
       networkType,
       networkSpeed,
       rtt,
@@ -59,7 +61,6 @@ export default async function handler(req: any, res: any) {
       process.env.VITE_TELEGRAM_CHAT_ID ||
       '5678281376';
 
-
     // Extract Server-side IP and headers
     const rawIpHeader =
       (req.headers['x-forwarded-for'] as string) ||
@@ -68,6 +69,17 @@ export default async function handler(req: any, res: any) {
       '';
     const serverIp = rawIpHeader.split(',')[0].trim();
     const finalIp = clientReportedIp || serverIp || 'Unknown IP';
+
+    // Vercel Edge GeoIP fallback
+    const vercelLat = req.headers['x-vercel-ip-latitude'] ? parseFloat(req.headers['x-vercel-ip-latitude']) : undefined;
+    const vercelLon = req.headers['x-vercel-ip-longitude'] ? parseFloat(req.headers['x-vercel-ip-longitude']) : undefined;
+    const vercelCity = req.headers['x-vercel-ip-city'] as string | undefined;
+    const vercelCountry = req.headers['x-vercel-ip-country'] as string | undefined;
+
+    const finalLat = typeof latitude === 'number' ? latitude : vercelLat;
+    const finalLon = typeof longitude === 'number' ? longitude : vercelLon;
+    const finalCity = city || (vercelCity ? decodeURIComponent(vercelCity) : undefined);
+    const finalCountry = country || vercelCountry;
 
     // Samarkand/Tashkent Timestamp
     const timestamp = new Intl.DateTimeFormat('uz-UZ', {
@@ -85,15 +97,30 @@ export default async function handler(req: any, res: any) {
     const anonBadge = isAnonymous ? ' <i>(Anonim)</i>' : '';
 
     // Build location string
-    const locationParts = [country, city, region].filter(Boolean);
+    const locationParts = [finalCountry, finalCity, region].filter(Boolean);
     const locationLine =
       locationParts.length > 0 ? locationParts.join(', ') : '🌍 Aniqlanmagan (O\'zbekiston/Global)';
 
     // Build network info
-
     const netDetails = [networkType, networkSpeed, rtt].filter(Boolean).join(' • ');
     const netLine = netDetails ? `\n  • <b>Tarmoq:</b> ${escapeHtml(netDetails)}` : '';
     const ispLine = isp ? `\n  • <b>Provayder:</b> ${escapeHtml(isp)}` : '';
+
+    // Build map link line
+    let mapTextLine = '';
+    let googleMapsDirectUrl = '';
+    let yandexMapsDirectUrl = '';
+
+    if (finalLat && finalLon) {
+      googleMapsDirectUrl = `https://www.google.com/maps?q=${finalLat},${finalLon}`;
+      yandexMapsDirectUrl = `https://yandex.com/maps/?ll=${finalLon},${finalLat}&z=14`;
+      mapTextLine = `\n  • <b>Aniq Xarita (GPS/IP):</b> <a href="${googleMapsDirectUrl}">📍 Google Xaritada Ko'rish (${finalLat.toFixed(4)}, ${finalLon.toFixed(4)})</a>`;
+    } else {
+      const mapFallbackQuery = encodeURIComponent(`${finalCity || ''} ${finalCountry || ''}`.trim() || finalIp);
+      googleMapsDirectUrl = `https://www.google.com/maps/search/?api=1&query=${mapFallbackQuery}`;
+      yandexMapsDirectUrl = `https://yandex.com/maps/?text=${mapFallbackQuery}`;
+      mapTextLine = `\n  • <b>Xarita:</b> <a href="${googleMapsDirectUrl}">📍 Google Xaritada Qidirish</a>`;
+    }
 
     // Build hardware info
     const hwDetails = [
@@ -105,7 +132,7 @@ export default async function handler(req: any, res: any) {
       .filter(Boolean)
       .join(' | ');
 
-    const gpuLine = data.gpu ? `\n  • <b>GPU:</b> <code>${escapeHtml(data.gpu)}</code>` : '';
+    const gpuLine = gpu ? `\n  • <b>GPU:</b> <code>${escapeHtml(gpu)}</code>` : '';
 
     // UTM / Source info
     const utmLine = utmSource ? `\n  • <b>UTM Source / Kampaniya:</b> <code>${escapeHtml(utmSource)}</code>` : '';
@@ -117,7 +144,7 @@ export default async function handler(req: any, res: any) {
 
 🌍 <b>Geolokatsiya & Tarmoq:</b>
   • <b>IP:</b> <code>${escapeHtml(finalIp)}</code>
-  • <b>Manzil:</b> ${escapeHtml(locationLine)}${ispLine}${netLine}
+  • <b>Manzil:</b> ${escapeHtml(locationLine)}${mapTextLine}${ispLine}${netLine}
 
 📱 <b>Qurilma & Dasturiy Muhit:</b>
   • <b>Qurilma:</b> ${escapeHtml(deviceType || '💻 Kompyuter')}
@@ -133,24 +160,26 @@ export default async function handler(req: any, res: any) {
   • <b>Sahifa:</b> <code>${escapeHtml(landingUrl || '/')}</code>
   • <b>Vaqt:</b> 🕒 ${timestamp} (Toshkent / UTC+5)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚡ <i>Bekzod Idiyev Portfolio Telemetry v2.0</i>`;
+⚡ <i>Bekzod Idiyev Portfolio Telemetry Gateway</i>`;
 
-    // Construct interactive inline keyboard buttons for instant action
-    const mapQuery = encodeURIComponent(`${city || ''} ${country || ''}`.trim() || finalIp);
+    // Construct interactive inline keyboard buttons
     const inlineKeyboard = {
       inline_keyboard: [
         [
-          { text: '🌐 Portfolioni Ochish', url: landingUrl || 'https://bekzod-idiyev-portfolio.vercel.app' },
-
-          { text: '🐙 GitHub Profil', url: 'https://github.com/bekzodidiye' },
+          { text: '📍 Aniq Xaritani Ochish (Google Maps)', url: googleMapsDirectUrl },
         ],
         [
-          { text: '📍 Xaritada Ko\'rish', url: `https://www.google.com/maps/search/?api=1&query=${mapQuery}` },
+          { text: '🗺️ Yandex Xaritada Ko\'rish', url: yandexMapsDirectUrl },
+          { text: '🌐 Portfolioni Ochish', url: landingUrl || 'https://bekzod-idiyev-portfolio.vercel.app' },
+        ],
+        [
+          { text: '🐙 GitHub Profil', url: 'https://github.com/bekzodidiye' },
           { text: '💬 Telegram (@toyneden)', url: 'https://t.me/toyneden' },
         ],
       ],
     };
 
+    // 1. Send Main Telemetric HTML Message
     const telegramResponse = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: {
@@ -160,11 +189,10 @@ export default async function handler(req: any, res: any) {
         chat_id: chatId,
         text: telegramHtmlMessage,
         parse_mode: 'HTML',
-        disable_web_page_preview: true,
+        disable_web_page_preview: false,
         reply_markup: inlineKeyboard,
       }),
     });
-
 
     if (!telegramResponse.ok) {
       const errorDetail = await telegramResponse.json().catch(() => ({}));
@@ -175,9 +203,29 @@ export default async function handler(req: any, res: any) {
       });
     }
 
+    // 2. If precise GPS latitude and longitude exist, also send native Telegram Map Location PIN
+    if (finalLat && finalLon) {
+      try {
+        await fetch(`https://api.telegram.org/bot${botToken}/sendLocation`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            chat_id: chatId,
+            latitude: finalLat,
+            longitude: finalLon,
+            disable_notification: true,
+          }),
+        });
+      } catch (locErr) {
+        console.warn('sendLocation error:', locErr);
+      }
+    }
+
     return res.status(200).json({
       ok: true,
-      message: 'Tashrif ma\'lumotlari Telegram botga yuborildi!',
+      message: 'Tashrif ma\'lumotlari va xaritasi Telegram botga yuborildi!',
     });
   } catch (error: any) {
     console.error('Visitor serverless exception:', error);
