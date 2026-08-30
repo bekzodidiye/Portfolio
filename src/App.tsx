@@ -7,12 +7,14 @@ import { HeroSection } from './components/HeroSection';
 import { TerminalAbout } from './components/TerminalAbout';
 import { SkillsSection } from './components/SkillsSection';
 import { ProjectsSection } from './components/ProjectsSection';
+import { BackendApiPlayground } from './components/sandbox/BackendApiPlayground';
 import { TimelineSection } from './components/TimelineSection';
 import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
 import { ResumeModal } from './components/ResumeModal';
 import { ScrollProgressBar } from './components/ScrollProgressBar';
 import { VisitorWelcomeModal } from './components/VisitorWelcomeModal';
+import { PortfolioAiAssistant } from './components/ai/PortfolioAiAssistant';
 import { AdminAuthModal } from './components/admin/AdminAuthModal';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { collectVisitorTelemetry } from './services/visitorTelemetry';
@@ -65,11 +67,15 @@ function PortfolioApp() {
           <TerminalAbout />
           <SkillsSection />
           <ProjectsSection />
+          <BackendApiPlayground />
           <TimelineSection />
           <ContactSection />
         </main>
         <Footer />
       </div>
+
+      {/* 24/7 Interactive AI Hiring & Architecture Assistant */}
+      <PortfolioAiAssistant />
 
       {/* Resume / CV Modal */}
       <ResumeModal

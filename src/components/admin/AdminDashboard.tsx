@@ -23,14 +23,17 @@ import {
   Save,
   KeyRound,
   Eye,
+  Send,
   MapPin,
-  Smartphone,
-  Laptop,
+  Bot,
+  FileJson,
+  Sparkles,
 } from 'lucide-react';
 import { usePortfolioData } from '../../context/PortfolioDataContext';
 import { ProjectEditModal } from './ProjectEditModal';
 import { SkillEditModal } from './SkillEditModal';
 import { ExperienceEditModal } from './ExperienceEditModal';
+import { GlobalVisitorGlobe } from './GlobalVisitorGlobe';
 import { ProjectItem, WorkExperienceItem, EducationItem, SkillItem } from '../../types/portfolio';
 
 type AdminTab = 'overview' | 'profile' | 'projects' | 'skills' | 'timeline' | 'analytics' | 'settings';
@@ -791,6 +794,9 @@ export const AdminDashboard: React.FC = () => {
                   Portfolio saytiga tashrif buyuruvchilarning real-vaqtdagi tahlili
                 </p>
               </div>
+
+              {/* 3D Global Visitor Earth */}
+              <GlobalVisitorGlobe />
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800">

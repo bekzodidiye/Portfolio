@@ -11,7 +11,7 @@ interface ResumeModalProps {
 
 export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => {
   const { t } = useLanguage();
-  const { candidateProfile, workExperience, educationList } = usePortfolioData();
+  const { candidateProfile, workExperience, educationList, skillCategories } = usePortfolioData();
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -155,6 +155,19 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
         <div className="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200 print:bg-white print:border-slate-300">
           <h3 className="text-xs font-mono uppercase text-blue-700 font-bold tracking-wider mb-2">{t.resume.summaryTitle}</h3>
           <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">{candidateProfile.summary || t.hero.subtext}</p>
+        </div>
+
+        {/* Core Skills (ATS Optimized) */}
+        <div className="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200 print:bg-white print:border-slate-300">
+          <h3 className="text-xs font-mono uppercase text-indigo-700 font-bold tracking-wider mb-2">Technical Proficiencies</h3>
+          <div className="space-y-1.5 text-xs font-mono text-slate-700">
+            {skillCategories.map((cat, idx) => (
+              <div key={idx} className="flex flex-col sm:flex-row sm:items-baseline gap-1">
+                <span className="font-bold text-slate-900 min-w-[140px]">• {cat.title}:</span>
+                <span className="text-slate-600">{cat.skills.map((s) => s.name).join(', ')}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Work Experience */}
