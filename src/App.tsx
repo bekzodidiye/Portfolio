@@ -7,7 +7,9 @@ import { HeroSection } from './components/HeroSection';
 import { TerminalAbout } from './components/TerminalAbout';
 import { SkillsSection } from './components/SkillsSection';
 import { ProjectsSection } from './components/ProjectsSection';
+import { SystemArchitectureVisualizer } from './components/architecture/SystemArchitectureVisualizer';
 import { BackendApiPlayground } from './components/sandbox/BackendApiPlayground';
+import { GitHubActivityStats } from './components/github/GitHubActivityStats';
 import { TimelineSection } from './components/TimelineSection';
 import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
@@ -70,7 +72,9 @@ function PortfolioApp() {
           <TerminalAbout />
           <SkillsSection />
           <ProjectsSection />
+          <SystemArchitectureVisualizer />
           <BackendApiPlayground />
+          <GitHubActivityStats />
           <TimelineSection />
           <ContactSection />
         </main>
