@@ -258,7 +258,7 @@ export async function sendVisitorNotification(
   const chatId = (import.meta as any).env?.VITE_TELEGRAM_CHAT_ID;
 
   if (botToken && chatId && botToken !== 'YOUR_TELEGRAM_BOT_TOKEN' && chatId !== 'YOUR_TELEGRAM_CHAT_ID') {
-    const locationParts = [telemetry.country, telemetry.city, telemetry.region].filter(Boolean);
+    const locationParts = [telemetry.country, telemetry.city, telemetry.region, telemetry.street ? `(${telemetry.street})` : undefined].filter(Boolean);
     const locationLine =
       locationParts.length > 0 ? locationParts.join(', ') : '🌍 Aniqlanmagan (Global)';
 

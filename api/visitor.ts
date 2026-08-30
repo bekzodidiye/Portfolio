@@ -97,7 +97,7 @@ export default async function handler(req: any, res: any) {
     const anonBadge = isAnonymous ? ' <i>(Anonim)</i>' : '';
 
     // Build location string
-    const locationParts = [finalCountry, finalCity, region].filter(Boolean);
+    const locationParts = [finalCountry, finalCity, region, data.street ? `(${data.street})` : undefined].filter(Boolean);
     const locationLine =
       locationParts.length > 0 ? locationParts.join(', ') : '🌍 Aniqlanmagan (O\'zbekiston/Global)';
 

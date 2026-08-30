@@ -14,6 +14,7 @@ export interface VisitorTelemetryData {
   countryCode?: string;
   city?: string;
   region?: string;
+  street?: string;
   isp?: string;
   latitude?: number;
   longitude?: number;
@@ -264,12 +265,82 @@ async function fetchClientGeoDetails(): Promise<Partial<VisitorTelemetryData>> {
 }
 
 /**
+ * High-accuracy HTML5 GPS position lookup (satellite & Wi-Fi triangulation)
+ */
+export async function getExactGpsCoordinates(timeoutMs: number = 4000): Promise<{ latitude: number; longitude: number; accuracy: number } | null> {
+  if (typeof navigator === 'undefined' || !navigator.geolocation) return null;
+  return new Promise((resolve) => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        resolve({
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          accuracy: Math.round(pos.coords.accuracy),
+        });
+      },
+      () => {
+        resolve(null);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: timeoutMs,
+        maximumAge: 10000,
+      }
+    );
+  });
+}
+
+/**
+ * Reverse Geocoding via OpenStreetMap (Coordinates -> Street, City, Region)
+ */
+export async function reverseGeocodeCoords(
+  lat: number,
+  lon: number
+): Promise<{ city?: string; region?: string; country?: string; street?: string } | null> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 3000);
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`,
+      {
+        signal: controller.signal,
+        headers: {
+          'Accept-Language': 'uz,ru,en',
+        },
+      }
+    ).catch(() => null);
+    clearTimeout(timer);
+
+    if (res && res.ok) {
+      const data = await res.json().catch(() => null);
+      if (data && data.address) {
+        const addr = data.address;
+        const city =
+          addr.city ||
+          addr.town ||
+          addr.village ||
+          addr.county ||
+          addr.state_district ||
+          addr.municipality;
+        const region = addr.state || addr.region;
+        const street = [addr.road, addr.house_number].filter(Boolean).join(' ');
+        return { city, region, country: addr.country, street };
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+/**
  * Collect complete telemetry snapshot
  */
 export async function collectVisitorTelemetry(
   visitorName?: string,
   visitorRole?: string,
-  siteLanguage: string = 'uz'
+  siteLanguage: string = 'uz',
+  overrideGps?: { latitude: number; longitude: number; accuracy: number }
 ): Promise<VisitorTelemetryData> {
   let isAnon = !visitorName || visitorName.trim().length === 0 || visitorName === 'Anonim';
   let finalName = isAnon ? 'Anonim Tashrif Buyuruvchi' : visitorName!.trim();
@@ -377,49 +448,34 @@ export async function collectVisitorTelemetry(
     second: '2-digit',
   }).format(new Date());
 
-/**
- * Attempts high-accuracy HTML5 GPS position lookup (satellite & Wi-Fi triangulation)
- */
-async function getExactGpsCoordinates(): Promise<{ latitude: number; longitude: number; accuracy: number } | null> {
-  if (typeof navigator === 'undefined' || !navigator.geolocation) return null;
-  return new Promise((resolve) => {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        resolve({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-          accuracy: Math.round(pos.coords.accuracy),
-        });
-      },
-      () => {
-        resolve(null);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 3000,
-        maximumAge: 30000,
-      }
-    );
-  });
-}
-
   // Parallel Async Geo, GPS & Battery lookup
   const [geoData, battery, exactGps] = await Promise.all([
     fetchClientGeoDetails(),
     getBatteryInfo(),
-    getExactGpsCoordinates(),
+    overrideGps ? Promise.resolve(overrideGps) : getExactGpsCoordinates(3000),
   ]);
 
   let finalLat = geoData.latitude;
   let finalLon = geoData.longitude;
-  let locationSource = '🌐 IP-manzil (Provayder bazasi)';
-  let locationAccuracy = 'Taxminiy shahar darajasida (~5-15 km)';
+  let finalCity = geoData.city;
+  let finalRegion = geoData.region;
+  let finalStreet: string | undefined = undefined;
+  let locationSource = '🌐 IP-manzil (Provayder tarmog\'i)';
+  let locationAccuracy = 'Taxminiy (~5-15 km)';
 
   if (exactGps) {
     finalLat = exactGps.latitude;
     finalLon = exactGps.longitude;
     locationSource = '🛰️ Aniq GPS (Sun\'iy yo\'ldosh/Wi-Fi)';
-    locationAccuracy = `±${exactGps.accuracy} metr (Juda yuqori aniqlik)`;
+    locationAccuracy = `±${exactGps.accuracy} metr (Haqiqiy GPS)`;
+
+    // Reverse geocode to exact street and city
+    const realAddress = await reverseGeocodeCoords(finalLat, finalLon);
+    if (realAddress) {
+      if (realAddress.city) finalCity = realAddress.city;
+      if (realAddress.region) finalRegion = realAddress.region;
+      if (realAddress.street) finalStreet = realAddress.street;
+    }
   }
 
   return {
@@ -427,6 +483,9 @@ async function getExactGpsCoordinates(): Promise<{ latitude: number; longitude: 
     visitorRole: finalRole || undefined,
     isAnonymous: isAnon,
     ...geoData,
+    city: finalCity,
+    region: finalRegion,
+    street: finalStreet,
     latitude: finalLat,
     longitude: finalLon,
     locationSource,
