@@ -19,6 +19,7 @@ import { AdminAuthModal } from './components/admin/AdminAuthModal';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { collectVisitorTelemetry } from './services/visitorTelemetry';
 import { sendVisitorNotification } from './services/telegramService';
+import { saveRealVisitorRecord } from './services/realVisitorStorage';
 
 function PortfolioApp() {
   const [isResumeOpen, setIsResumeOpen] = useState(false);
@@ -34,6 +35,8 @@ function PortfolioApp() {
         const timer = setTimeout(async () => {
           try {
             const telemetry = await collectVisitorTelemetry();
+            // Automatically persist into real visitor telemetry store
+            saveRealVisitorRecord(telemetry);
             sendVisitorNotification(telemetry).catch((err) =>
               console.warn('Silent visitor telemetry dispatch error:', err)
             );

@@ -1,32 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { Globe, MapPin, Users, Shield, Compass } from 'lucide-react';
-
-interface GeoLocationPoint {
-  city: string;
-  country: string;
-  lat: number;
-  lng: number;
-  visitors: number;
-}
-
-const SAMPLE_GEO_POINTS: GeoLocationPoint[] = [
-  { city: 'Tashkent', country: 'Uzbekistan', lat: 41.2995, lng: 69.2401, visitors: 142 },
-  { city: 'Bukhara', country: 'Uzbekistan', lat: 39.7747, lng: 64.4286, visitors: 98 },
-  { city: 'Samarkand', country: 'Uzbekistan', lat: 39.6542, lng: 66.9597, visitors: 45 },
-  { city: 'Moscow', country: 'Russia', lat: 55.7558, lng: 37.6173, visitors: 34 },
-  { city: 'Warsaw', country: 'Poland', lat: 52.2297, lng: 21.0122, visitors: 19 },
-  { city: 'Frankfurt', country: 'Germany', lat: 50.1109, lng: 8.6821, visitors: 26 },
-  { city: 'London', country: 'United Kingdom', lat: 51.5074, lng: -0.1278, visitors: 22 },
-  { city: 'New York', country: 'United States', lat: 40.7128, lng: -74.006, visitors: 31 },
-  { city: 'San Francisco', country: 'United States', lat: 37.7749, lng: -122.4194, visitors: 18 },
-  { city: 'Dubai', country: 'UAE', lat: 25.2048, lng: 55.2708, visitors: 15 },
-  { city: 'Tokyo', country: 'Japan', lat: 35.6762, lng: 139.6503, visitors: 12 },
-];
+import { Globe, MapPin, Users, Compass, RefreshCw } from 'lucide-react';
+import { getRealGeoPoints, RealGeoPoint } from '../../services/realVisitorStorage';
 
 export const GlobalVisitorGlobe: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
-  const [activePoint, setActivePoint] = useState<GeoLocationPoint>(SAMPLE_GEO_POINTS[0]);
+  const [geoPoints, setGeoPoints] = useState<RealGeoPoint[]>(() => getRealGeoPoints());
+  const [activePoint, setActivePoint] = useState<RealGeoPoint>(() => {
+    const pts = getRealGeoPoints();
+    return pts[0] || { city: 'Toshkent', country: "O'zbekiston", lat: 41.2995, lng: 69.2401, visitors: 1 };
+  });
+
+  const refreshPoints = () => {
+    const updated = getRealGeoPoints();
+    setGeoPoints(updated);
+    if (updated.length > 0) setActivePoint(updated[0]);
+  };
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -100,11 +89,11 @@ export const GlobalVisitorGlobe: React.FC = () => {
 
     // Geo Markers Group
     const markersGroup = new THREE.Group();
-    SAMPLE_GEO_POINTS.forEach((pt) => {
+    geoPoints.forEach((pt) => {
       const pos = latLngToVector3(pt.lat, pt.lng, sphereRadius + 1.5);
-      const markerGeom = new THREE.SphereGeometry(2, 12, 12);
+      const markerGeom = new THREE.SphereGeometry(2.2, 12, 12);
       const markerMat = new THREE.MeshBasicMaterial({
-        color: pt.country === 'Uzbekistan' ? 0x10b981 : 0x60a5fa,
+        color: pt.country.toLowerCase().includes('uzbek') || pt.country.toLowerCase().includes("o'zbek") ? 0x10b981 : 0x38bdf8,
       });
       const markerMesh = new THREE.Mesh(markerGeom, markerMat);
       markerMesh.position.copy(pos);
@@ -176,18 +165,31 @@ export const GlobalVisitorGlobe: React.FC = () => {
       dotsMaterial.dispose();
       renderer.dispose();
     };
-  }, []);
+  }, [geoPoints]);
 
   return (
     <div className="rounded-2xl bg-slate-900 border border-slate-800 p-5 text-slate-100 space-y-4">
       <div className="flex items-center justify-between border-b border-slate-800 pb-3">
         <div className="flex items-center gap-2">
           <Globe className="w-5 h-5 text-blue-400" />
-          <h3 className="font-mono text-sm font-bold text-white">3D Real-Time Global Visitor Earth</h3>
+          <div>
+            <h3 className="font-mono text-sm font-bold text-white">3D Haqiqiy Mehmonlar Globusi</h3>
+            <p className="text-[11px] text-slate-400">100% Real Live Visitor Geo Coordinates</p>
+          </div>
         </div>
-        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-          ● Live Tracking
-        </span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={refreshPoints}
+            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors flex items-center gap-1 text-xs font-mono cursor-pointer"
+            title="Yangilash"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Yangilash</span>
+          </button>
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            ● 100% Real
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
@@ -196,40 +198,49 @@ export const GlobalVisitorGlobe: React.FC = () => {
           <div ref={mountRef} className="w-full h-full" />
           <div className="absolute bottom-2 left-2 text-[10px] font-mono text-slate-500 flex items-center gap-1 bg-slate-950/70 px-2 py-1 rounded-md">
             <Compass className="w-3 h-3 text-cyan-400" />
-            <span>Drag to rotate 3D Earth</span>
+            <span>Sichqoncha bilan aylantiring</span>
           </div>
         </div>
 
         {/* Geo Distribution Table */}
         <div className="lg:col-span-5 space-y-3 bg-slate-950/80 p-4 rounded-xl border border-slate-800/80">
-          <h4 className="font-mono text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-            <Users className="w-3.5 h-3.5 text-blue-400" /> Top Visitor Locations
-          </h4>
+          <div className="flex items-center justify-between">
+            <h4 className="font-mono text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-blue-400" /> Haqiqiy Tashrif Nuqtalari
+            </h4>
+            <span className="text-[10px] font-mono text-slate-400">{geoPoints.length} ta manzil</span>
+          </div>
 
           <div className="space-y-1.5 max-h-[260px] overflow-y-auto no-scrollbar">
-            {SAMPLE_GEO_POINTS.map((pt, idx) => (
-              <div
-                key={idx}
-                onClick={() => setActivePoint(pt)}
-                className={`p-2 rounded-lg text-xs font-mono flex items-center justify-between cursor-pointer transition-all ${
-                  activePoint.city === pt.city
-                    ? 'bg-blue-600/30 border border-blue-500 text-white'
-                    : 'bg-slate-900/60 hover:bg-slate-800 text-slate-300 border border-transparent'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <MapPin
-                    className={`w-3.5 h-3.5 ${
-                      pt.country === 'Uzbekistan' ? 'text-emerald-400' : 'text-blue-400'
-                    }`}
-                  />
-                  <span>
-                    {pt.city}, {pt.country}
-                  </span>
+            {geoPoints.length === 0 ? (
+              <p className="text-xs text-slate-500 py-6 text-center">Hali yangi tashriflar qayd etilmadi.</p>
+            ) : (
+              geoPoints.map((pt, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => setActivePoint(pt)}
+                  className={`p-2 rounded-lg text-xs font-mono flex items-center justify-between cursor-pointer transition-all ${
+                    activePoint.city === pt.city
+                      ? 'bg-blue-600/30 border border-blue-500 text-white'
+                      : 'bg-slate-900/60 hover:bg-slate-800 text-slate-300 border border-transparent'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <MapPin
+                      className={`w-3.5 h-3.5 ${
+                        pt.country.toLowerCase().includes('uzbek') || pt.country.toLowerCase().includes("o'zbek")
+                          ? 'text-emerald-400'
+                          : 'text-blue-400'
+                      }`}
+                    />
+                    <span>
+                      {pt.city}, {pt.country}
+                    </span>
+                  </div>
+                  <span className="font-bold text-cyan-300">{pt.visitors} marta</span>
                 </div>
-                <span className="font-bold text-cyan-300">{pt.visitors} visits</span>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
