@@ -62,12 +62,15 @@ class BackendEngineer:
     switch (trimmed) {
       case 'help':
         output = language === 'uz'
-          ? 'Mavjud buyruqlar: cat spec, whoami, skills, projects, bot, admin, contact, clear, python --version'
+          ? 'Mavjud buyruqlar: cat spec, whoami, skills, projects, bot, contact, clear, python --version'
           : language === 'ru'
-          ? 'Доступные команды: cat spec, whoami, skills, projects, bot, admin, contact, clear, python --version'
-          : 'Available commands: cat spec, whoami, skills, projects, bot, admin, contact, clear, python --version';
+          ? 'Доступные команды: cat spec, whoami, skills, projects, bot, contact, clear, python --version'
+          : 'Available commands: cat spec, whoami, skills, projects, bot, contact, clear, python --version';
         break;
       case 'admin':
+      case 'sudo':
+      case 'sudo su':
+      case 'root':
         setIsAdminOpen(true);
         output = '👑 Launching Admin Control Center... (PIN authentication required)';
         break;
@@ -93,7 +96,7 @@ class BackendEngineer:
       case 'stats':
       case 'visitors':
       case 'analytics':
-        output = `📊 PORTFOLIO LIVE TELEMETRY: 24/7 Serverless Visitor Gateway Active | Real-time GPS Alerts connected to Telegram Bot (${candidateProfile.botUsername || '@my_portfolio_support_bot'}). Admin panel: Type /admin in Telegram bot or type 'admin' here.`;
+        output = `📊 PORTFOLIO LIVE TELEMETRY: 24/7 Serverless Visitor Gateway Active | Real-time Visitor Telemetry connected to Telegram Bot (${candidateProfile.botUsername || '@my_portfolio_support_bot'}).`;
         break;
       case 'clear':
         setCliHistory([]);

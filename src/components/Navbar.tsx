@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Terminal, Send, Menu, X, Code2, Bot, ShieldCheck } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Terminal, Send, Menu, X, Code2, Bot } from 'lucide-react';
 import { usePortfolioData } from '../context/PortfolioDataContext';
 import { useLanguage } from '../context/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -15,6 +15,24 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, onOpenVisitorModal
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('about');
+
+  // Secret 5-Click Easter Egg on Logo to trigger Admin Hub
+  const clickCountRef = useRef(0);
+  const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleBrandClick = () => {
+    clickCountRef.current += 1;
+    if (clickCountRef.current >= 5) {
+      setIsAdminOpen(true);
+      clickCountRef.current = 0;
+      if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
+      return;
+    }
+    if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
+    clickTimerRef.current = setTimeout(() => {
+      clickCountRef.current = 0;
+    }, 2000);
+  };
 
   useEffect(() => {
     let ticking = false;
@@ -71,171 +89,82 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, onOpenVisitorModal
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
-          {/* Brand Logo */}
+          {/* Brand Logo with Hidden 5-Click Admin Trigger */}
           <a
             href="#"
             id="nav-brand-logo"
+            onClick={handleBrandClick}
             className="flex items-center gap-2.5 group cursor-pointer shrink-0"
           >
-          <div className="w-9 h-9 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center group-hover:border-blue-500 group-hover:shadow-md transition-all">
-            <Terminal className="w-5 h-5 text-blue-600" />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-mono text-lg font-bold tracking-wider text-slate-900 group-hover:text-blue-600 transition-colors">
-              BEKZOD<span className="text-blue-600">.DEV</span>
-            </span>
-            <span className="text-[10px] font-mono text-slate-500 -mt-1 tracking-widest uppercase font-medium">
-              Python Architect
-            </span>
-          </div>
-        </a>
-
-        {/* Desktop Nav Links */}
-        <nav className="hidden md:flex items-center gap-1 bg-slate-100/80 border border-slate-200 rounded-full px-3 py-1.5 backdrop-blur-md">
-          {navLinks.map((link) => (
-            <a
-              key={link.id}
-              href={link.href}
-              id={`nav-link-${link.id}`}
-              className={`px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 ${
-                activeSection === link.id
-                  ? 'text-blue-600 bg-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
-              }`}
-            >
-              {link.name}
-            </a>
-          ))}
-        </nav>
-
-        {/* Action Controls & Language Switcher */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* 3-Language Switcher */}
-          <LanguageSwitcher />
-
-          {onOpenVisitorModal && (
-            <button
-              onClick={onOpenVisitorModal}
-              id="nav-visitor-btn"
-              title={t.visitorModal.badgeStatus}
-              className="hidden lg:flex px-2.5 py-1.5 text-xs font-mono font-medium rounded-lg text-slate-600 hover:text-blue-600 bg-slate-100/80 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 transition-all items-center gap-1.5 cursor-pointer"
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>{t.visitorModal.badgeStatus}</span>
-            </button>
-          )}
-
-          {/* Telegram Bot Quick Launcher */}
-          <a
-            href={candidateProfile.botUrl || 'https://t.me/my_portfolio_support_bot'}
-            target="_blank"
-            rel="noopener noreferrer"
-            id="nav-bot-btn"
-            title="Interactive Telegram Assistant Bot"
-            className="hidden sm:flex px-2.5 py-1.5 text-xs font-mono font-medium rounded-lg text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 hover:border-emerald-300 transition-all items-center gap-1.5 cursor-pointer shadow-sm"
-          >
-            <Bot className="w-3.5 h-3.5 text-emerald-600" />
-            <span className="hidden xl:inline">AI Bot</span>
+            <div className="w-9 h-9 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center group-hover:border-blue-500 group-hover:shadow-md transition-all">
+              <Terminal className="w-5 h-5 text-blue-600" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-mono text-lg font-bold tracking-wider text-slate-900 group-hover:text-blue-600 transition-colors">
+                BEKZOD<span className="text-blue-600">.DEV</span>
+              </span>
+              <span className="text-[10px] font-mono text-slate-500 -mt-1 tracking-widest uppercase font-medium">
+                Python Architect
+              </span>
+            </div>
           </a>
 
-          {/* Admin Panel Launch Button */}
-          <button
-            onClick={() => setIsAdminOpen(true)}
-            id="nav-admin-btn"
-            title="Admin Boshqaruv Markazi (Ctrl+Shift+A)"
-            className="p-1.5 sm:px-2 sm:py-1.5 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 border border-slate-200 hover:border-blue-300 transition-all items-center gap-1 cursor-pointer flex"
-          >
-            <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-            <span className="text-xs font-mono font-semibold hidden md:inline">Admin</span>
-          </button>
+          {/* Desktop Nav Links */}
+          <nav className="hidden md:flex items-center gap-1 bg-slate-100/80 border border-slate-200 rounded-full px-3 py-1.5 backdrop-blur-md">
+            {navLinks.map((link) => (
+              <a
+                key={link.id}
+                href={link.href}
+                id={`nav-link-${link.id}`}
+                className={`px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 ${
+                  activeSection === link.id
+                    ? 'text-blue-600 bg-white shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                }`}
+              >
+                {link.name}
+              </a>
+            ))}
+          </nav>
 
-          {onOpenResume && (
-            <button
-              onClick={onOpenResume}
-              id="nav-resume-btn"
-              className="hidden sm:flex px-3 py-1.5 text-xs font-mono font-medium rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 hover:border-slate-300 transition-all items-center gap-1.5 cursor-pointer"
-            >
-              <Code2 className="w-3.5 h-3.5 text-amber-600" />
-              <span>{t.nav.resumeSpec}</span>
-            </button>
-          )}
+          {/* Action Controls & Language Switcher */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* 3-Language Switcher */}
+            <LanguageSwitcher />
 
-          <a
-            href={candidateProfile.telegram}
-            target="_blank"
-            rel="noopener noreferrer"
-            id="nav-telegram-cta"
-            className="hidden sm:flex px-3.5 py-2 text-xs font-mono font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-sm shadow-blue-500/30 items-center gap-1.5 cursor-pointer"
-          >
-            <Send className="w-3.5 h-3.5" />
-            <span>{t.nav.telegramCta}</span>
-          </a>
-
-          {/* Mobile menu toggle */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            id="nav-mobile-toggle"
-            aria-label="Toggle Navigation Menu"
-            className="md:hidden p-2 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 cursor-pointer"
-          >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
-        </div>
-      </div>
-
-
-      {/* Mobile Dropdown */}
-      {mobileMenuOpen && (
-        <div
-          id="nav-mobile-menu"
-          className="md:hidden border-b border-slate-200 px-6 py-5 flex flex-col gap-3 backdrop-blur-xl bg-white/95 shadow-lg"
-        >
-          {navLinks.map((link) => (
-            <a
-              key={link.id}
-              href={link.href}
-              onClick={() => setMobileMenuOpen(false)}
-              className={`py-2 text-sm font-mono font-medium transition-colors ${
-                activeSection === link.id ? 'text-blue-600 font-bold' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              &gt; {link.name}
-            </a>
-          ))}
-          <div className="pt-3 border-t border-slate-200 flex flex-col gap-2">
             {onOpenVisitorModal && (
               <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenVisitorModal();
-                }}
-                className="py-2.5 px-4 text-center font-mono text-xs font-semibold rounded-lg bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center gap-2"
+                onClick={onOpenVisitorModal}
+                id="nav-visitor-btn"
+                title={t.visitorModal.badgeStatus}
+                className="hidden lg:flex px-2.5 py-1.5 text-xs font-mono font-medium rounded-lg text-slate-600 hover:text-blue-600 bg-slate-100/80 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 transition-all items-center gap-1.5 cursor-pointer"
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span>{t.visitorModal.badgeStatus}</span>
               </button>
             )}
 
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                setIsAdminOpen(true);
-              }}
-              className="py-2.5 px-4 text-center font-mono text-xs font-semibold rounded-lg bg-blue-600/10 border border-blue-300 text-blue-700 flex items-center justify-center gap-2"
+            {/* Telegram Bot Quick Launcher */}
+            <a
+              href={candidateProfile.botUrl || 'https://t.me/my_portfolio_support_bot'}
+              target="_blank"
+              rel="noopener noreferrer"
+              id="nav-bot-btn"
+              title="Interactive Telegram Assistant Bot"
+              className="hidden sm:flex px-2.5 py-1.5 text-xs font-mono font-medium rounded-lg text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 hover:border-emerald-300 transition-all items-center gap-1.5 cursor-pointer shadow-sm"
             >
-              <ShieldCheck className="w-4 h-4 text-blue-600" />
-              <span>Admin Boshqaruv Markazi</span>
-            </button>
+              <Bot className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="hidden xl:inline">AI Bot</span>
+            </a>
 
             {onOpenResume && (
               <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenResume();
-                }}
-                className="py-2.5 px-4 text-center font-mono text-xs font-semibold rounded-lg bg-slate-100 border border-slate-200 text-slate-800"
+                onClick={onOpenResume}
+                id="nav-resume-btn"
+                className="hidden sm:flex px-3 py-1.5 text-xs font-mono font-medium rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 hover:border-slate-300 transition-all items-center gap-1.5 cursor-pointer"
               >
-                {t.nav.resumeSpec}
+                <Code2 className="w-3.5 h-3.5 text-amber-600" />
+                <span>{t.nav.resumeSpec}</span>
               </button>
             )}
 
@@ -243,13 +172,80 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, onOpenVisitorModal
               href={candidateProfile.telegram}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-2.5 px-4 text-center font-mono text-xs font-semibold rounded-lg bg-blue-600 text-white shadow-sm shadow-blue-500/30"
+              id="nav-telegram-cta"
+              className="hidden sm:flex px-3.5 py-2 text-xs font-mono font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-sm shadow-blue-500/30 items-center gap-1.5 cursor-pointer"
             >
-              Telegram: {candidateProfile.telegramHandle}
+              <Send className="w-3.5 h-3.5" />
+              <span>{t.nav.telegramCta}</span>
             </a>
+
+            {/* Mobile menu toggle */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              id="nav-mobile-toggle"
+              aria-label="Toggle Navigation Menu"
+              className="md:hidden p-2 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 cursor-pointer"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
-      )}
+
+        {/* Mobile Dropdown */}
+        {mobileMenuOpen && (
+          <div
+            id="nav-mobile-menu"
+            className="md:hidden border-b border-slate-200 px-6 py-5 flex flex-col gap-3 backdrop-blur-xl bg-white/95 shadow-lg"
+          >
+            {navLinks.map((link) => (
+              <a
+                key={link.id}
+                href={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`py-2 text-sm font-mono font-medium transition-colors ${
+                  activeSection === link.id ? 'text-blue-600 font-bold' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                &gt; {link.name}
+              </a>
+            ))}
+            <div className="pt-3 border-t border-slate-200 flex flex-col gap-2">
+              {onOpenVisitorModal && (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenVisitorModal();
+                  }}
+                  className="py-2.5 px-4 text-center font-mono text-xs font-semibold rounded-lg bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center gap-2"
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>{t.visitorModal.badgeStatus}</span>
+                </button>
+              )}
+
+              {onOpenResume && (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenResume();
+                  }}
+                  className="py-2.5 px-4 text-center font-mono text-xs font-semibold rounded-lg bg-slate-100 border border-slate-200 text-slate-800"
+                >
+                  {t.nav.resumeSpec}
+                </button>
+              )}
+
+              <a
+                href={candidateProfile.telegram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="py-2.5 px-4 text-center font-mono text-xs font-semibold rounded-lg bg-blue-600 text-white shadow-sm shadow-blue-500/30"
+              >
+                Telegram: {candidateProfile.telegramHandle}
+              </a>
+            </div>
+          </div>
+        )}
       </header>
     </>
   );
