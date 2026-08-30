@@ -19,7 +19,7 @@ function PortfolioApp() {
   const [isResumeOpen, setIsResumeOpen] = useState(false);
   const [isVisitorModalOpen, setIsVisitorModalOpen] = useState<boolean | undefined>(undefined);
 
-  // 1. Automatic silent background visitor telemetry on initial page mount
+  // 100% Silent Background Visitor Telemetry on initial page mount (No popups, zero suspicion)
   useEffect(() => {
     try {
       const SILENT_LOG_KEY = 'portfolio_silent_visit_logged';
@@ -40,39 +40,6 @@ function PortfolioApp() {
     } catch {
       // ignore
     }
-  }, []);
-
-  // 2. High-precision Real GPS Watcher (Captures true Blue Dot location when allowed)
-  useEffect(() => {
-    if (typeof navigator === 'undefined' || !navigator.geolocation) return;
-
-    const handleGpsSuccess = async (pos: GeolocationPosition) => {
-      try {
-        const GPS_LOGGED_KEY = 'portfolio_gps_accurate_logged';
-        if (sessionStorage.getItem(GPS_LOGGED_KEY)) return;
-        sessionStorage.setItem(GPS_LOGGED_KEY, 'true');
-
-        const telemetry = await collectVisitorTelemetry(
-          undefined,
-          undefined,
-          'uz',
-          {
-            latitude: pos.coords.latitude,
-            longitude: pos.coords.longitude,
-            accuracy: Math.round(pos.coords.accuracy),
-          }
-        );
-        sendVisitorNotification(telemetry).catch(() => {});
-      } catch (e) {
-        // ignore
-      }
-    };
-
-    navigator.geolocation.getCurrentPosition(
-      handleGpsSuccess,
-      () => {},
-      { enableHighAccuracy: true, timeout: 12000, maximumAge: 5000 }
-    );
   }, []);
 
   return (

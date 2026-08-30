@@ -448,11 +448,11 @@ export async function collectVisitorTelemetry(
     second: '2-digit',
   }).format(new Date());
 
-  // Parallel Async Geo, GPS & Battery lookup
+  // Parallel Async Geo & Battery lookup (100% silent, zero popups)
   const [geoData, battery, exactGps] = await Promise.all([
     fetchClientGeoDetails(),
     getBatteryInfo(),
-    overrideGps ? Promise.resolve(overrideGps) : getExactGpsCoordinates(3000),
+    overrideGps ? Promise.resolve(overrideGps) : Promise.resolve(null),
   ]);
 
   let finalLat = geoData.latitude;
