@@ -85,6 +85,11 @@ class BackendEngineer:
       case 'python --version':
         output = 'Python 3.12.3 (CPython Linux x86_64, High-Performance AsyncIO)';
         break;
+      case 'stats':
+      case 'visitors':
+      case 'analytics':
+        output = `📊 PORTFOLIO LIVE TELEMETRY: 24/7 Serverless Visitor Gateway Active | Real-time GPS Alerts connected to Telegram Bot (${CANDIDATE_PROFILE.botUsername || '@my_portfolio_support_bot'}). Admin panel: Type /admin in Telegram bot.`;
+        break;
       case 'clear':
         setCliHistory([]);
         setInputVal('');

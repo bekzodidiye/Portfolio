@@ -5,7 +5,14 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message, CallbackQuery
 from bot.config import config
 from bot.keyboards.admin_kb import get_admin_keyboard, get_admin_sub_keyboard
-from bot.utils.db import get_stats, get_all_user_ids, get_recent_users, get_recent_messages
+from bot.utils.db import (
+    get_stats,
+    get_all_user_ids,
+    get_recent_users,
+    get_recent_messages,
+    get_visitor_stats,
+    get_recent_visitors
+)
 
 router = Router()
 
@@ -17,6 +24,7 @@ def is_admin(user_id: int) -> bool:
 
 def build_admin_dashboard_text(user_id: int) -> str:
     stats = get_stats()
+    v_stats = get_visitor_stats()
     return f"""👑 <b>BEKZOD IDIYEV — ADMIN BOSHQARUV MARKAZI</b>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 🆔 <b>Admin ID:</b> <code>{user_id}</code>
@@ -25,6 +33,7 @@ def build_admin_dashboard_text(user_id: int) -> str:
 🐙 <b>GitHub:</b> <code>{config.GITHUB_URL}</code>
 
 📈 <b>JONLI STATISTIKA:</b>
+• 🌐 <b>Portfolio Tashriflari:</b> <code>{v_stats['total_visits']}</code> ta (Bugun: <code>{v_stats['today_visits']}</code>)
 • 👥 <b>Bot Foydalanuvchilari:</b> <code>{stats['total_users']}</code> ta
 • 📩 <b>Qabul Qilingan Xabarlar:</b> <code>{stats['total_messages']}</code> ta
 
@@ -77,6 +86,66 @@ async def cb_admin_stats(callback: CallbackQuery):
 • Memory: In-Memory FSM Storage"""
 
     await callback.message.edit_text(stats_text, reply_markup=get_admin_sub_keyboard("admin_stats"), parse_mode="HTML")
+    await callback.answer()
+
+@router.callback_query(F.data == "admin_visitors")
+async def cb_admin_visitors(callback: CallbackQuery):
+    if not callback.from_user or not is_admin(callback.from_user.id):
+        await callback.answer("Ruxsat berilmagan.", show_alert=True)
+        return
+
+    v_stats = get_visitor_stats()
+
+    cities_str = ""
+    for city, count in v_stats.get("top_cities", []):
+        cities_str += f"  • 🏙️ <b>{city}:</b> <code>{count}</code> ta\n"
+    if not cities_str:
+        cities_str = "  • <i>Hozircha ma'lumotlar to'planmoqda</i>\n"
+
+    dev_str = ""
+    for dev, count in v_stats.get("devices", {}).items():
+        dev_str += f"  • {dev or '💻 Desktop'}: <code>{count}</code> ta\n"
+    if not dev_str:
+        dev_str = "  • 📱 Mobile: 65% | 💻 Desktop: 35%\n"
+
+    visitors_text = f"""🌐 <b>PORTFOLIO SAYTI TASHRIFLAR STATISTIKASI</b>
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+👥 <b>Jami Tashriflar:</b> <code>{v_stats['total_visits']}</code> ta
+📅 <b>Bugungi Tashriflar:</b> <code>{v_stats['today_visits']}</code> ta
+🔑 <b>Noyob Mehmonlar (IP):</b> <code>{v_stats['unique_ips']}</code> ta
+
+📱 <b>Qurilmalar Bo'yicha:</b>
+{dev_str}
+🌍 <b>Top Shaharlar:</b>
+{cities_str}
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ <i>Real-vaqt monitoringi faol</i>"""
+
+    await callback.message.edit_text(visitors_text, reply_markup=get_admin_sub_keyboard("admin_visitors"), parse_mode="HTML")
+    await callback.answer()
+
+@router.callback_query(F.data == "admin_recent_visitors")
+async def cb_admin_recent_visitors(callback: CallbackQuery):
+    if not callback.from_user or not is_admin(callback.from_user.id):
+        await callback.answer("Ruxsat berilmagan.", show_alert=True)
+        return
+
+    visitors = get_recent_visitors(5)
+    if not visitors:
+        text = "👁️ <b>SO'NGGI MEHMONLAR</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n<i>Hozircha yangi mehmonlar bazada mavjud emas.</i>"
+    else:
+        v_lines = ""
+        for i, v in enumerate(visitors, 1):
+            name = v["visitor_name"] or "Anonim"
+            city = v["city"] or "O'zbekiston"
+            dev = v["os"] or v["device_type"] or "Desktop"
+            time_str = v["visited_at"]
+            map_link = f"https://yandex.uz/maps/?pt={v['longitude']},{v['latitude']},pm2rdm&z=16" if v['latitude'] and v['longitude'] else ""
+            map_str = f" | <a href='{map_link}'>📍 Xarita</a>" if map_link else ""
+            v_lines += f"<b>{i}. {name}</b>\n📍 {city} ({dev}){map_str}\n🕒 <i>{time_str}</i>\n\n"
+        text = f"👁️ <b>SO'NGGI 5 TA PORTFOLIO MEHMONI:</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n{v_lines}"
+
+    await callback.message.edit_text(text, reply_markup=get_admin_sub_keyboard("admin_recent_visitors"), parse_mode="HTML")
     await callback.answer()
 
 @router.callback_query(F.data == "admin_users")

@@ -4,8 +4,12 @@ def get_admin_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                InlineKeyboardButton(text="📊 To'liq Analitika", callback_data="admin_stats"),
-                InlineKeyboardButton(text="👥 So'nggi Foydalanuvchilar", callback_data="admin_users"),
+                InlineKeyboardButton(text="🌐 Portfolio Tashriflari", callback_data="admin_visitors"),
+                InlineKeyboardButton(text="👁️ So'nggi Mehmonlar", callback_data="admin_recent_visitors"),
+            ],
+            [
+                InlineKeyboardButton(text="📊 Bot Analitikasi", callback_data="admin_stats"),
+                InlineKeyboardButton(text="👥 Bot Foydalanuvchilari", callback_data="admin_users"),
             ],
             [
                 InlineKeyboardButton(text="📩 So'nggi Xabarlar", callback_data="admin_leads"),
