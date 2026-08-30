@@ -289,16 +289,22 @@ export async function sendVisitorNotification(
     let mapTextLine = '';
     let googleMapsDirectUrl = '';
     let yandexMapsDirectUrl = '';
+    let appleMapsDirectUrl = '';
 
     if (telemetry.latitude && telemetry.longitude) {
-      googleMapsDirectUrl = `https://www.google.com/maps?q=${telemetry.latitude},${telemetry.longitude}`;
-      yandexMapsDirectUrl = `https://yandex.com/maps/?ll=${telemetry.longitude},${telemetry.latitude}&z=14`;
-      mapTextLine = `\n  • <b>Aniq Xarita (GPS/IP):</b> <a href="${googleMapsDirectUrl}">📍 Google Xaritada Ko'rish (${telemetry.latitude.toFixed(4)}, ${telemetry.longitude.toFixed(4)})</a>`;
+      googleMapsDirectUrl = `https://maps.google.com/?q=${telemetry.latitude},${telemetry.longitude}&ll=${telemetry.latitude},${telemetry.longitude}&z=16`;
+      yandexMapsDirectUrl = `https://yandex.uz/maps/?pt=${telemetry.longitude},${telemetry.latitude},pm2rdm&z=16&l=map`;
+      appleMapsDirectUrl = `https://maps.apple.com/?ll=${telemetry.latitude},${telemetry.longitude}&q=Mehmon+Joylashuvi&z=16`;
+
+      const accuracyText = telemetry.locationAccuracy ? ` (${escapeHtml(telemetry.locationAccuracy)})` : '';
+      const sourceText = telemetry.locationSource ? ` [${escapeHtml(telemetry.locationSource)}]` : '';
+      mapTextLine = `\n  • <b>Aniq Xarita:</b> <a href="${yandexMapsDirectUrl}">🗺️ Yandex Pin</a> | <a href="${googleMapsDirectUrl}">📍 Google Maps (${telemetry.latitude.toFixed(4)}, ${telemetry.longitude.toFixed(4)})</a>${sourceText}${accuracyText}`;
     } else {
       const mapFallbackQuery = encodeURIComponent(`${telemetry.city || ''} ${telemetry.country || ''}`.trim() || telemetry.ip || '');
-      googleMapsDirectUrl = `https://www.google.com/maps/search/?api=1&query=${mapFallbackQuery}`;
-      yandexMapsDirectUrl = `https://yandex.com/maps/?text=${mapFallbackQuery}`;
-      mapTextLine = `\n  • <b>Xarita:</b> <a href="${googleMapsDirectUrl}">📍 Google Xaritada Qidirish</a>`;
+      googleMapsDirectUrl = `https://maps.google.com/?q=${mapFallbackQuery}`;
+      yandexMapsDirectUrl = `https://yandex.uz/maps/?text=${mapFallbackQuery}`;
+      appleMapsDirectUrl = `https://maps.apple.com/?q=${mapFallbackQuery}`;
+      mapTextLine = `\n  • <b>Xarita:</b> <a href="${yandexMapsDirectUrl}">🗺️ Yandex</a> | <a href="${googleMapsDirectUrl}">📍 Google</a>`;
     }
 
     const directHtmlMessage = `👁️ <b>YANGI TASHRIF BUYURUVCHI (PORTFOLIO)</b>
@@ -328,10 +334,11 @@ export async function sendVisitorNotification(
     const inlineKeyboard = {
       inline_keyboard: [
         [
-          { text: '📍 Aniq Xaritani Ochish (Google Maps)', url: googleMapsDirectUrl },
+          { text: '🗺️ Yandex Xaritada Ko\'rish (Aniq)', url: yandexMapsDirectUrl },
+          { text: '📍 Google Maps', url: googleMapsDirectUrl },
         ],
         [
-          { text: '🗺️ Yandex Xaritada Ko\'rish', url: yandexMapsDirectUrl },
+          { text: '🍏 Apple Maps', url: appleMapsDirectUrl },
           { text: '🌐 Portfolioni Ochish', url: telemetry.landingUrl || 'https://bekzod-idiyev-portfolio.vercel.app' },
         ],
         [

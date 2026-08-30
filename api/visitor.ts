@@ -110,18 +110,23 @@ export default async function handler(req: any, res: any) {
     let mapTextLine = '';
     let googleMapsDirectUrl = '';
     let yandexMapsDirectUrl = '';
+    let appleMapsDirectUrl = '';
 
     if (finalLat && finalLon) {
-      googleMapsDirectUrl = `https://www.google.com/maps?q=${finalLat},${finalLon}`;
-      yandexMapsDirectUrl = `https://yandex.com/maps/?ll=${finalLon},${finalLat}&z=14`;
+      // High-precision pin URLs
+      googleMapsDirectUrl = `https://maps.google.com/?q=${finalLat},${finalLon}&ll=${finalLat},${finalLon}&z=16`;
+      yandexMapsDirectUrl = `https://yandex.uz/maps/?pt=${finalLon},${finalLat},pm2rdm&z=16&l=map`;
+      appleMapsDirectUrl = `https://maps.apple.com/?ll=${finalLat},${finalLon}&q=Mehmon+Joylashuvi&z=16`;
+      
       const accuracyText = data.locationAccuracy ? ` (${escapeHtml(data.locationAccuracy)})` : '';
       const sourceText = data.locationSource ? ` [${escapeHtml(data.locationSource)}]` : '';
-      mapTextLine = `\n  • <b>Xarita (Koordinatalar):</b> <a href="${googleMapsDirectUrl}">📍 Google Xaritani Ochish (${finalLat.toFixed(4)}, ${finalLon.toFixed(4)})</a>${sourceText}${accuracyText}`;
+      mapTextLine = `\n  • <b>Aniq Xarita:</b> <a href="${yandexMapsDirectUrl}">🗺️ Yandex Pin</a> | <a href="${googleMapsDirectUrl}">📍 Google Maps (${finalLat.toFixed(4)}, ${finalLon.toFixed(4)})</a>${sourceText}${accuracyText}`;
     } else {
       const mapFallbackQuery = encodeURIComponent(`${finalCity || ''} ${finalCountry || ''}`.trim() || finalIp);
-      googleMapsDirectUrl = `https://www.google.com/maps/search/?api=1&query=${mapFallbackQuery}`;
-      yandexMapsDirectUrl = `https://yandex.com/maps/?text=${mapFallbackQuery}`;
-      mapTextLine = `\n  • <b>Xarita:</b> <a href="${googleMapsDirectUrl}">📍 Google Xaritada Qidirish</a>`;
+      googleMapsDirectUrl = `https://maps.google.com/?q=${mapFallbackQuery}`;
+      yandexMapsDirectUrl = `https://yandex.uz/maps/?text=${mapFallbackQuery}`;
+      appleMapsDirectUrl = `https://maps.apple.com/?q=${mapFallbackQuery}`;
+      mapTextLine = `\n  • <b>Xarita:</b> <a href="${yandexMapsDirectUrl}">🗺️ Yandex</a> | <a href="${googleMapsDirectUrl}">📍 Google</a>`;
     }
 
     // Build hardware info
@@ -168,10 +173,11 @@ export default async function handler(req: any, res: any) {
     const inlineKeyboard = {
       inline_keyboard: [
         [
-          { text: '📍 Aniq Xaritani Ochish (Google Maps)', url: googleMapsDirectUrl },
+          { text: '🗺️ Yandex Xaritada Ko\'rish (Aniq)', url: yandexMapsDirectUrl },
+          { text: '📍 Google Maps', url: googleMapsDirectUrl },
         ],
         [
-          { text: '🗺️ Yandex Xaritada Ko\'rish', url: yandexMapsDirectUrl },
+          { text: '🍏 Apple Maps', url: appleMapsDirectUrl },
           { text: '🌐 Portfolioni Ochish', url: landingUrl || 'https://bekzod-idiyev-portfolio.vercel.app' },
         ],
         [
