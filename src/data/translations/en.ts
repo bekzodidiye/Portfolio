@@ -97,6 +97,16 @@ export const enTranslations: TranslationSchema = {
     keyFeaturesTitle: 'Key Technical Features',
     techStackTitle: 'Technologies Used',
     items: {
+      portfolioBot: {
+        category: 'Telegram Bot & Mini App Engine',
+        summary: 'Official interactive Telegram assistant featuring 3D WebApp launch, multilingual catalog, lead capture FSM, and broadcast dashboard.',
+        features: [
+          'Telegram Mini App launcher opening full 3D interactive portfolio inside Telegram.',
+          'Multilingual support (UZ/RU/EN) with clean modular aiogram 3.x router architecture.',
+          'FSM-based contact form, resume delivery, and admin broadcasting dashboard.',
+        ],
+        architecture: 'Asynchronous aiogram 3.x dispatcher with FSM context management, Pydantic v2 settings, and Telegram WebApp integration.',
+      },
       buddyTeam: {
         category: 'Matching & AI Platform',
         summary: 'High-throughput student-mentor matching platform with automated AI recommendation engines.',

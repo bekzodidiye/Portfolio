@@ -56,6 +56,8 @@ export interface CandidateProfile {
   linkedin: string;
   telegram: string;
   telegramHandle: string;
+  botUsername?: string;
+  botUrl?: string;
   summary: string;
   freelanceCount: number;
 }

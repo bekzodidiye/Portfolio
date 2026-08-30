@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, Mail, Send, Copy, Check, Clock } from 'lucide-react';
+import { Phone, Mail, Send, Copy, Check, Clock, Bot, ArrowUpRight } from 'lucide-react';
 import { CANDIDATE_PROFILE } from '../data/portfolioData';
 import { SpotlightCard } from './SpotlightCard';
 
@@ -23,10 +23,11 @@ export const ContactQuickCards: React.FC<ContactQuickCardsProps> = ({
   locationLabel,
 }) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10 perspective-3d">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 mb-10 perspective-3d">
+      {/* 1. Phone */}
       <SpotlightCard className="contact-reveal p-4 card-3d flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-lg bg-blue-50 text-blue-600">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
             <Phone className="w-4 h-4" />
           </div>
           <div>
@@ -43,14 +44,15 @@ export const ContactQuickCards: React.FC<ContactQuickCardsProps> = ({
         </button>
       </SpotlightCard>
 
+      {/* 2. Email */}
       <SpotlightCard className="contact-reveal p-4 card-3d flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-lg bg-indigo-50 text-indigo-600">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600">
             <Mail className="w-4 h-4" />
           </div>
           <div className="overflow-hidden">
             <span className="text-[10px] font-mono text-slate-500 uppercase">{emailLabel}</span>
-            <p className="text-xs font-mono font-semibold text-slate-900 truncate">{CANDIDATE_PROFILE.email}</p>
+            <p className="text-xs font-mono font-semibold text-slate-900 truncate max-w-[120px]">{CANDIDATE_PROFILE.email}</p>
           </div>
         </div>
         <button
@@ -62,9 +64,10 @@ export const ContactQuickCards: React.FC<ContactQuickCardsProps> = ({
         </button>
       </SpotlightCard>
 
+      {/* 3. Telegram Direct */}
       <SpotlightCard className="contact-reveal p-4 card-3d flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-lg bg-blue-50 text-blue-600">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
             <Send className="w-4 h-4" />
           </div>
           <div>
@@ -83,9 +86,33 @@ export const ContactQuickCards: React.FC<ContactQuickCardsProps> = ({
         </a>
       </SpotlightCard>
 
+      {/* 4. Telegram Interactive Bot */}
+      <SpotlightCard className="contact-reveal p-4 card-3d flex items-center justify-between border-emerald-200/80 bg-emerald-50/20 hover:border-emerald-400 transition-all">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-emerald-100 text-emerald-700">
+            <Bot className="w-4 h-4" />
+          </div>
+          <div className="overflow-hidden">
+            <span className="text-[10px] font-mono text-emerald-700 uppercase font-semibold">24/7 AI BOT</span>
+            <p className="text-xs font-mono font-semibold text-slate-900 truncate max-w-[110px]">{CANDIDATE_PROFILE.botUsername || '@my_portfolio_support_bot'}</p>
+          </div>
+        </div>
+        <a
+          href={CANDIDATE_PROFILE.botUrl || 'https://t.me/my_portfolio_support_bot'}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="p-1.5 rounded bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm flex items-center gap-0.5 text-[10px] font-mono font-semibold"
+          title="Start Telegram Bot"
+        >
+          <span>Start</span>
+          <ArrowUpRight className="w-3 h-3" />
+        </a>
+      </SpotlightCard>
+
+      {/* 5. Location & Clock */}
       <SpotlightCard className="contact-reveal p-4 card-3d flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-lg bg-amber-50 text-amber-700">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-amber-50 text-amber-700">
             <Clock className="w-4 h-4" />
           </div>
           <div>

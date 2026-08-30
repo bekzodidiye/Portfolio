@@ -88,6 +88,12 @@ export interface TranslationSchema {
     keyFeaturesTitle: string;
     techStackTitle: string;
     items: {
+      portfolioBot: {
+        category: string;
+        summary: string;
+        features: string[];
+        architecture: string;
+      };
       buddyTeam: {
         category: string;
         summary: string;

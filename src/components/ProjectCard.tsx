@@ -4,6 +4,7 @@ import { ProjectItem } from '../types/portfolio';
 import { SpotlightCard } from './SpotlightCard';
 
 const PROJECT_ICONS: Record<string, React.ReactNode> = {
+  'portfolio-bot': <Bot className="w-5 h-5 text-emerald-600" />,
   'buddy-team': <Users className="w-5 h-5 text-blue-600" />,
   'esports-bot': <Trophy className="w-5 h-5 text-amber-600" />,
   'peerlearn-app': <Bot className="w-5 h-5 text-indigo-600" />,
@@ -27,9 +28,11 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       {/* Top Accent Line */}
       <div
         className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${
-          index === 0
+          index % 4 === 0
+            ? 'from-emerald-500 to-blue-500'
+            : index % 4 === 1
             ? 'from-blue-500 to-indigo-600'
-            : index === 1
+            : index % 4 === 2
             ? 'from-amber-500 to-blue-500'
             : 'from-indigo-600 to-blue-500'
         } opacity-90`}

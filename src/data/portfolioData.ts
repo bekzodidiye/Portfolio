@@ -11,12 +11,31 @@ export const CANDIDATE_PROFILE: CandidateProfile = {
   linkedin: 'https://linkedin.com/in/bekzod-idiyev',
   telegram: 'https://t.me/toyneden',
   telegramHandle: '@toyneden',
+  botUsername: '@my_portfolio_support_bot',
+  botUrl: 'https://t.me/my_portfolio_support_bot',
   summary:
     'Results-oriented Python Backend Engineer with hands-on experience in building high-performance REST APIs, scalable Telegram bots, and complex CRM backend systems. Proficient in Django, FastAPI, and Flask frameworks. Demonstrates proven freelance experience on Kwork platform with 8+ successfully delivered client projects. Currently enhancing specialized knowledge in Data Science algorithms and production-level Backend Systems Engineering at School 21.',
   freelanceCount: 8,
 };
 
 export const FEATURED_PROJECTS: ProjectItem[] = [
+  {
+    id: 'portfolio-bot',
+    name: 'Portfolio Support & Assistant Bot',
+    category: 'Telegram Bot & Mini App Engine',
+    timeline: '2026',
+    techStack: ['Python 3.12', 'aiogram 3.x', 'Pydantic v2', 'FSM State Engine', 'Telegram Mini Apps', 'Webhook / Vercel Serverless'],
+    summary: 'Official interactive Telegram assistant featuring 3D WebApp launch, multilingual catalog, lead capture FSM, and broadcast dashboard.',
+    keyFeatures: [
+      'Telegram Mini App launcher opening full 3D interactive portfolio inside Telegram.',
+      'Multilingual support (UZ/RU/EN) with clean modular aiogram 3.x router architecture.',
+      'FSM-based contact form, resume delivery, and admin broadcasting dashboard.',
+    ],
+    architecture: 'Asynchronous aiogram 3.x dispatcher with FSM context management, Pydantic v2 settings, and Telegram WebApp integration.',
+    githubUrl: 'https://github.com/bekzodidiye/Portfolio',
+    demoUrl: 'https://t.me/my_portfolio_support_bot',
+    badge: 'aiogram 3.x & Mini App',
+  },
   {
     id: 'buddy-team',
     name: 'Buddy Team',

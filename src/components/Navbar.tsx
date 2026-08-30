@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Terminal, Send, Menu, X, Code2 } from 'lucide-react';
+import { Terminal, Send, Menu, X, Code2, Bot } from 'lucide-react';
 import { CANDIDATE_PROFILE } from '../data/portfolioData';
 import { useLanguage } from '../context/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -123,6 +123,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, onOpenVisitorModal
               <span>{t.visitorModal.badgeStatus}</span>
             </button>
           )}
+
+          {/* Telegram Bot Quick Launcher */}
+          <a
+            href={CANDIDATE_PROFILE.botUrl || 'https://t.me/my_portfolio_support_bot'}
+            target="_blank"
+            rel="noopener noreferrer"
+            id="nav-bot-btn"
+            title="Interactive Telegram Assistant Bot"
+            className="hidden sm:flex px-2.5 py-1.5 text-xs font-mono font-medium rounded-lg text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 hover:border-emerald-300 transition-all items-center gap-1.5 cursor-pointer shadow-sm"
+          >
+            <Bot className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="hidden xl:inline">AI Bot</span>
+          </a>
 
           {onOpenResume && (
             <button

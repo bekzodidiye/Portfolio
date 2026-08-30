@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Terminal, Send } from 'lucide-react';
+import { ArrowRight, Terminal, Send, Bot } from 'lucide-react';
 import { CANDIDATE_PROFILE } from '../data/portfolioData';
 import { HeroSystemVisualizer } from './HeroSystemVisualizer';
 import { useLanguage } from '../context/LanguageContext';
@@ -18,19 +18,23 @@ export const HeroSection: React.FC = () => {
   });
 
   return (
-    <section ref={sectionRef} id="hero" className="relative min-h-[90vh] pt-28 pb-16 flex items-center px-4 sm:px-6 lg:px-8 z-10">
+    <section
+      ref={sectionRef}
+      id="hero"
+      className="relative min-h-[92vh] flex items-center justify-center pt-24 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden z-10"
+    >
       <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
-        {/* Left Column: Engineer Bio & CTA */}
+        {/* Left Col: High-impact bio & mission text */}
         <div className="lg:col-span-7 flex flex-col items-start text-left">
-          {/* Availability Badge */}
+          {/* Status Badge */}
           <div className="hero-reveal inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-mono mb-6 shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="font-semibold">{t.hero.badgeAvailable}</span>
           </div>
 
-          {/* Main Title */}
+          {/* Primary Name */}
           <h1 className="hero-reveal text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-4 font-sans">
-            BEKZOD <span className="text-blue-600">IDIYEV</span>
+            {CANDIDATE_PROFILE.name}
           </h1>
 
           {/* Brief Subtext */}
@@ -57,6 +61,19 @@ export const HeroSection: React.FC = () => {
               >
                 <Terminal className="w-4 h-4 text-blue-600" />
                 <span>{t.hero.getInTouch}</span>
+              </a>
+            </MagneticButton>
+
+            <MagneticButton strength={0.35}>
+              <a
+                href={CANDIDATE_PROFILE.botUrl || 'https://t.me/my_portfolio_support_bot'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-3 rounded-xl font-mono text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 hover:border-emerald-300 transition-all flex items-center gap-2 cursor-pointer active:scale-95 shadow-sm"
+                title="Interactive Telegram Assistant Bot"
+              >
+                <Bot className="w-4 h-4 text-emerald-600" />
+                <span className="text-xs font-mono font-semibold hidden sm:inline">Bot Assistant</span>
               </a>
             </MagneticButton>
 

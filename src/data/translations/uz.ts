@@ -97,6 +97,16 @@ export const uzTranslations: TranslationSchema = {
     keyFeaturesTitle: 'Asosiy Funksionallik',
     techStackTitle: 'Ishlatilgan Texnologiyalar',
     items: {
+      portfolioBot: {
+        category: 'Telegram Bot & Mini App Dvigateli',
+        summary: '3D WebApp integratsiyasi, 3 tilli katalog, FSM aloqa formasi va admin panelga ega rasmiy interaktiv Telegram bot.',
+        features: [
+          '3D interaktiv portfolioni to\'liq ekranli Telegram Mini App sifatida ochish imkoniyati.',
+          'aiogram 3.x routerlari asosida 3 ta tilda (UZ/RU/EN) modulli navigatsiya va inline menyular.',
+          'FSM holatlar mashinasi orqali to\'g\'ridan-to\'g\'ri xabar qoldirish va admin broadcast boshqaruv paneli.',
+        ],
+        architecture: 'aiogram 3.x asinxron dispetcher, FSM xotirasi, Pydantic v2 sozlamalari va Telegram WebApp SDK integratsiyasi.',
+      },
       buddyTeam: {
         category: 'AI & Moslashtirish Platformasi',
         summary: 'Talabalar va mentorlarni sun\'iy intellekt tavsiyalari asosida bog\'lovchi yuqori samarali platforma.',

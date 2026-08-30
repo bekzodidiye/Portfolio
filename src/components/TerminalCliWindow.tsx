@@ -34,6 +34,8 @@ class BackendEngineer:
     name: str = "${CANDIDATE_PROFILE.name}"
     title: str = "${CANDIDATE_PROFILE.primaryTitle}"
     education: str = "${CANDIDATE_PROFILE.subTitle}"
+    base_location: str = "${CANDIDATE_PROFILE.location}"
+    telegram_bot: str = "${CANDIDATE_PROFILE.botUsername || '@my_portfolio_support_bot'}"
     kwork_deliveries: int = ${CANDIDATE_PROFILE.freelanceCount}
 
     def execute_mission(self) -> str:
@@ -59,10 +61,10 @@ class BackendEngineer:
     switch (trimmed) {
       case 'help':
         output = language === 'uz'
-          ? 'Mavjud buyruqlar: cat spec, whoami, skills, projects, contact, clear, python --version'
+          ? 'Mavjud buyruqlar: cat spec, whoami, skills, projects, bot, contact, clear, python --version'
           : language === 'ru'
-          ? 'Доступные команды: cat spec, whoami, skills, projects, contact, clear, python --version'
-          : 'Available commands: cat spec, whoami, skills, projects, contact, clear, python --version';
+          ? 'Доступные команды: cat spec, whoami, skills, projects, bot, contact, clear, python --version'
+          : 'Available commands: cat spec, whoami, skills, projects, bot, contact, clear, python --version';
         break;
       case 'whoami':
         output = `${CANDIDATE_PROFILE.name} — ${t.hero.typewriter[0]} & ${t.hero.typewriter[1]}`;
@@ -71,10 +73,14 @@ class BackendEngineer:
         output = 'FastAPI, Django, PostgreSQL, Redis, Docker, aiogram 3.x, WebSockets, Clean Architecture';
         break;
       case 'projects':
-        output = '1. Buddy Team (AI Mentor Match) | 2. Esports Tournament Bot | 3. PeerLearn Telegram Mini App';
+        output = '1. Portfolio Assistant Bot | 2. Buddy Team (AI Match) | 3. Esports Tournament Bot | 4. PeerLearn Mini App';
+        break;
+      case 'bot':
+      case 'telegram-bot':
+        output = `🤖 Official Interactive Telegram Assistant: ${CANDIDATE_PROFILE.botUsername || '@my_portfolio_support_bot'} (${CANDIDATE_PROFILE.botUrl || 'https://t.me/my_portfolio_support_bot'})`;
         break;
       case 'contact':
-        output = `Telegram: ${CANDIDATE_PROFILE.telegramHandle} | Email: ${CANDIDATE_PROFILE.email} | Phone: ${CANDIDATE_PROFILE.phone}`;
+        output = `Bot: ${CANDIDATE_PROFILE.botUsername} | Telegram: ${CANDIDATE_PROFILE.telegramHandle} | Email: ${CANDIDATE_PROFILE.email} | Phone: ${CANDIDATE_PROFILE.phone}`;
         break;
       case 'python --version':
         output = 'Python 3.12.3 (CPython Linux x86_64, High-Performance AsyncIO)';
@@ -139,6 +145,7 @@ class BackendEngineer:
             {'    '}title: <span className="text-blue-300">str</span> = <span className="text-emerald-400">"{CANDIDATE_PROFILE.primaryTitle}"</span>{'\n'}
             {'    '}education: <span className="text-blue-300">str</span> = <span className="text-emerald-400">"{CANDIDATE_PROFILE.subTitle}"</span>{'\n'}
             {'    '}base_location: <span className="text-blue-300">str</span> = <span className="text-emerald-400">"{CANDIDATE_PROFILE.location}"</span>{'\n'}
+            {'    '}telegram_bot: <span className="text-blue-300">str</span> = <span className="text-emerald-400">"{CANDIDATE_PROFILE.botUsername || '@my_portfolio_support_bot'}"</span>{'\n'}
             {'    '}kwork_deliveries: <span className="text-blue-300">int</span> = <span className="text-amber-400">{CANDIDATE_PROFILE.freelanceCount}</span>{'\n\n'}
             {'    '}<span className="text-purple-400">def</span> <span className="text-blue-400">execute_mission</span>(self) -&gt; <span className="text-blue-300">str</span>:{'\n'}
             {'        '}<span className="text-purple-400">return</span> <span className="text-emerald-300">"Designing zero-downtime APIs & scalable Telegram engines."</span>

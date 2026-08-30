@@ -28,8 +28,9 @@ export const ProjectsSection: React.FC = () => {
 
   const getLocalizedProject = (project: ProjectItem) => {
     let loc = t.projects.items.buddyTeam;
-    if (project.id === 'esports-bot') loc = t.projects.items.esportsBot;
-    if (project.id === 'peerlearn-app') loc = t.projects.items.peerLearn;
+    if (project.id === 'portfolio-bot') loc = t.projects.items.portfolioBot;
+    else if (project.id === 'esports-bot') loc = t.projects.items.esportsBot;
+    else if (project.id === 'peerlearn-app') loc = t.projects.items.peerLearn;
 
     return {
       ...project,
@@ -57,8 +58,8 @@ export const ProjectsSection: React.FC = () => {
           </p>
         </div>
 
-        {/* 3-Column Clean Card Grid with GSAP ScrollTrigger 3D Depth Parallax */}
-        <div ref={parallaxGridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 perspective-3d">
+        {/* 2x2 Clean Card Grid with GSAP ScrollTrigger 3D Depth Parallax */}
+        <div ref={parallaxGridRef} className="grid grid-cols-1 md:grid-cols-2 gap-6 perspective-3d">
           {FEATURED_PROJECTS.map((rawProject, idx) => {
             const project = getLocalizedProject(rawProject);
             return (
