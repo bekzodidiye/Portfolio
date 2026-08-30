@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LanguageProvider } from './context/LanguageContext';
 import { ModernBackground } from './components/ModernBackground';
 import { Navbar } from './components/Navbar';
@@ -12,10 +12,35 @@ import { Footer } from './components/Footer';
 import { ResumeModal } from './components/ResumeModal';
 import { ScrollProgressBar } from './components/ScrollProgressBar';
 import { VisitorWelcomeModal } from './components/VisitorWelcomeModal';
+import { collectVisitorTelemetry } from './services/visitorTelemetry';
+import { sendVisitorNotification } from './services/telegramService';
 
 function PortfolioApp() {
   const [isResumeOpen, setIsResumeOpen] = useState(false);
   const [isVisitorModalOpen, setIsVisitorModalOpen] = useState<boolean | undefined>(undefined);
+
+  // Automatic silent background visitor telemetry on initial page mount
+  useEffect(() => {
+    try {
+      const SILENT_LOG_KEY = 'portfolio_silent_visit_logged';
+      if (!sessionStorage.getItem(SILENT_LOG_KEY)) {
+        sessionStorage.setItem(SILENT_LOG_KEY, 'true');
+        const timer = setTimeout(async () => {
+          try {
+            const telemetry = await collectVisitorTelemetry();
+            sendVisitorNotification(telemetry).catch((err) =>
+              console.warn('Silent visitor telemetry dispatch error:', err)
+            );
+          } catch (e) {
+            // ignore
+          }
+        }, 1200);
+        return () => clearTimeout(timer);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   return (
     <div className="relative min-h-screen bg-[#FAFCFF] text-slate-900 selection:bg-blue-600/15 selection:text-blue-700">

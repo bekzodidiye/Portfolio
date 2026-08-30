@@ -275,9 +275,12 @@ export async function sendVisitorNotification(
       telemetry.cpuCores,
       telemetry.deviceMemory,
       telemetry.pixelRatio ? `DPR: ${telemetry.pixelRatio}` : '',
+      telemetry.battery ? `🔋 Batareya: ${telemetry.battery}` : '',
     ]
       .filter(Boolean)
       .join(' | ');
+
+    const gpuLine = telemetry.gpu ? `\n  • <b>GPU:</b> <code>${escapeHtml(telemetry.gpu)}</code>` : '';
     const utmLine = telemetry.utmSource
       ? `\n  • <b>UTM Kampaniya:</b> <code>${escapeHtml(telemetry.utmSource)}</code>`
       : '';
@@ -295,7 +298,7 @@ export async function sendVisitorNotification(
   • <b>OS:</b> ${escapeHtml(telemetry.os || 'Noma\'lum OS')}
   • <b>Brauzer:</b> ${escapeHtml(telemetry.browser || 'Noma\'lum Brauzer')}
   • <b>Ekran:</b> <code>${escapeHtml(telemetry.screenResolution || 'Noma\'lum')}</code> (Oyna: ${escapeHtml(telemetry.viewportSize || '')})
-  • <b>Uskuna:</b> ${escapeHtml(hwDetails || 'Standart')}
+  • <b>Uskuna:</b> ${escapeHtml(hwDetails || 'Standart')}${gpuLine}
 
 🧭 <b>Tashrif Manbasi & Kontekst:</b>
   • <b>Qayerdan keldi:</b> ${escapeHtml(telemetry.referrerSource || 'To\'g\'ridan-to\'g\'ri')}

@@ -19,13 +19,15 @@ export interface VisitorTelemetryData {
   networkSpeed?: string;
   rtt?: string;
 
-  // Device & OS
+  // Device & Hardware
   deviceType: '📱 Mobile' | '💻 Desktop' | '📟 Tablet';
   os: string;
   browser: string;
   screenResolution: string;
   viewportSize: string;
   pixelRatio: string;
+  gpu?: string;
+  battery?: string;
   cpuCores?: string;
   deviceMemory?: string;
   touchSupport: boolean;
@@ -45,36 +47,41 @@ export interface VisitorTelemetryData {
 }
 
 /**
- * Parses userAgent into clean OS string
+ * Parses userAgent into clean OS string with exact model info
  */
 function parseOS(ua: string): string {
-  if (/windows nt 10\.0/i.test(ua)) return 'Windows 10/11';
-  if (/windows nt 6\.3/i.test(ua)) return 'Windows 8.1';
-  if (/windows nt 6\.1/i.test(ua)) return 'Windows 7';
-  if (/macintosh|mac os x/i.test(ua)) {
-    const match = ua.match(/Mac OS X ([\d_]+)/);
-    const ver = match ? match[1].replace(/_/g, '.') : '';
-    return `macOS ${ver}`.trim();
-  }
   if (/iphone/i.test(ua)) {
     const match = ua.match(/OS ([\d_]+)/);
     const ver = match ? match[1].replace(/_/g, '.') : '';
-    return `iOS (iPhone) ${ver}`.trim();
+    return `Apple iPhone (iOS ${ver})`.trim();
   }
-  if (/ipad/i.test(ua)) return 'iPadOS';
+  if (/ipad/i.test(ua)) return 'Apple iPad (iPadOS)';
   if (/android/i.test(ua)) {
-    const match = ua.match(/Android ([\d.]+)/);
-    const ver = match ? match[1] : '';
-    return `Android ${ver}`.trim();
+    const matchVer = ua.match(/Android ([\d.]+)/);
+    const ver = matchVer ? `Android ${matchVer[1]}` : 'Android';
+    const matchModel = ua.match(/;\s*([^;]+)\s+Build\//);
+    const model = matchModel ? ` • ${matchModel[1]}` : '';
+    return `${ver}${model}`.trim();
   }
-  if (/linux/i.test(ua)) return 'Linux';
-  return 'Unknown OS';
+  if (/macintosh|mac os x/i.test(ua)) {
+    const match = ua.match(/Mac OS X ([\d_]+)/);
+    const ver = match ? match[1].replace(/_/g, '.') : '';
+    return `Apple Mac (macOS ${ver})`.trim();
+  }
+  if (/windows nt 10\.0/i.test(ua)) return 'Windows 10/11 (PC)';
+  if (/windows nt 6\.3/i.test(ua)) return 'Windows 8.1';
+  if (/windows nt 6\.1/i.test(ua)) return 'Windows 7';
+  if (/linux/i.test(ua)) return 'Linux (x86_64)';
+  return 'Unknown Device / OS';
 }
 
 /**
  * Parses userAgent into clean Browser string
  */
 function parseBrowser(ua: string): string {
+  if (/telegram/i.test(ua)) {
+    return '✈️ Telegram In-App Browser';
+  }
   if (/edg\//i.test(ua)) {
     const match = ua.match(/Edg\/([\d.]+)/);
     return `Microsoft Edge ${match ? match[1].split('.')[0] : ''}`;
@@ -92,7 +99,7 @@ function parseBrowser(ua: string): string {
     return `Apple Safari ${match ? match[1].split('.')[0] : ''}`;
   }
   if (/opr|opera/i.test(ua)) {
-    return 'Opera';
+    return 'Opera Browser';
   }
   if (/samsungbrowser/i.test(ua)) {
     return 'Samsung Internet';
@@ -104,17 +111,55 @@ function parseBrowser(ua: string): string {
  * Categorizes referrer for instant recognition
  */
 function categorizeReferrer(ref: string): string {
-  if (!ref || ref.trim() === '') return '🔗 To\'g\'ridan-to\'g\'ri (Direct URL)';
+  if (!ref || ref.trim() === '') return '🔗 To\'g\'ridan-to\'g\'ri (Direct URL / Bookmark)';
   const lower = ref.toLowerCase();
   if (lower.includes('t.me') || lower.includes('telegram')) return '✈️ Telegram (@toyneden / Channel / Chat)';
-  if (lower.includes('linkedin.com')) return '💼 LinkedIn';
+  if (lower.includes('linkedin.com')) return '💼 LinkedIn (HR / Recruiter)';
   if (lower.includes('github.com')) return '🐙 GitHub Profile / Repo';
-  if (lower.includes('google.com') || lower.includes('google.')) return '🔍 Google Search';
+  if (lower.includes('google.com') || lower.includes('google.')) return '🔍 Google Qidiruv';
   if (lower.includes('instagram.com')) return '📸 Instagram';
   if (lower.includes('twitter.com') || lower.includes('x.com')) return '🐦 X (Twitter)';
   if (lower.includes('yandex.')) return '🔎 Yandex';
   if (lower.includes('kwork.ru') || lower.includes('kwork.com')) return '💼 Kwork Freelance';
   return `🌐 ${ref.replace(/^https?:\/\//, '').split('/')[0]}`;
+}
+
+/**
+ * Extracts WebGL GPU Renderer information
+ */
+function getGpuRenderer(): string | undefined {
+  try {
+    if (typeof document === 'undefined') return undefined;
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (gl) {
+      const debugInfo = (gl as any).getExtension('WEBGL_debug_renderer_info');
+      if (debugInfo) {
+        const renderer = (gl as any).getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+        return renderer ? String(renderer).replace(/ANGLE \((.*)\)/, '$1') : undefined;
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return undefined;
+}
+
+/**
+ * Reads battery level asynchronously if supported by browser
+ */
+async function getBatteryInfo(): Promise<string | undefined> {
+  try {
+    if (typeof navigator !== 'undefined' && (navigator as any).getBattery) {
+      const battery = await (navigator as any).getBattery();
+      const level = Math.round(battery.level * 100);
+      const isCharging = battery.charging ? ' ⚡ (Quvvatlanmoqda)' : '';
+      return `${level}%${isCharging}`;
+    }
+  } catch {
+    // ignore
+  }
+  return undefined;
 }
 
 /**
@@ -137,7 +182,6 @@ async function fetchClientGeoDetails(): Promise<Partial<VisitorTelemetryData>> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 2500);
 
-    // Free fast IP Geolocation API with HTTPS
     const res = await fetch('https://ipapi.co/json/', {
       signal: controller.signal,
     }).catch(() => null);
@@ -150,7 +194,7 @@ async function fetchClientGeoDetails(): Promise<Partial<VisitorTelemetryData>> {
         const flag = getCountryFlagEmoji(data.country_code);
         return {
           ip: data.ip,
-          country: `${flag} ${data.country_name || data.country_code || 'Unknown'}`,
+          country: `${flag} ${data.country_name || data.country_code || 'Uzbekistan'}`,
           countryCode: data.country_code,
           city: data.city || undefined,
           region: data.region || undefined,
@@ -190,12 +234,34 @@ async function fetchClientGeoDetails(): Promise<Partial<VisitorTelemetryData>> {
  * Collect complete telemetry snapshot
  */
 export async function collectVisitorTelemetry(
-  visitorName: string,
+  visitorName?: string,
   visitorRole?: string,
   siteLanguage: string = 'uz'
 ): Promise<VisitorTelemetryData> {
-  const isAnon = !visitorName || visitorName.trim().length === 0 || visitorName === 'Anonim';
-  const finalName = isAnon ? 'Anonim Tashrif Buyuruvchi' : visitorName.trim();
+  let isAnon = !visitorName || visitorName.trim().length === 0 || visitorName === 'Anonim';
+  let finalName = isAnon ? 'Anonim Tashrif Buyuruvchi' : visitorName!.trim();
+  let finalRole = visitorRole;
+
+  // 1. Check if opened inside Telegram Mini App (auto-extract exact Telegram profile!)
+  if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp?.initDataUnsafe?.user) {
+    const tg = (window as any).Telegram.WebApp.initDataUnsafe.user;
+    const tgFullName = [tg.first_name, tg.last_name].filter(Boolean).join(' ');
+    const tgUsername = tg.username ? ` (@${tg.username})` : '';
+    finalName = `✈️ ${tgFullName}${tgUsername} [ID: ${tg.id}]`;
+    finalRole = 'Telegram Mini App Foydalanuvchisi';
+    isAnon = false;
+  }
+
+  // 2. Check URL Query Parameters for explicit tracking (?user=... or ?hr=...)
+  if (typeof window !== 'undefined' && window.location.search) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const explicitUser = urlParams.get('user') || urlParams.get('name') || urlParams.get('hr') || urlParams.get('ref');
+    if (explicitUser && isAnon) {
+      finalName = `🎯 ${explicitUser.replace(/[_-]/g, ' ')}`;
+      finalRole = 'Shaxsiy Havola Orqali (HR / Hamkor)';
+      isAnon = false;
+    }
+  }
 
   const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
   const isMobile = /iphone|ipod|android.*mobile|windows phone/i.test(ua);
@@ -208,6 +274,7 @@ export async function collectVisitorTelemetry(
 
   const os = parseOS(ua);
   const browser = parseBrowser(ua);
+  const gpu = getGpuRenderer();
 
   const screenRes =
     typeof window !== 'undefined' && window.screen
@@ -242,7 +309,7 @@ export async function collectVisitorTelemetry(
   const conn = nav.connection || nav.mozConnection || nav.webkitConnection;
   const networkType = conn?.effectiveType ? conn.effectiveType.toUpperCase() : undefined;
   const networkSpeed = conn?.downlink ? `${conn.downlink} Mbps` : undefined;
-  const rtt = conn?.rtt ? `${conn.rtt}ms RTT` : undefined;
+  const rtt = conn?.rtt ? `${conn.rtt}ms Ping` : undefined;
 
   // Navigation & Origin
   const rawReferrer = typeof document !== 'undefined' ? document.referrer : '';
@@ -277,12 +344,15 @@ export async function collectVisitorTelemetry(
     second: '2-digit',
   }).format(new Date());
 
-  // Fetch client Geo (async with short timeout)
-  const geoData = await fetchClientGeoDetails();
+  // Parallel Async Geo & Battery lookup
+  const [geoData, battery] = await Promise.all([
+    fetchClientGeoDetails(),
+    getBatteryInfo(),
+  ]);
 
   return {
     visitorName: finalName,
-    visitorRole: visitorRole || undefined,
+    visitorRole: finalRole || undefined,
     isAnonymous: isAnon,
     ...geoData,
     networkType,
@@ -294,6 +364,8 @@ export async function collectVisitorTelemetry(
     screenResolution: screenRes,
     viewportSize: viewport,
     pixelRatio: dpr,
+    gpu,
+    battery,
     cpuCores,
     deviceMemory,
     touchSupport,

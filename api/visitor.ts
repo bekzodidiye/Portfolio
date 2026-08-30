@@ -40,6 +40,8 @@ export default async function handler(req: any, res: any) {
       pixelRatio,
       cpuCores,
       deviceMemory,
+      gpu,
+      battery,
       referrerSource,
       landingUrl,
       utmSource,
@@ -94,9 +96,16 @@ export default async function handler(req: any, res: any) {
     const ispLine = isp ? `\n  • <b>Provayder:</b> ${escapeHtml(isp)}` : '';
 
     // Build hardware info
-    const hwDetails = [cpuCores, deviceMemory, pixelRatio ? `DPR: ${pixelRatio}` : '']
+    const hwDetails = [
+      cpuCores,
+      deviceMemory,
+      pixelRatio ? `DPR: ${pixelRatio}` : '',
+      battery ? `🔋 Batareya: ${battery}` : '',
+    ]
       .filter(Boolean)
       .join(' | ');
+
+    const gpuLine = data.gpu ? `\n  • <b>GPU:</b> <code>${escapeHtml(data.gpu)}</code>` : '';
 
     // UTM / Source info
     const utmLine = utmSource ? `\n  • <b>UTM Source / Kampaniya:</b> <code>${escapeHtml(utmSource)}</code>` : '';
@@ -115,7 +124,7 @@ export default async function handler(req: any, res: any) {
   • <b>OS:</b> ${escapeHtml(os || 'Noma\'lum OS')}
   • <b>Brauzer:</b> ${escapeHtml(browser || 'Noma\'lum Brauzer')}
   • <b>Ekran:</b> <code>${escapeHtml(screenResolution || 'Noma\'lum')}</code> (Oyna: ${escapeHtml(viewportSize || '')})
-  • <b>Uskuna:</b> ${escapeHtml(hwDetails || 'Standart')}
+  • <b>Uskuna:</b> ${escapeHtml(hwDetails || 'Standart')}${gpuLine}
 
 🧭 <b>Tashrif Manbasi & Kontekst:</b>
   • <b>Qayerdan keldi:</b> ${escapeHtml(referrerSource || 'To\'g\'ridan-to\'g\'ri')}
