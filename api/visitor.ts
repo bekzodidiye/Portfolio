@@ -136,6 +136,10 @@ export default async function handler(req: any, res: any) {
       country,
       city,
       region,
+      street,
+      placeName,
+      placeCategory,
+      wifiSsid,
       isp,
       latitude,
       longitude,
@@ -278,6 +282,11 @@ export default async function handler(req: any, res: any) {
     // UTM / Source info
     const utmLine = utmSource ? `\n  • <b>UTM Source / Kampaniya:</b> <code>${escapeHtml(utmSource)}</code>` : '';
 
+    const placeDetails = [
+      placeName ? `\n  • <b>Muassasa / Bino:</b> 🏢 ${escapeHtml(placeName)}${placeCategory ? ` (${escapeHtml(placeCategory)})` : ''}` : '',
+      wifiSsid ? `\n  • <b>Wi-Fi Tarmog'i:</b> 📶 <code>${escapeHtml(wifiSsid)}</code>` : '',
+    ].filter(Boolean).join('');
+
     // Construct rich HTML message
     const telegramHtmlMessage = `👁️ <b>YANGI TASHRIF BUYURUVCHI (PORTFOLIO)</b>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -285,7 +294,7 @@ export default async function handler(req: any, res: any) {
 
 🌍 <b>Geolokatsiya & Tarmoq:</b>
   • <b>IP:</b> <code>${escapeHtml(finalIp)}</code>
-  • <b>Manzil:</b> ${escapeHtml(locationLine)}${mapTextLine}${ispLine}${netLine}
+  • <b>Manzil:</b> ${escapeHtml(locationLine)}${placeDetails}${mapTextLine}${ispLine}${netLine}
 
 📱 <b>Qurilma & Dasturiy Muhit:</b>
   • <b>Qurilma:</b> ${escapeHtml(deviceType || '💻 Kompyuter')}

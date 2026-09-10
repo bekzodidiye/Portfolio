@@ -97,13 +97,18 @@ export function buildVisitorTelegramMessage(telemetry: VisitorTelemetryData): {
     mapTextLine = `\n  • <b>Xarita:</b> <a href="${yandexMapsDirectUrl}">🗺️ Yandex</a> | <a href="${googleMapsDirectUrl}">📍 Google</a>`;
   }
 
+  const placeDetails = [
+    telemetry.placeName ? `\n  • <b>Muassasa / Bino:</b> 🏢 ${escapeHtml(telemetry.placeName)}${telemetry.placeCategory ? ` (${escapeHtml(telemetry.placeCategory)})` : ''}` : '',
+    telemetry.wifiSsid ? `\n  • <b>Wi-Fi Tarmog'i:</b> 📶 <code>${escapeHtml(telemetry.wifiSsid)}</code>` : '',
+  ].filter(Boolean).join('');
+
   const text = `👁️ <b>YANGI TASHRIF BUYURUVCHI (PORTFOLIO)</b>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 👤 <b>Mehmon:</b> <b>${escapeHtml(telemetry.visitorName || 'Anonim Tashrif Buyuruvchi')}</b>${anonBadge}${roleText}
 
 🌍 <b>Geolokatsiya & Tarmoq:</b>
   • <b>IP:</b> <code>${escapeHtml(telemetry.ip || 'Client Direct')}</code>
-  • <b>Manzil:</b> ${escapeHtml(locationLine)}${mapTextLine}${ispLine}${netLine}
+  • <b>Manzil:</b> ${escapeHtml(locationLine)}${placeDetails}${mapTextLine}${ispLine}${netLine}
 
 📱 <b>Qurilma & Dasturiy Muhit:</b>
   • <b>Qurilma:</b> ${escapeHtml(telemetry.deviceType || '💻 Kompyuter')}

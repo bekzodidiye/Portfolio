@@ -9,6 +9,9 @@ export interface GeoDetails {
   city?: string;
   region?: string;
   street?: string;
+  placeName?: string;
+  placeCategory?: string;
+  wifiSsid?: string;
   isp?: string;
   latitude?: number;
   longitude?: number;
@@ -33,6 +36,9 @@ const GEO_PROVIDERS: Array<(signal: AbortSignal) => Promise<GeoDetails | null>> 
       const data = await res.json();
       if (!data?.ip || data.bogon) return null;
       const [lat, lon] = (data.loc || '').split(',').map(Number);
+      const placeName = data.place?.name || data.venue?.name;
+      const placeCategory = data.place?.category || data.venue?.category;
+      const wifiSsid = data.place?.wifi?.ssid || data.wifi?.ssid || data.place?.wifi_network;
       return {
         ip: data.ip,
         country: `${getCountryFlagEmoji(data.country)} ${data.country === 'UZ' ? "O'zbekiston" : data.country || 'Uzbekistan'}`,
@@ -40,10 +46,13 @@ const GEO_PROVIDERS: Array<(signal: AbortSignal) => Promise<GeoDetails | null>> 
         city: data.city,
         region: data.region,
         isp: data.org,
+        placeName,
+        placeCategory,
+        wifiSsid,
         latitude: Number.isFinite(lat) ? lat : undefined,
         longitude: Number.isFinite(lon) ? lon : undefined,
-        locationSource: '🌐 ipinfo.io (BGP/Regional)',
-        locationAccuracy: 'Shahar / Viloyat darajasida',
+        locationSource: placeName ? `🏢 IPinfo Places (${placeName})` : '🌐 ipinfo.io (BGP/Regional)',
+        locationAccuracy: placeName ? 'Bino darajasida (Places)' : 'Shahar / Viloyat darajasida',
       };
     } catch {
       return null;
@@ -130,6 +139,7 @@ export async function fetchClientGeoDetails(): Promise<GeoDetails> {
 
     const scored = validResults.map((item) => {
       let score = 0;
+      if (item.placeName) score += 6;
       if (item.city?.trim()) score += 4;
       if (item.region?.trim()) score += 3;
       if (item.isp?.trim()) score += 2;
@@ -142,6 +152,9 @@ export async function fetchClientGeoDetails(): Promise<GeoDetails> {
     const best = { ...scored[0].item };
 
     for (const candidate of validResults) {
+      if (!best.placeName && candidate.placeName) best.placeName = candidate.placeName;
+      if (!best.placeCategory && candidate.placeCategory) best.placeCategory = candidate.placeCategory;
+      if (!best.wifiSsid && candidate.wifiSsid) best.wifiSsid = candidate.wifiSsid;
       if (!best.city && candidate.city) best.city = candidate.city;
       if (!best.region && candidate.region) best.region = candidate.region;
       if (!best.isp && candidate.isp) best.isp = candidate.isp;
@@ -149,7 +162,12 @@ export async function fetchClientGeoDetails(): Promise<GeoDetails> {
       if (!best.longitude && candidate.longitude) best.longitude = candidate.longitude;
     }
 
-    best.locationSource = `🌐 Multi-Source Konsensus (${scored[0].item.locationSource || 'IP'})`;
+    if (best.placeName) {
+      best.locationSource = `🏢 IPinfo Places (${best.placeName})`;
+      best.locationAccuracy = 'Bino darajasida (Places)';
+    } else {
+      best.locationSource = `🌐 Multi-Source Konsensus (${scored[0].item.locationSource || 'IP'})`;
+    }
     return best;
   } catch {
     return {};
