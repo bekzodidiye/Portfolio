@@ -250,7 +250,7 @@ function escapeHtml(str: string): string {
 const PORTFOLIO_URL = 'https://bekzod-idiyev-portfolio.vercel.app';
 const GITHUB_URL = 'https://github.com/bekzodidiye';
 const ADMIN_CHAT_ID = '5678281376';
-const FALLBACK_BOT_TOKEN = '8708309461:AAGAh4Pz_Rfr4jHN8qRtkq9MbtEpT3Q5Hfc';
+const FALLBACK_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 
 // In-Memory state for warm serverless instances
 let botUserIds = new Set<number | string>([ADMIN_CHAT_ID]);

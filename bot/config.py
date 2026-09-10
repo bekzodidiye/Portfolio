@@ -9,8 +9,8 @@ class BotConfig(BaseSettings):
     """
     Configuration settings loaded from .env or environment variables.
     """
-    TELEGRAM_BOT_TOKEN: str = "8708309461:AAGAh4Pz_Rfr4jHN8qRtkq9MbtEpT3Q5Hfc"
-    TELEGRAM_CHAT_ID: str = "5678281376"
+    TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
+    TELEGRAM_CHAT_ID: str = os.getenv("TELEGRAM_CHAT_ID", "5678281376")
     ADMIN_IDS: list[int] = [5678281376]
     
     # Portfolio WebApp URL

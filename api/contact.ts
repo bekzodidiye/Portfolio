@@ -81,15 +81,23 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    // 3. Server-side Secret Tokens (with safe fallback)
+    // 3. Server-side Secret Tokens (loaded strictly from environment)
     const botToken =
       process.env.TELEGRAM_BOT_TOKEN ||
       process.env.VITE_TELEGRAM_BOT_TOKEN ||
-      '8708309461:AAGAh4Pz_Rfr4jHN8qRtkq9MbtEpT3Q5Hfc';
+      '';
     const chatId =
       process.env.TELEGRAM_CHAT_ID ||
       process.env.VITE_TELEGRAM_CHAT_ID ||
       '5678281376';
+
+    if (!botToken) {
+      console.warn('TELEGRAM_BOT_TOKEN is not configured.');
+      return res.status(500).json({
+        ok: false,
+        error: 'Telegram bildirishnoma xizmati sozlanmagan.',
+      });
+    }
 
 
     // 4. Client Metadata
