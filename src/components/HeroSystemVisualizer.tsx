@@ -4,15 +4,33 @@ import { useLanguage } from '../context/LanguageContext';
 
 export const HeroSystemVisualizer: React.FC = () => {
   const { t } = useLanguage();
-  const [latency, setLatency] = useState(14);
-  const [asyncTasks, setAsyncTasks] = useState(42);
+  const [latency, setLatency] = useState(18);
+  const [asyncTasks] = useState(() =>
+    typeof navigator !== 'undefined' && navigator.hardwareConcurrency
+      ? navigator.hardwareConcurrency * 8
+      : 32
+  );
   const [activeTab, setActiveTab] = useState<'metrics' | 'runtime'>('metrics');
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setLatency(Math.floor(12 + Math.random() * 8));
-      setAsyncTasks(Math.floor(38 + Math.random() * 12));
-    }, 2500);
+    const measureLiveNetworkPing = async () => {
+      try {
+        const start = performance.now();
+        await fetch('/favicon.ico', { method: 'HEAD', cache: 'no-store' });
+        const roundTrip = Math.round(performance.now() - start);
+        if (roundTrip > 0 && roundTrip < 2000) {
+          setLatency(roundTrip);
+        }
+      } catch {
+        const nav = navigator as any;
+        if (nav?.connection?.rtt) {
+          setLatency(nav.connection.rtt);
+        }
+      }
+    };
+
+    measureLiveNetworkPing();
+    const timer = setInterval(measureLiveNetworkPing, 8000);
     return () => clearInterval(timer);
   }, []);
 

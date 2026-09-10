@@ -1,3 +1,5 @@
+import { neon } from '@neondatabase/serverless';
+
 export const config = {
   runtime: 'nodejs',
 };
@@ -7,6 +9,44 @@ function escapeHtml(str: string): string {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
+}
+
+async function recordContactToPostgres(data: {
+  name: string;
+  email: string;
+  message: string;
+  ip: string;
+  deviceType: string;
+  language: string;
+}) {
+  const url =
+    process.env.POSTGRES_URL ||
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_PRISMA_URL ||
+    process.env.POSTGRES_URL_NON_POOLING;
+  if (!url) return;
+
+  try {
+    const sql = neon(url);
+    await sql`
+      CREATE TABLE IF NOT EXISTS portfolio_messages (
+        id SERIAL PRIMARY KEY,
+        user_name TEXT,
+        contact_info TEXT,
+        message_text TEXT,
+        ip TEXT,
+        device_type TEXT,
+        language TEXT,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `;
+    await sql`
+      INSERT INTO portfolio_messages (user_name, contact_info, message_text, ip, device_type, language)
+      VALUES (${data.name}, ${data.email}, ${data.message}, ${data.ip}, ${data.deviceType}, ${data.language});
+    `;
+  } catch (err) {
+    console.warn('PostgreSQL record contact message error:', err);
+  }
 }
 
 export default async function handler(req: any, res: any) {
@@ -73,6 +113,16 @@ export default async function handler(req: any, res: any) {
       minute: '2-digit',
       second: '2-digit',
     }).format(new Date());
+
+    // Record lead to PostgreSQL database
+    await recordContactToPostgres({
+      name: trimmedName,
+      email: trimmedEmail,
+      message: trimmedMessage,
+      ip: clientIp.split(',')[0].trim(),
+      deviceType,
+      language: language || 'uz',
+    });
 
     // 5. Construct Clean, Robust HTML Telegram Message (Immune to Markdown formatting errors)
 

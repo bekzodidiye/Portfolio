@@ -64,7 +64,9 @@ export const AdminAnalyticsTab: React.FC<AdminAnalyticsTabProps> = ({
           <div className="text-xs text-slate-400">Bugungi Real Tashriflar</div>
           <div className="text-3xl font-bold text-blue-400 mt-1">{realSummary.todayVisitors} ta</div>
           <p className="text-[11px] text-slate-400 mt-1">
-            {realSummary.topLocations.map((l) => l.city).slice(0, 3).join(', ') || "O'zbekiston"}
+            {realSummary.topLocations.length > 0
+              ? realSummary.topLocations.map((l) => l.city).slice(0, 3).join(', ')
+              : "Hozircha ma'lumotlar to'planmoqda"}
           </p>
         </div>
         <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800">

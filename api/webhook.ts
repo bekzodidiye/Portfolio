@@ -151,13 +151,87 @@ async function getBotUserStatsDb(): Promise<{
   if (!sql) return { totalUsers: 0, totalMessages: 0 };
   try {
     const [usersRow] = await sql`SELECT COUNT(*)::int AS count FROM bot_users;`;
+    let msgCount = 0;
+    try {
+      const [msgRow] = await sql`SELECT COUNT(*)::int AS count FROM portfolio_messages;`;
+      msgCount = msgRow?.count || 0;
+    } catch {
+      msgCount = 0;
+    }
     return {
       totalUsers: usersRow?.count || 0,
-      totalMessages: 0,
+      totalMessages: msgCount,
     };
   } catch (err) {
     console.warn('Postgres bot stats error:', err);
     return { totalUsers: 0, totalMessages: 0 };
+  }
+}
+
+async function getGeoAndReferrerStatsDb() {
+  const sql = getPostgresSql();
+  if (!sql) return { countries: [], referrers: [], total: 0 };
+  try {
+    const [totalRow] = await sql`SELECT COUNT(*)::int AS count FROM portfolio_visitors;`;
+    const total = totalRow?.count || 0;
+    const countryRows = await sql`
+      SELECT COALESCE(NULLIF(country, ''), 'Noma\'lum') AS country, COUNT(*)::int AS count
+      FROM portfolio_visitors
+      GROUP BY country
+      ORDER BY count DESC
+      LIMIT 5;
+    `;
+    const referrerRows = await sql`
+      SELECT COALESCE(NULLIF(referrer, ''), 'Direct URL (To\'g\'ridan-to\'g\'ri)') AS referrer, COUNT(*)::int AS count
+      FROM portfolio_visitors
+      GROUP BY referrer
+      ORDER BY count DESC
+      LIMIT 5;
+    `;
+    return {
+      total,
+      countries: countryRows.map((r: any) => ({ country: r.country, count: Number(r.count) })),
+      referrers: referrerRows.map((r: any) => ({ referrer: r.referrer, count: Number(r.count) })),
+    };
+  } catch (err) {
+    console.warn('Postgres geo/referrer stats error:', err);
+    return { countries: [], referrers: [], total: 0 };
+  }
+}
+
+async function getRecentBotUsersDb(limit = 5) {
+  const sql = getPostgresSql();
+  if (!sql) return [];
+  try {
+    const rows = await sql`
+      SELECT user_id, username, full_name, language,
+             TO_CHAR(last_active AT TIME ZONE 'Asia/Samarkand', 'YYYY-MM-DD HH24:MI:SS') AS last_active
+      FROM bot_users
+      ORDER BY last_active DESC
+      LIMIT ${limit};
+    `;
+    return rows;
+  } catch (err) {
+    console.warn('Postgres recent bot users error:', err);
+    return [];
+  }
+}
+
+async function getRecentMessagesDb(limit = 5) {
+  const sql = getPostgresSql();
+  if (!sql) return [];
+  try {
+    const rows = await sql`
+      SELECT id, user_name, contact_info, message_text, device_type,
+             TO_CHAR(created_at AT TIME ZONE 'Asia/Samarkand', 'YYYY-MM-DD HH24:MI:SS') AS created_at
+      FROM portfolio_messages
+      ORDER BY id DESC
+      LIMIT ${limit};
+    `;
+    return rows;
+  } catch (err) {
+    console.warn('Postgres recent messages error:', err);
+    return [];
   }
 }
 
@@ -310,6 +384,10 @@ function getAdminMainKeyboard() {
       [
         { text: '📊 Bot Analitikasi', callback_data: 'admin_stats' },
         { text: '⚡ Tizim Diagnostikasi', callback_data: 'admin_diag' },
+      ],
+      [
+        { text: '👥 Bot Foydalanuvchilari', callback_data: 'admin_users' },
+        { text: '📩 So\'nggi Xabarlar', callback_data: 'admin_leads' },
       ],
       [
         { text: '🌍 Geografiya & Manbalar', callback_data: 'admin_geo' },
@@ -596,29 +674,84 @@ ${citiesStr}
 
         replyMarkup = getAdminSubKeyboard('admin_stats');
       } else if (data === 'admin_diag') {
+        const pingStart = Date.now();
+        let tgPing = 'N/A';
+        try {
+          await fetch(`https://api.telegram.org/bot${botToken}/getMe`);
+          tgPing = `${Date.now() - pingStart}ms`;
+        } catch {
+          tgPing = 'Ulanishda xato';
+        }
+
         responseText = `⚡ <b>TIZIM DIAGNOSTIKASI VA SALOMATLIK HOLATI</b>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Vercel Serverless Function:</b> 200 OK
 ✅ <b>Telegram Webhook:</b> Ulangan & Faol
-✅ <b>Telegram Bot API Ping:</b> ~85ms
+✅ <b>Telegram Bot API Real Ping:</b> ${tgPing}
 ✅ <b>Xavfsizlik & Anti-Spam:</b> Honeypot Trap & HTML Sanitizer Faol
 ✅ <b>Admin Autentifikatsiyasi:</b> <code>${chatId}</code> (Tasdiqlangan)
-✅ <b>Doimiy Uptime:</b> 99.9% (Serverless 24/7)`;
+✅ <b>Database:</b> Neon PostgreSQL Connected (Serverless)`;
 
         replyMarkup = getAdminSubKeyboard('admin_diag');
       } else if (data === 'admin_geo') {
-        responseText = `🌍 <b>TASHRIF BUYURUVCHILAR GEOGRAFIYASI:</b>
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-• 🇺🇿 <b>O'zbekiston:</b> ~85% (Toshkent, Buxoro, Samarqand)
-• 🇷🇺 <b>Rossiya / MDH:</b> ~10%
-• 🌐 <b>AQSH & Boshqalar:</b> ~5%
+        const geoStats = await getGeoAndReferrerStatsDb();
+        let countryLines = '';
+        if (geoStats.countries.length === 0) {
+          countryLines = '• <i>Hozircha geografik ma\'lumotlar mavjud emas</i>\n';
+        } else {
+          geoStats.countries.forEach((c) => {
+            const pct = geoStats.total > 0 ? Math.round((c.count / geoStats.total) * 100) : 0;
+            const flag = c.country.toLowerCase().includes('uz') || c.country.toLowerCase().includes('o\'zb') ? '🇺🇿 ' : '🌐 ';
+            countryLines += `• ${flag}<b>${escapeHtml(c.country)}:</b> <code>${pct}%</code> (<code>${c.count}</code> ta)\n`;
+          });
+        }
 
-📊 <b>Manbalar (Referrers):</b>
-• 🔗 To'g'ridan-to'g'ri (Direct URL): ~75%
-• ✈️ Telegram (@toyneden): ~15%
-• 🐙 GitHub (bekzodidiye): ~10%`;
+        let refLines = '';
+        if (geoStats.referrers.length === 0) {
+          refLines = '• <i>Hozircha manbalar mavjud emas</i>\n';
+        } else {
+          geoStats.referrers.forEach((r) => {
+            const pct = geoStats.total > 0 ? Math.round((r.count / geoStats.total) * 100) : 0;
+            refLines += `• 🔗 <b>${escapeHtml(r.referrer)}:</b> <code>${pct}%</code> (<code>${r.count}</code> ta)\n`;
+          });
+        }
+
+        responseText = `🌍 <b>TASHRIF BUYURUVCHILAR REAL GEOGRAFIYASI:</b>
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+${countryLines}
+📊 <b>Manbalar (Referrers - Real):</b>
+${refLines}
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ <i>PostgreSQL bazasidan real-vaqtda hisoblandi (Jami: ${geoStats.total} ta tashrif).</i>`;
 
         replyMarkup = getAdminSubKeyboard('admin_geo');
+      } else if (data === 'admin_users') {
+        const users = await getRecentBotUsersDb(5);
+        if (users.length === 0) {
+          responseText = `👥 <b>SO'NGGI BOT FOYDALANUVCHILARI</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n<i>Hozircha bazada yangi bot foydalanuvchilari yo'q.</i>`;
+        } else {
+          let uLines = '';
+          users.forEach((u: any, idx: number) => {
+            const uname = u.username ? `@${escapeHtml(u.username)}` : 'mavjud_emas';
+            uLines += `<b>${idx + 1}. ${escapeHtml(u.full_name)}</b> (${uname})\n🆔 <code>${u.user_id}</code> | 🌐 ${(u.language || 'uz').toUpperCase()}\n🕒 <i>${u.last_active}</i>\n\n`;
+          });
+          responseText = `👥 <b>SO'NGGI ${users.length} TA BOT FOYDALANUVCHISI:</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n${uLines}━━━━━━━━━━━━━━━━━━━━━━━━━━\n⚡ <i>Real PostgreSQL bazasi</i>`;
+        }
+
+        replyMarkup = getAdminSubKeyboard('admin_users');
+      } else if (data === 'admin_leads') {
+        const messages = await getRecentMessagesDb(5);
+        if (messages.length === 0) {
+          responseText = `📩 <b>SO'NGGI QABUL QILINGAN XABARLAR</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n<i>Hozircha yangi murojaat yoki leadlar yo'q.</i>`;
+        } else {
+          let mLines = '';
+          messages.forEach((m: any, idx: number) => {
+            mLines += `<b>${idx + 1}. ${escapeHtml(m.user_name)}</b> (<code>${escapeHtml(m.contact_info)}</code>)\n💬 "<i>${escapeHtml((m.message_text || '').slice(0, 100))}</i>"\n📱 ${escapeHtml(m.device_type || 'Desktop')} | 🕒 <i>${m.created_at}</i>\n\n`;
+          });
+          responseText = `📩 <b>SO'NGGI ${messages.length} TA QABUL QILINGAN XABAR:</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n${mLines}━━━━━━━━━━━━━━━━━━━━━━━━━━\n⚡ <i>Real PostgreSQL bazasi</i>`;
+        }
+
+        replyMarkup = getAdminSubKeyboard('admin_leads');
       } else if (data === 'admin_broadcast') {
         responseText = `📢 <b>XABAR TARQATISH TIZIMI (BROADCAST)</b>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━

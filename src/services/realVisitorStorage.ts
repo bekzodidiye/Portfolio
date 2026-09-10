@@ -125,16 +125,7 @@ export function saveRealVisitorRecord(telemetry: VisitorTelemetryData): RealVisi
 export function getRealGeoPoints(): RealGeoPoint[] {
   const records = getRealVisitorRecords();
   if (records.length === 0) {
-    // If no visits recorded yet in this browser, return current real location
-    return [
-      {
-        city: 'Toshkent',
-        country: "O'zbekiston",
-        lat: 41.2995,
-        lng: 69.2401,
-        visitors: 1,
-      },
-    ];
+    return [];
   }
 
   const map = new Map<string, RealGeoPoint>();
@@ -167,28 +158,30 @@ export function getRealAnalyticsSummary(): RealAnalyticsSummary {
 
   if (records.length === 0) {
     return {
-      totalVisitors: 1,
-      todayVisitors: 1,
-      mobilePercent: 50,
-      desktopPercent: 50,
-      topLocations: [
-        { city: 'Toshkent / Buxoro', country: "O'zbekiston", visitors: 1 },
-      ],
+      totalVisitors: 0,
+      todayVisitors: 0,
+      mobilePercent: 0,
+      desktopPercent: 0,
+      topLocations: [],
     };
   }
 
   const totalVisitors = records.length;
-  const todayVisitors = records.filter((r) => r.dateStr === todayStr).length || 1;
+  const todayVisitors = records.filter((r) => r.dateStr === todayStr).length;
 
   let mobileCount = 0;
   records.forEach((r) => {
-    if (r.deviceType.includes('Mobile') || r.os.toLowerCase().includes('ios') || r.os.toLowerCase().includes('android')) {
+    if (
+      r.deviceType?.toLowerCase().includes('mobile') ||
+      r.os?.toLowerCase().includes('ios') ||
+      r.os?.toLowerCase().includes('android')
+    ) {
       mobileCount += 1;
     }
   });
 
-  const mobilePercent = Math.round((mobileCount / totalVisitors) * 100);
-  const desktopPercent = 100 - mobilePercent;
+  const mobilePercent = totalVisitors > 0 ? Math.round((mobileCount / totalVisitors) * 100) : 0;
+  const desktopPercent = totalVisitors > 0 ? 100 - mobilePercent : 0;
 
   const topLocations = getRealGeoPoints();
 
@@ -199,6 +192,91 @@ export function getRealAnalyticsSummary(): RealAnalyticsSummary {
     desktopPercent,
     topLocations,
   };
+}
+
+/**
+ * Fetches real visitor logs and summary metrics from Neon PostgreSQL via /api/visitor
+ */
+export async function fetchRealVisitorStatsFromPostgres(): Promise<{
+  totalVisitors: number;
+  todayVisitors: number;
+  mobilePercent: number;
+  desktopPercent: number;
+  topLocations: Array<{ city: string; country: string; visitors: number }>;
+  records: RealVisitorRecord[];
+} | null> {
+  try {
+    const res = await fetch('/api/visitor', { method: 'GET' });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data.ok || !Array.isArray(data.visitors)) return null;
+
+    const visitors = data.visitors;
+    const totalVisitors = Number(data.total) || visitors.length;
+    const todayVisitors = Number(data.today) || 0;
+
+    let mobileCount = 0;
+    const locMap = new Map<string, { city: string; country: string; visitors: number; lat: number; lng: number }>();
+
+    const records: RealVisitorRecord[] = visitors.map((v: any) => {
+      const devType = v.device_type || 'Desktop';
+      const osName = v.os || '';
+      const isMobile =
+        devType.toLowerCase().includes('mobile') ||
+        osName.toLowerCase().includes('ios') ||
+        osName.toLowerCase().includes('android');
+
+      if (isMobile) mobileCount++;
+
+      const city = v.city || 'Noma\'lum';
+      const country = v.country || "O'zbekiston";
+      const key = `${city.toLowerCase()}_${country.toLowerCase()}`;
+      const lat = Number(v.latitude) || 41.2995;
+      const lng = Number(v.longitude) || 69.2401;
+
+      const existing = locMap.get(key);
+      if (existing) {
+        existing.visitors += 1;
+      } else {
+        locMap.set(key, { city, country, visitors: 1, lat, lng });
+      }
+
+      return {
+        id: `pg-${v.id}`,
+        visitorName: v.visitor_name || 'Anonim',
+        visitorRole: v.visitor_role || undefined,
+        ip: v.ip || 'Direct',
+        country,
+        city,
+        region: v.region || city,
+        isp: v.browser || undefined,
+        latitude: lat,
+        longitude: lng,
+        deviceType: devType,
+        os: osName || 'OS',
+        browser: v.browser || 'Browser',
+        timestamp: v.visited_at || '',
+        dateStr: (v.visited_at || '').split(' ')[0] || '',
+      };
+    });
+
+    const mobilePercent = totalVisitors > 0 ? Math.round((mobileCount / totalVisitors) * 100) : 0;
+    const desktopPercent = totalVisitors > 0 ? 100 - mobilePercent : 0;
+    const topLocations = Array.from(locMap.values())
+      .map((l) => ({ city: l.city, country: l.country, visitors: l.visitors }))
+      .sort((a, b) => b.visitors - a.visitors);
+
+    return {
+      totalVisitors,
+      todayVisitors,
+      mobilePercent,
+      desktopPercent,
+      topLocations,
+      records,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export function clearRealVisitorRecords(): void {
