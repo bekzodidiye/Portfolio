@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { usePortfolioData } from '../../../context/PortfolioDataContext';
 import { useLanguage } from '../../../context/LanguageContext';
+import { generateCandidateSpec, executeTerminalCommand } from './terminalCommands';
 
 export const TerminalCliWindow: React.FC = () => {
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
   const { candidateProfile, setIsAdminOpen } = usePortfolioData();
   const [copied, setCopied] = useState(false);
   const [inputVal, setInputVal] = useState('');
@@ -15,32 +16,7 @@ export const TerminalCliWindow: React.FC = () => {
     },
   ]);
 
-  const specCode = `"""
-bekzod_engineer_spec.py
-=============================================================================
-Candidate: ${candidateProfile.name}
-Role: ${candidateProfile.primaryTitle}
-Education: ${candidateProfile.subTitle}
-Location: ${candidateProfile.location}
-Status: AVAILABLE_FOR_HIRE = True
-Language: ${language.toUpperCase()}
-=============================================================================
-"""
-
-from dataclasses import dataclass
-from typing import List, Dict
-
-@dataclass
-class BackendEngineer:
-    name: str = "${candidateProfile.name}"
-    title: str = "${candidateProfile.primaryTitle}"
-    education: str = "${candidateProfile.subTitle}"
-    base_location: str = "${candidateProfile.location}"
-    telegram_bot: str = "${candidateProfile.botUsername || '@my_portfolio_support_bot'}"
-    kwork_deliveries: int = ${candidateProfile.freelanceCount}
-
-    def execute_mission(self) -> str:
-        return "Designing zero-downtime APIs & scalable Telegram engines."`;
+  const specCode = generateCandidateSpec(candidateProfile, language);
 
   const handleCopy = () => {
     if (navigator.clipboard?.writeText) {
@@ -55,58 +31,23 @@ class BackendEngineer:
 
   const handleCommand = (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = inputVal.trim().toLowerCase();
-    if (!trimmed) return;
+    if (!inputVal.trim()) return;
 
-    let output = '';
-    switch (trimmed) {
-      case 'help':
-        output = language === 'uz'
-          ? 'Mavjud buyruqlar: cat spec, whoami, skills, projects, bot, contact, clear, python --version'
-          : language === 'ru'
-          ? 'Доступные команды: cat spec, whoami, skills, projects, bot, contact, clear, python --version'
-          : 'Available commands: cat spec, whoami, skills, projects, bot, contact, clear, python --version';
-        break;
-      case 'admin':
-      case 'sudo':
-      case 'sudo su':
-      case 'root':
-        setIsAdminOpen(true);
-        output = '👑 Launching Admin Control Center... (PIN authentication required)';
-        break;
-      case 'whoami':
-        output = `${candidateProfile.name} — ${candidateProfile.primaryTitle}`;
-        break;
-      case 'skills':
-        output = 'FastAPI, Django, PostgreSQL, Redis, Docker, aiogram 3.x, WebSockets, Clean Architecture';
-        break;
-      case 'projects':
-        output = '1. Portfolio Assistant Bot | 2. Buddy Team (AI Match) | 3. Esports Tournament Bot | 4. PeerLearn Mini App';
-        break;
-      case 'bot':
-      case 'telegram-bot':
-        output = `🤖 Official Interactive Telegram Assistant: ${candidateProfile.botUsername || '@my_portfolio_support_bot'} (${candidateProfile.botUrl || 'https://t.me/my_portfolio_support_bot'})`;
-        break;
-      case 'contact':
-        output = `Bot: ${candidateProfile.botUsername} | Telegram: ${candidateProfile.telegramHandle} | Email: ${candidateProfile.email} | Phone: ${candidateProfile.phone}`;
-        break;
-      case 'python --version':
-        output = 'Python 3.12.3 (CPython Linux x86_64, High-Performance AsyncIO)';
-        break;
-      case 'stats':
-      case 'visitors':
-      case 'analytics':
-        output = `📊 PORTFOLIO LIVE TELEMETRY: 24/7 Serverless Visitor Gateway Active | Real-time Visitor Telemetry connected to Telegram Bot (${candidateProfile.botUsername || '@my_portfolio_support_bot'}).`;
-        break;
-      case 'clear':
-        setCliHistory([]);
-        setInputVal('');
-        return;
-      default:
-        output = `bash: command not found: ${trimmed}. Type 'help' for available commands.`;
+    const res = executeTerminalCommand(inputVal, {
+      candidateProfile,
+      language,
+      openAdmin: () => setIsAdminOpen(true),
+    });
+
+    if (res.clear) {
+      setCliHistory([]);
+      setInputVal('');
+      return;
     }
 
-    setCliHistory((prev) => [...prev, { cmd: inputVal, output }]);
+    if (res.output) {
+      setCliHistory((prev) => [...prev, { cmd: inputVal, output: res.output! }]);
+    }
     setInputVal('');
   };
 
