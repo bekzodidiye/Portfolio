@@ -85,10 +85,44 @@ async function recordVisitorToPostgres(data: {
 }
 
 export default async function handler(req: any, res: any) {
+  if (req.method === 'GET') {
+    const url =
+      process.env.POSTGRES_URL ||
+      process.env.DATABASE_URL ||
+      process.env.POSTGRES_PRISMA_URL ||
+      process.env.POSTGRES_URL_NON_POOLING;
+    if (!url) {
+      return res.status(200).json({ ok: true, source: 'no_db', total: 0, today: 0, visitors: [] });
+    }
+    try {
+      const sql = neon(url);
+      const rows = await sql`
+        SELECT id, visitor_name, visitor_role, ip, country, city, region, street,
+               device_type, os, browser, gpu, referrer, latitude, longitude,
+               TO_CHAR(visited_at AT TIME ZONE 'Asia/Samarkand', 'YYYY-MM-DD HH24:MI:SS') AS visited_at
+        FROM portfolio_visitors
+        ORDER BY id DESC
+        LIMIT 50;
+      `;
+      const [totalRow] = await sql`SELECT COUNT(*)::int AS count FROM portfolio_visitors;`;
+      const [todayRow] = await sql`SELECT COUNT(*)::int AS count FROM portfolio_visitors WHERE visited_at >= CURRENT_DATE;`;
+      return res.status(200).json({
+        ok: true,
+        source: 'postgres',
+        total: totalRow?.count || 0,
+        today: todayRow?.count || 0,
+        visitors: rows,
+      });
+    } catch (err: any) {
+      console.warn('Postgres GET visitors error:', err);
+      return res.status(200).json({ ok: true, source: 'error_fallback', total: 0, today: 0, visitors: [] });
+    }
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({
       ok: false,
-      error: 'Method Not Allowed. Use POST.',
+      error: 'Method Not Allowed. Use GET or POST.',
     });
   }
 

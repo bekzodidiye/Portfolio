@@ -14,7 +14,14 @@ import {
 } from 'lucide-react';
 import { usePortfolioData } from '../../context/PortfolioDataContext';
 import { ProjectItem, SkillItem, WorkExperienceItem, EducationItem } from '../../types/portfolio';
-import { getRealVisitorRecords, getRealAnalyticsSummary, clearRealVisitorRecords, RealVisitorRecord, RealAnalyticsSummary } from '../../services/realVisitorStorage';
+import {
+  getRealVisitorRecords,
+  getRealAnalyticsSummary,
+  clearRealVisitorRecords,
+  fetchRealVisitorStatsFromPostgres,
+  RealVisitorRecord,
+  RealAnalyticsSummary,
+} from '../../services/realVisitorStorage';
 
 import { ProjectEditModal } from './ProjectEditModal';
 import { SkillEditModal } from './SkillEditModal';
@@ -90,9 +97,25 @@ export const AdminDashboard: React.FC = () => {
     topLocations: [],
   });
 
-  const refreshAnalyticsData = () => {
-    setRealLogs(getRealVisitorRecords());
-    setRealSummary(getRealAnalyticsSummary());
+  const refreshAnalyticsData = async () => {
+    // 1. Instant load from local storage
+    const localRecords = getRealVisitorRecords();
+    const localSummary = getRealAnalyticsSummary();
+    setRealLogs(localRecords);
+    setRealSummary(localSummary);
+
+    // 2. Query Neon PostgreSQL via API for live real database state
+    const pgData = await fetchRealVisitorStatsFromPostgres();
+    if (pgData && pgData.records.length > 0) {
+      setRealLogs(pgData.records);
+      setRealSummary({
+        totalVisitors: pgData.totalVisitors,
+        todayVisitors: pgData.todayVisitors,
+        mobilePercent: pgData.mobilePercent,
+        desktopPercent: pgData.desktopPercent,
+        topLocations: pgData.topLocations,
+      });
+    }
   };
 
   useEffect(() => {

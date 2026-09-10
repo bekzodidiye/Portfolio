@@ -71,7 +71,7 @@ async def cb_admin_stats(callback: CallbackQuery):
         flag = "🇺🇿" if lang == "uz" else ("🇷🇺" if lang == "ru" else "🇬🇧")
         lang_info += f"• {flag} <b>{lang.upper()}:</b> {count} ta foydalanuvchi\n"
     if not lang_info:
-        lang_info = "• 🇺🇿 <b>UZ:</b> 100%\n"
+        lang_info = "  • <i>Hozircha til ma'lumotlari mavjud emas</i>\n"
 
     stats_text = f"""📊 <b>TO'LIQ BOT STATISTIKASI VA METRIKALAR</b>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -106,7 +106,7 @@ async def cb_admin_visitors(callback: CallbackQuery):
     for dev, count in v_stats.get("devices", {}).items():
         dev_str += f"  • {dev or '💻 Desktop'}: <code>{count}</code> ta\n"
     if not dev_str:
-        dev_str = "  • 📱 Mobile: 65% | 💻 Desktop: 35%\n"
+        dev_str = "  • <i>Hozircha qurilma ma'lumotlari mavjud emas</i>\n"
 
     visitors_text = f"""🌐 <b>PORTFOLIO SAYTI TASHRIFLAR STATISTIKASI</b>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━

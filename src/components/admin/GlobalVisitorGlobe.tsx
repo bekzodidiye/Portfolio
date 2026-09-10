@@ -12,9 +12,9 @@ import {
 export const GlobalVisitorGlobe: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
   const [geoPoints, setGeoPoints] = useState<RealGeoPoint[]>(() => getRealGeoPoints());
-  const [activePoint, setActivePoint] = useState<RealGeoPoint>(() => {
+  const [activePoint, setActivePoint] = useState<RealGeoPoint | null>(() => {
     const pts = getRealGeoPoints();
-    return pts[0] || { city: 'Toshkent', country: "O'zbekiston", lat: 41.2995, lng: 69.2401, visitors: 1 };
+    return pts[0] || null;
   });
   const [isAutoRotating, setIsAutoRotating] = useState(true);
 
@@ -23,7 +23,7 @@ export const GlobalVisitorGlobe: React.FC = () => {
   const refreshPoints = () => {
     const updated = getRealGeoPoints();
     setGeoPoints(updated);
-    if (updated.length > 0) setActivePoint(updated[0]);
+    setActivePoint(updated[0] || null);
   };
 
   useEffect(() => {
@@ -217,26 +217,32 @@ export const GlobalVisitorGlobe: React.FC = () => {
         <div className="lg:col-span-4 space-y-3">
           <div className="text-xs font-mono text-slate-400 uppercase">Qayd Etilgan Shaharlar:</div>
           <div className="space-y-1.5 max-h-[320px] overflow-y-auto no-scrollbar">
-            {geoPoints.map((pt) => (
-              <div
-                key={pt.city}
-                onClick={() => {
-                  setActivePoint(pt);
-                  focusCityRef.current?.(pt.lat, pt.lng);
-                }}
-                className={`p-3 rounded-xl border text-xs transition-all cursor-pointer flex items-center justify-between ${
-                  activePoint.city === pt.city
-                    ? 'bg-emerald-950/50 border-emerald-500 text-emerald-200'
-                    : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
-                }`}
-              >
-                <div className="flex items-center gap-2 truncate">
-                  <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span className="font-bold truncate">{pt.city}, {pt.country}</span>
-                </div>
-                <span className="font-mono text-[11px] text-emerald-400 shrink-0 font-semibold">{pt.visitors} tashrif</span>
+            {geoPoints.length === 0 ? (
+              <div className="p-4 text-center text-xs text-slate-500 font-mono">
+                Hozircha tashrif geografiyasi to'planmoqda...
               </div>
-            ))}
+            ) : (
+              geoPoints.map((pt) => (
+                <div
+                  key={pt.city}
+                  onClick={() => {
+                    setActivePoint(pt);
+                    focusCityRef.current?.(pt.lat, pt.lng);
+                  }}
+                  className={`p-3 rounded-xl border text-xs transition-all cursor-pointer flex items-center justify-between ${
+                    activePoint?.city === pt.city
+                      ? 'bg-emerald-950/50 border-emerald-500 text-emerald-200'
+                      : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 truncate">
+                    <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <span className="font-bold truncate">{pt.city}, {pt.country}</span>
+                  </div>
+                  <span className="font-mono text-[11px] text-emerald-400 shrink-0 font-semibold">{pt.visitors} tashrif</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
