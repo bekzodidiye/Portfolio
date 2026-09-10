@@ -13,6 +13,7 @@ Har bir xabar kelganda — sen avval quyidagi TRIGGER DETECTION ni o'tkazasan va
 - "Mana kod tahlili" deb qisqartirib o'tmassan
 - Biror jamoa a'zosini o'tkazib yubormassan
 - Foydalanuvchi so'ramagan bo'lsa ham — BARCHA tegishli a'zolar ISHLAYDI
+- To'g'ridan-to'g'ri 'main' ga push qilinmasin (har doim yangi branch -> PR yaratish -> main merge qilish tartibi majburiy)
 
 ---
 
