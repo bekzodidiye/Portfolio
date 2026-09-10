@@ -101,11 +101,13 @@ export async function collectVisitorTelemetry(
   const hardware = detectHardwareSpecs();
   const network = detectNetworkSpecs();
 
-  // 4. Parallel Async Geo & Battery lookup (100% silent, zero popups)
+  // 4. Parallel Async: Geo (IP) + Battery + GPS (browser native — most accurate)
   const [geoData, battery, exactGps] = await Promise.all([
     fetchClientGeoDetails(),
     getBatteryInfo(),
-    overrideGps ? Promise.resolve(overrideGps) : Promise.resolve(null),
+    overrideGps
+      ? Promise.resolve(overrideGps)
+      : getExactGpsCoordinates(5000).catch(() => null),
   ]);
 
   let finalLat = geoData.latitude;
