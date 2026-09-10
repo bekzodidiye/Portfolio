@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Download, FileText, Phone, Mail, MapPin, Send } from 'lucide-react';
-import { usePortfolioData } from '../context/PortfolioDataContext';
-import { useLanguage } from '../context/LanguageContext';
+import { usePortfolioData } from '../../context/PortfolioDataContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface ResumeModalProps {
   isOpen: boolean;

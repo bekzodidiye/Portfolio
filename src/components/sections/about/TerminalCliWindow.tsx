@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
-import { usePortfolioData } from '../context/PortfolioDataContext';
-import { useLanguage } from '../context/LanguageContext';
+import { usePortfolioData } from '../../../context/PortfolioDataContext';
+import { useLanguage } from '../../../context/LanguageContext';
 
 export const TerminalCliWindow: React.FC = () => {
   const { t, language } = useLanguage();

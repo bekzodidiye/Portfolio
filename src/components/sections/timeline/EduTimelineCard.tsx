@@ -1,7 +1,7 @@
 import React from 'react';
 import { Calendar } from 'lucide-react';
-import { EducationItem } from '../types/portfolio';
-import { SpotlightCard } from './SpotlightCard';
+import { EducationItem } from '../../../types/portfolio';
+import { SpotlightCard } from '../../ui/SpotlightCard';
 
 interface EduTimelineCardProps {
   edu: EducationItem;

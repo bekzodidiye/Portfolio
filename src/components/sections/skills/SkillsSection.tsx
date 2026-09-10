@@ -1,9 +1,9 @@
 import React from 'react';
 import { Layers } from 'lucide-react';
-import { usePortfolioData } from '../context/PortfolioDataContext';
-import { useLanguage } from '../context/LanguageContext';
-import { useGsapReveal } from '../hooks/useGsapReveal';
-import { useGsapDepthParallax } from '../hooks/useGsapDepthParallax';
+import { usePortfolioData } from '../../../context/PortfolioDataContext';
+import { useLanguage } from '../../../context/LanguageContext';
+import { useGsapReveal } from '../../../hooks/useGsapReveal';
+import { useGsapDepthParallax } from '../../../hooks/useGsapDepthParallax';
 import { SkillTiltCard } from './SkillTiltCard';
 
 export const SkillsSection: React.FC = () => {

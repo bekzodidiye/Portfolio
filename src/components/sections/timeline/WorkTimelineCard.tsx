@@ -1,7 +1,7 @@
 import React from 'react';
 import { Calendar, CheckCircle2 } from 'lucide-react';
-import { WorkExperienceItem } from '../types/portfolio';
-import { SpotlightCard } from './SpotlightCard';
+import { WorkExperienceItem } from '../../../types/portfolio';
+import { SpotlightCard } from '../../ui/SpotlightCard';
 
 interface WorkTimelineCardProps {
   exp: WorkExperienceItem;

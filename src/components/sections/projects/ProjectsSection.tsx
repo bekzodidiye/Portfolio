@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Sparkles } from 'lucide-react';
-import { usePortfolioData } from '../context/PortfolioDataContext';
-import { ProjectItem } from '../types/portfolio';
+import { usePortfolioData } from '../../../context/PortfolioDataContext';
+import { ProjectItem } from '../../../types/portfolio';
 import { ProjectModal } from './ProjectModal';
 import { ProjectCard } from './ProjectCard';
-import { useLanguage } from '../context/LanguageContext';
-import { useGsapReveal } from '../hooks/useGsapReveal';
-import { useGsapDepthParallax } from '../hooks/useGsapDepthParallax';
+import { useLanguage } from '../../../context/LanguageContext';
+import { useGsapReveal } from '../../../hooks/useGsapReveal';
+import { useGsapDepthParallax } from '../../../hooks/useGsapDepthParallax';
 
 export const ProjectsSection: React.FC = () => {
   const { t } = useLanguage();

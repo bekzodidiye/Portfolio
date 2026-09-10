@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { LanguageProvider } from './context/LanguageContext';
 import { PortfolioDataProvider, usePortfolioData } from './context/PortfolioDataContext';
-import { ModernBackground } from './components/ModernBackground';
-import { Navbar } from './components/Navbar';
-import { HeroSection } from './components/HeroSection';
-import { TerminalAbout } from './components/TerminalAbout';
-import { SkillsSection } from './components/SkillsSection';
-import { ProjectsSection } from './components/ProjectsSection';
+import { ModernBackground, Navbar, Footer, ScrollProgressBar } from './components/layout';
+import {
+  HeroSection,
+  TerminalAbout,
+  SkillsSection,
+  ProjectsSection,
+  TimelineSection,
+  ContactSection,
+} from './components/sections';
 import { SystemArchitectureVisualizer } from './components/architecture/SystemArchitectureVisualizer';
 import { BackendApiPlayground } from './components/sandbox/BackendApiPlayground';
-import { TimelineSection } from './components/TimelineSection';
-import { ContactSection } from './components/ContactSection';
-import { Footer } from './components/Footer';
-import { ResumeModal } from './components/ResumeModal';
-import { ScrollProgressBar } from './components/ScrollProgressBar';
-import { VisitorWelcomeModal } from './components/VisitorWelcomeModal';
+import { ResumeModal, VisitorWelcomeModal } from './components/modals';
 import { PortfolioAiAssistant } from './components/ai/PortfolioAiAssistant';
 import { AdminAuthModal } from './components/admin/AdminAuthModal';
 import { AdminDashboard } from './components/admin/AdminDashboard';

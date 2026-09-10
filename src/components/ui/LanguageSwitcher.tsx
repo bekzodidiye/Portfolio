@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Globe, Check } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
-import { Language } from '../types/language';
+import { useLanguage } from '../../context/LanguageContext';
+import { Language } from '../../types/language';
 
 export const LanguageSwitcher: React.FC = () => {
   const { language, setLanguage, options } = useLanguage();

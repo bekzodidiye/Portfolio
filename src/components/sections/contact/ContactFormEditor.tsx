@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Send, Check, Code2, Terminal, Loader2, AlertCircle, ExternalLink, Clock } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
-import { useContactForm } from '../hooks/useContactForm';
-import { MagneticButton } from './MagneticButton';
+import { useLanguage } from '../../../context/LanguageContext';
+import { useContactForm } from '../../../hooks/useContactForm';
+import { MagneticButton } from '../../ui/MagneticButton';
 
 export const ContactFormEditor: React.FC = () => {
   const { t, language } = useLanguage();

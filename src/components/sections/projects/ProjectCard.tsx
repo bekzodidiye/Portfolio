@@ -1,7 +1,7 @@
 import React from 'react';
 import { Github, ExternalLink, ArrowUpRight, CheckCircle2, Code2, Bot, Users, Trophy } from 'lucide-react';
-import { ProjectItem } from '../types/portfolio';
-import { SpotlightCard } from './SpotlightCard';
+import { ProjectItem } from '../../../types/portfolio';
+import { SpotlightCard } from '../../ui/SpotlightCard';
 
 const PROJECT_ICONS: Record<string, React.ReactNode> = {
   'portfolio-bot': <Bot className="w-5 h-5 text-emerald-600" />,

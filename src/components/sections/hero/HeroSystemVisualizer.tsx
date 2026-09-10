@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, Server, Cpu, Database, Wifi, Shield, Terminal } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage } from '../../../context/LanguageContext';
 
 export const HeroSystemVisualizer: React.FC = () => {
   const { t } = useLanguage();

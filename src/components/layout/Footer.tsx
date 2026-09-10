@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { Terminal, Github, Linkedin, Send, ArrowUp } from 'lucide-react';
-import { usePortfolioData } from '../context/PortfolioDataContext';
-import { useLanguage } from '../context/LanguageContext';
+import { usePortfolioData } from '../../context/PortfolioDataContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const Footer: React.FC = () => {
   const { t } = useLanguage();
