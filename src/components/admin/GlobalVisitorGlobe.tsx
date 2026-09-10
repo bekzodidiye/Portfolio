@@ -1,13 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { Globe, MapPin, Users, RefreshCw, RotateCw } from 'lucide-react';
+import { Globe, RefreshCw, RotateCw } from 'lucide-react';
 import { getRealGeoPoints, RealGeoPoint } from '../../services/realVisitorStorage';
 import {
   EARTH_TEXTURE_URL,
   EARTH_CLOUDS_URL,
   createProceduralEarthCanvas,
-  latLngToVector3,
 } from './threeGlobeHelpers';
+import { createAtmosphereHalo, addVisitorBeacons } from './threeGlobeBeacons';
+import { GlobeCityList } from './GlobeCityList';
 
 export const GlobalVisitorGlobe: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -89,59 +90,11 @@ export const GlobalVisitorGlobe: React.FC = () => {
     });
 
     // Atmosphere halo
-    const glowMaterial = new THREE.ShaderMaterial({
-      vertexShader: `
-        varying vec3 vNormal;
-        void main() {
-          vNormal = normalize(normalMatrix * normal);
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        varying vec3 vNormal;
-        void main() {
-          float intensity = pow(0.65 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.8);
-          gl_FragColor = vec4(0.0, 0.6, 1.0, 1.0) * intensity * 0.9;
-        }
-      `,
-      side: THREE.BackSide,
-      blending: THREE.AdditiveBlending,
-      transparent: true,
-    });
-    const glowMesh = new THREE.Mesh(new THREE.SphereGeometry(sphereRadius + 14, 48, 48), glowMaterial);
+    const glowMesh = createAtmosphereHalo(sphereRadius);
     scene.add(glowMesh);
 
     // Add Visitor Beacons
-    const ringsToAnimate: THREE.Mesh[] = [];
-    geoPoints.forEach((pt) => {
-      const pos = latLngToVector3(pt.lat, pt.lng, sphereRadius);
-      const normal = pos.clone().normalize();
-
-      const pinMesh = new THREE.Mesh(
-        new THREE.SphereGeometry(2.2, 16, 16),
-        new THREE.MeshBasicMaterial({ color: 0x10b981 })
-      );
-      pinMesh.position.copy(pos);
-      globeGroup.add(pinMesh);
-
-      const pillarHeight = 18;
-      const pillarMesh = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.5, 0.8, pillarHeight, 8),
-        new THREE.MeshBasicMaterial({ color: 0x34d399, transparent: true, opacity: 0.85 })
-      );
-      pillarMesh.position.copy(pos.clone().add(normal.clone().multiplyScalar(pillarHeight / 2)));
-      pillarMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
-      globeGroup.add(pillarMesh);
-
-      const ringMesh = new THREE.Mesh(
-        new THREE.RingGeometry(1.5, 3.8, 24),
-        new THREE.MeshBasicMaterial({ color: 0x10b981, side: THREE.DoubleSide, transparent: true, opacity: 0.9 })
-      );
-      ringMesh.position.copy(pos.clone().add(normal.clone().multiplyScalar(0.4)));
-      ringMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
-      globeGroup.add(ringMesh);
-      ringsToAnimate.push(ringMesh);
-    });
+    const ringsToAnimate = addVisitorBeacons(globeGroup, geoPoints, sphereRadius);
 
     focusCityRef.current = (lat: number, lng: number) => {
       globeGroup.rotation.y = -((lng + 90) * Math.PI) / 180;
@@ -175,7 +128,6 @@ export const GlobalVisitorGlobe: React.FC = () => {
       renderer.dispose();
       earthMaterial.dispose();
       fallbackTexture.dispose();
-      glowMaterial.dispose();
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
@@ -214,37 +166,14 @@ export const GlobalVisitorGlobe: React.FC = () => {
           <div ref={mountRef} className="w-full max-w-[460px] h-[400px] cursor-grab active:cursor-grabbing" />
         </div>
 
-        <div className="lg:col-span-4 space-y-3">
-          <div className="text-xs font-mono text-slate-400 uppercase">Qayd Etilgan Shaharlar:</div>
-          <div className="space-y-1.5 max-h-[320px] overflow-y-auto no-scrollbar">
-            {geoPoints.length === 0 ? (
-              <div className="p-4 text-center text-xs text-slate-500 font-mono">
-                Hozircha tashrif geografiyasi to'planmoqda...
-              </div>
-            ) : (
-              geoPoints.map((pt) => (
-                <div
-                  key={pt.city}
-                  onClick={() => {
-                    setActivePoint(pt);
-                    focusCityRef.current?.(pt.lat, pt.lng);
-                  }}
-                  className={`p-3 rounded-xl border text-xs transition-all cursor-pointer flex items-center justify-between ${
-                    activePoint?.city === pt.city
-                      ? 'bg-emerald-950/50 border-emerald-500 text-emerald-200'
-                      : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 truncate">
-                    <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                    <span className="font-bold truncate">{pt.city}, {pt.country}</span>
-                  </div>
-                  <span className="font-mono text-[11px] text-emerald-400 shrink-0 font-semibold">{pt.visitors} tashrif</span>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+        <GlobeCityList
+          geoPoints={geoPoints}
+          activePoint={activePoint}
+          onSelectCity={(pt) => {
+            setActivePoint(pt);
+            focusCityRef.current?.(pt.lat, pt.lng);
+          }}
+        />
       </div>
     </div>
   );

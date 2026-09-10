@@ -177,7 +177,7 @@ Tekshiriladi: barchasi, birma-bir.
 - Secrets hardcode, .env nomi eshitilmagan
 
 **6. Kod Gigiyenasi**
-- 300+ qator fayllar, SRP nima ekanini bilishmaydi
+- 200+ qator fayllar taqiqlanadi (Senior SRP qoidasi: har qanday fayl maksimal ~200 qator bo'lishi shart, aks holda kichik modullarga ajratiladi)
 - `console.log` production-da — debugging muzeyiga aylanib ketgan
 
 **CHIQISH FORMATI (har xato uchun):**
