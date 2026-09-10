@@ -1,10 +1,165 @@
 import nodemailer from 'nodemailer';
-import {
-  recordBotUserDb,
-  getVisitorStatsDb,
-  getRecentVisitorsDb,
-  getBotUserStatsDb,
-} from './db';
+import { neon } from '@neondatabase/serverless';
+
+function getPostgresSql() {
+  const url =
+    process.env.POSTGRES_URL ||
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_PRISMA_URL ||
+    process.env.POSTGRES_URL_NON_POOLING;
+  if (!url) return null;
+  try {
+    return neon(url);
+  } catch {
+    return null;
+  }
+}
+
+async function recordBotUserDb(user: {
+  userId: number | string;
+  username?: string;
+  fullName: string;
+  language?: string;
+}) {
+  const sql = getPostgresSql();
+  if (!sql) return null;
+  try {
+    const uid = String(user.userId);
+    await sql`
+      CREATE TABLE IF NOT EXISTS bot_users (
+        user_id BIGINT PRIMARY KEY,
+        username TEXT,
+        full_name TEXT,
+        language TEXT DEFAULT 'uz',
+        joined_at TIMESTAMPTZ DEFAULT NOW(),
+        last_active TIMESTAMPTZ DEFAULT NOW()
+      );
+    `;
+    await sql`
+      INSERT INTO bot_users (user_id, username, full_name, language, joined_at, last_active)
+      VALUES (${uid}, ${user.username || null}, ${user.fullName}, ${user.language || 'uz'}, NOW(), NOW())
+      ON CONFLICT (user_id) DO UPDATE SET
+        username = EXCLUDED.username,
+        full_name = EXCLUDED.full_name,
+        last_active = NOW();
+    `;
+    return true;
+  } catch (err) {
+    console.warn('Postgres record bot user error:', err);
+    return false;
+  }
+}
+
+async function getVisitorStatsDb(): Promise<{
+  totalVisits: number;
+  todayVisits: number;
+  uniqueIps: number;
+  topCities: Array<{ city: string; count: number }>;
+  deviceStats: { mobile: number; desktop: number };
+}> {
+  const sql = getPostgresSql();
+  if (!sql) {
+    return {
+      totalVisits: 0,
+      todayVisits: 0,
+      uniqueIps: 0,
+      topCities: [],
+      deviceStats: { mobile: 0, desktop: 0 },
+    };
+  }
+  try {
+    await sql`
+      CREATE TABLE IF NOT EXISTS portfolio_visitors (
+        id SERIAL PRIMARY KEY,
+        visitor_name TEXT,
+        visitor_role TEXT,
+        ip TEXT,
+        country TEXT,
+        city TEXT,
+        region TEXT,
+        street TEXT,
+        device_type TEXT,
+        os TEXT,
+        browser TEXT,
+        gpu TEXT,
+        referrer TEXT,
+        latitude REAL,
+        longitude REAL,
+        visited_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `;
+    const [totalRow] = await sql`SELECT COUNT(*)::int AS count FROM portfolio_visitors;`;
+    const [todayRow] = await sql`SELECT COUNT(*)::int AS count FROM portfolio_visitors WHERE visited_at >= CURRENT_DATE;`;
+    const [uniqueIpsRow] = await sql`SELECT COUNT(DISTINCT ip)::int AS count FROM portfolio_visitors WHERE ip IS NOT NULL AND ip != '';`;
+    const cityRows = await sql`
+      SELECT city, COUNT(*)::int AS count FROM portfolio_visitors
+      WHERE city IS NOT NULL AND city != ''
+      GROUP BY city ORDER BY count DESC LIMIT 5;
+    `;
+    const deviceRows = await sql`
+      SELECT
+        COUNT(*) FILTER (WHERE device_type ILIKE '%mobile%' OR os ILIKE '%ios%' OR os ILIKE '%android%')::int AS mobile_count,
+        COUNT(*) FILTER (WHERE NOT (device_type ILIKE '%mobile%' OR os ILIKE '%ios%' OR os ILIKE '%android%'))::int AS desktop_count
+      FROM portfolio_visitors;
+    `;
+    return {
+      totalVisits: totalRow?.count || 0,
+      todayVisits: todayRow?.count || 0,
+      uniqueIps: uniqueIpsRow?.count || 0,
+      topCities: cityRows.map((r: any) => ({ city: r.city, count: Number(r.count) })),
+      deviceStats: {
+        mobile: deviceRows[0]?.mobile_count || 0,
+        desktop: deviceRows[0]?.desktop_count || 0,
+      },
+    };
+  } catch (err) {
+    console.warn('Postgres visitor stats error:', err);
+    return {
+      totalVisits: 0,
+      todayVisits: 0,
+      uniqueIps: 0,
+      topCities: [],
+      deviceStats: { mobile: 0, desktop: 0 },
+    };
+  }
+}
+
+async function getRecentVisitorsDb(limit = 5) {
+  const sql = getPostgresSql();
+  if (!sql) return [];
+  try {
+    const rows = await sql`
+      SELECT id, visitor_name, visitor_role, ip, country, city, street,
+             device_type, os, browser, latitude, longitude,
+             TO_CHAR(visited_at AT TIME ZONE 'Asia/Samarkand', 'YYYY-MM-DD HH24:MI:SS') AS visited_at
+      FROM portfolio_visitors
+      ORDER BY id DESC
+      LIMIT ${limit};
+    `;
+    return rows;
+  } catch (err) {
+    console.warn('Postgres recent visitors error:', err);
+    return [];
+  }
+}
+
+async function getBotUserStatsDb(): Promise<{
+  totalUsers: number;
+  totalMessages: number;
+}> {
+  const sql = getPostgresSql();
+  if (!sql) return { totalUsers: 0, totalMessages: 0 };
+  try {
+    const [usersRow] = await sql`SELECT COUNT(*)::int AS count FROM bot_users;`;
+    return {
+      totalUsers: usersRow?.count || 0,
+      totalMessages: 0,
+    };
+  } catch (err) {
+    console.warn('Postgres bot stats error:', err);
+    return { totalUsers: 0, totalMessages: 0 };
+  }
+}
 
 export const config = {
   runtime: 'nodejs',

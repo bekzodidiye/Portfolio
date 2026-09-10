@@ -1,4 +1,4 @@
-import { recordVisitorDb } from './db';
+import { neon } from '@neondatabase/serverless';
 
 export const config = {
   runtime: 'nodejs',
@@ -10,6 +10,78 @@ function escapeHtml(str: string): string {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
+}
+
+async function recordVisitorToPostgres(data: {
+  visitorName?: string;
+  visitorRole?: string;
+  ip?: string;
+  country?: string;
+  city?: string;
+  region?: string;
+  street?: string;
+  deviceType?: string;
+  os?: string;
+  browser?: string;
+  gpu?: string;
+  referrer?: string;
+  latitude?: number;
+  longitude?: number;
+}) {
+  const url =
+    process.env.POSTGRES_URL ||
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_PRISMA_URL ||
+    process.env.POSTGRES_URL_NON_POOLING;
+  if (!url) return;
+
+  try {
+    const sql = neon(url);
+    await sql`
+      CREATE TABLE IF NOT EXISTS portfolio_visitors (
+        id SERIAL PRIMARY KEY,
+        visitor_name TEXT,
+        visitor_role TEXT,
+        ip TEXT,
+        country TEXT,
+        city TEXT,
+        region TEXT,
+        street TEXT,
+        device_type TEXT,
+        os TEXT,
+        browser TEXT,
+        gpu TEXT,
+        referrer TEXT,
+        latitude REAL,
+        longitude REAL,
+        visited_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `;
+
+    await sql`
+      INSERT INTO portfolio_visitors (
+        visitor_name, visitor_role, ip, country, city, region, street,
+        device_type, os, browser, gpu, referrer, latitude, longitude
+      ) VALUES (
+        ${data.visitorName || 'Anonim'},
+        ${data.visitorRole || null},
+        ${data.ip || null},
+        ${data.country || null},
+        ${data.city || null},
+        ${data.region || null},
+        ${data.street || null},
+        ${data.deviceType || null},
+        ${data.os || null},
+        ${data.browser || null},
+        ${data.gpu || null},
+        ${data.referrer || null},
+        ${data.latitude ?? null},
+        ${data.longitude ?? null}
+      );
+    `;
+  } catch (err) {
+    console.warn('PostgreSQL record visitor error:', err);
+  }
 }
 
 export default async function handler(req: any, res: any) {
@@ -84,7 +156,7 @@ export default async function handler(req: any, res: any) {
     const finalCountry = country || vercelCountry;
 
     // Persist real visitor to PostgreSQL (Vercel Postgres)
-    await recordVisitorDb({
+    await recordVisitorToPostgres({
       visitorName,
       visitorRole,
       ip: finalIp,
