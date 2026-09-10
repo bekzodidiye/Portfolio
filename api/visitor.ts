@@ -1,3 +1,5 @@
+import { recordVisitorDb } from './db';
+
 export const config = {
   runtime: 'nodejs',
 };
@@ -80,6 +82,24 @@ export default async function handler(req: any, res: any) {
     const finalLon = typeof longitude === 'number' ? longitude : vercelLon;
     const finalCity = city || (vercelCity ? decodeURIComponent(vercelCity) : undefined);
     const finalCountry = country || vercelCountry;
+
+    // Persist real visitor to PostgreSQL (Vercel Postgres)
+    await recordVisitorDb({
+      visitorName,
+      visitorRole,
+      ip: finalIp,
+      country: finalCountry,
+      city: finalCity,
+      region,
+      street: data.street,
+      deviceType,
+      os,
+      browser,
+      gpu,
+      referrer: referrerSource,
+      latitude: finalLat,
+      longitude: finalLon,
+    }).catch((e) => console.warn('Postgres persist error:', e));
 
     // Samarkand/Tashkent Timestamp
     const timestamp = new Intl.DateTimeFormat('uz-UZ', {

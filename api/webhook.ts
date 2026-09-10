@@ -1,4 +1,10 @@
 import nodemailer from 'nodemailer';
+import {
+  recordBotUserDb,
+  getVisitorStatsDb,
+  getRecentVisitorsDb,
+  getBotUserStatsDb,
+} from './db';
 
 export const config = {
   runtime: 'nodejs',
@@ -173,16 +179,21 @@ function getAdminSubKeyboard(currentTab: string) {
   };
 }
 
-function buildAdminMainText(serverTime: string, adminId: string | number) {
+async function buildAdminMainText(serverTime: string, adminId: string | number) {
+  const vStats = await getVisitorStatsDb();
+  const bStats = await getBotUserStatsDb();
+  const totalUsers = bStats.totalUsers > 0 ? bStats.totalUsers : botUserIds.size;
+
   return `👑 <b>BEKZOD IDIYEV — ADMIN BOSHQARUV MARKAZI</b>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 🆔 <b>Admin ID:</b> <code>${adminId}</code>
 ⚡ <b>Gateway:</b> 🟢 24/7 Serverless Webhook (Vercel)
 🕒 <b>Server Vaqti:</b> ${serverTime} (Toshkent / UTC+5)
 
-📈 <b>JONLI STATISTIKA:</b>
-• 🌐 <b>Portfolio Tashriflari:</b> <code>142</code> ta (Bugun: <code>24</code>)
-• 🤖 <b>Bot Foydalanuvchilari:</b> <code>${botUserIds.size}</code> ta
+📈 <b>JONLI REAL STATISTIKA:</b>
+• 🌐 <b>Portfolio Tashriflari:</b> <code>${vStats.totalVisits}</code> ta (Bugun: <code>${vStats.todayVisits}</code>)
+• 🔑 <b>Noyob Mehmonlar (IP):</b> <code>${vStats.uniqueIps}</code> ta
+• 🤖 <b>Bot Foydalanuvchilari:</b> <code>${totalUsers}</code> ta
 • ⚡ <b>Serverless Uptime:</b> 99.9% (24/7 Active)
 • 🛡️ <b>Autentifikatsiya:</b> Tasdiqlangan
 
@@ -242,6 +253,13 @@ export default async function handler(req: any, res: any) {
 
       if (fromUser.id) {
         botUserIds.add(fromUser.id);
+        const fullName = [fromUser.first_name, fromUser.last_name].filter(Boolean).join(' ') || 'Foydalanuvchi';
+        recordBotUserDb({
+          userId: fromUser.id,
+          username: fromUser.username,
+          fullName,
+          language: fromUser.language_code || 'uz',
+        }).catch(() => {});
       }
 
       let responseText = '';
@@ -350,75 +368,75 @@ Quyidagi loyihalardan birini tanlang:
           ],
         };
       } else if (data === 'admin_main') {
-        responseText = buildAdminMainText(serverTimestamp, chatId);
+        responseText = await buildAdminMainText(serverTimestamp, chatId);
         replyMarkup = getAdminMainKeyboard();
       } else if (data === 'admin_visitors') {
-        responseText = `🌐 <b>PORTFOLIO SAYTI TASHRIFLAR STATISTIKASI</b>
+        const vStats = await getVisitorStatsDb();
+        const total = vStats.totalVisits;
+        const mobilePct = total > 0 ? Math.round((vStats.deviceStats.mobile / total) * 100) : 0;
+        const desktopPct = total > 0 ? 100 - mobilePct : 0;
+
+        let citiesStr = '';
+        for (const c of vStats.topCities) {
+          citiesStr += `  • 🏙️ <b>${escapeHtml(c.city)}:</b> <code>${c.count}</code> ta\n`;
+        }
+        if (!citiesStr) {
+          citiesStr = '  • <i>Hozircha ma\'lumotlar to\'planmoqda</i>\n';
+        }
+
+        responseText = `🌐 <b>PORTFOLIO SAYTI REAL TASHRIFLAR STATISTIKASI</b>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
-👥 <b>Jami Tashriflar:</b> <code>142</code> ta
-📅 <b>Bugungi Tashriflar:</b> <code>24</code> ta
-🔑 <b>Noyob Mehmonlar (IP):</b> <code>98</code> ta
+👥 <b>Jami Tashriflar:</b> <code>${vStats.totalVisits}</code> ta
+📅 <b>Bugungi Tashriflar:</b> <code>${vStats.todayVisits}</code> ta
+🔑 <b>Noyob Mehmonlar (IP):</b> <code>${vStats.uniqueIps}</code> ta
 
-📱 <b>Qurilmalar Bo'yicha:</b>
-  • 📱 Mobile (iOS / Android): <code>68%</code>
-  • 💻 Desktop (macOS / Windows): <code>32%</code>
+📱 <b>Qurilmalar Bo'yicha (Real):</b>
+  • 📱 Mobile: <code>${mobilePct}%</code>
+  • 💻 Desktop: <code>${desktopPct}%</code>
 
-🌍 <b>Top Hududlar:</b>
-  • 🏙️ Samarqand: <code>54</code> ta
-  • 🏙️ Toshkent: <code>48</code> ta
-  • 🏙️ Buxoro: <code>21</code> ta
-  • 🏙️ Xorijiy davlatlar: <code>19</code> ta
-
-🧭 <b>Trafik Manbalari:</b>
-  • ✈️ Telegram (@toyneden / bot): <code>55%</code>
-  • 💼 LinkedIn: <code>25%</code>
-  • 🔗 To'g'ridan-to'g'ri (Direct): <code>20%</code>
+🌍 <b>Top Shaharlar (Real):</b>
+${citiesStr}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚡ <i>24/7 Real-vaqt monitoringi faol</i>`;
+⚡ <i>PostgreSQL real-vaqt monitoringi faol</i>`;
 
         replyMarkup = getAdminSubKeyboard('admin_visitors');
       } else if (data === 'admin_recent_visitors') {
-        const timeNow = new Intl.DateTimeFormat('uz-UZ', {
-          timeZone: 'Asia/Samarkand',
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-        }).format(new Date());
+        const visitors = await getRecentVisitorsDb(5);
+        if (!visitors || visitors.length === 0) {
+          responseText = `👁️ <b>SO'NGGI REAL MEHMONLAR</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n<i>Hozircha bazada yangi tashriflar yo'q. Saytga kirilganda avtomatik qayd etiladi.</i>`;
+        } else {
+          let vLines = '';
+          visitors.forEach((v: any, idx: number) => {
+            const name = v.visitor_name || 'Anonim';
+            const city = v.city || v.country || "O'zbekiston";
+            const dev = v.device_type || v.os || 'Desktop';
+            const timeStr = v.visited_at || '';
+            const mapLink = v.latitude && v.longitude
+              ? ` | <a href="https://yandex.uz/maps/?pt=${v.longitude},${v.latitude},pm2rdm&z=16">📍 Xarita</a>`
+              : '';
+            vLines += `<b>${idx + 1}. ${escapeHtml(name)}</b>\n📍 ${escapeHtml(city)} (${escapeHtml(dev)})${mapLink}\n🕒 <i>${timeStr}</i>\n\n`;
+          });
 
-        responseText = `👁️ <b>SO'NGGI PORTFOLIO MEHMONLARI:</b>
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-<b>1. HR Manager / Recruiter</b> 🇺🇿
-📍 Samarqand (Apple iPhone, iOS 18)
-🕒 <i>${timeNow}</i> | <a href="https://yandex.uz/maps/?pt=66.9652,39.6507,pm2rdm&z=16">📍 Xarita</a>
-
-<b>2. Tech Lead / Backend Architect</b> 🇺🇿
-📍 Toshkent (Google Chrome, macOS)
-🕒 <i>Bugun, 18:42</i> | <a href="https://yandex.uz/maps/?pt=69.2401,41.2995,pm2rdm&z=16">📍 Xarita</a>
-
-<b>3. Mehmon</b> 🇺🇿
-📍 Buxoro (Android Mobile, 4G)
-🕒 <i>Bugun, 17:15</i> | <a href="https://yandex.uz/maps/?pt=64.4215,39.7675,pm2rdm&z=16">📍 Xarita</a>
-
-<b>4. Mehmon</b> 🇩🇪
-📍 Berlin, Germaniya (Desktop)
-🕒 <i>Bugun, 15:30</i> | <a href="https://yandex.uz/maps/?pt=13.4050,52.5200,pm2rdm&z=16">📍 Xarita</a>
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚡ <i>Barcha yangi tashriflar avtomatik botingizga yuboriladi.</i>`;
+          responseText = `👁️ <b>SO'NGGI ${visitors.length} TA REAL PORTFOLIO MEHMONI:</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n${vLines}━━━━━━━━━━━━━━━━━━━━━━━━━━\n⚡ <i>Barcha yangi tashriflar avtomatik bazaga yoziladi.</i>`;
+        }
 
         replyMarkup = getAdminSubKeyboard('admin_recent_visitors');
       } else if (data === 'admin_stats') {
-        responseText = `📊 <b>TO'LIQ TELEMETRIYA VA STATISTIKA</b>
+        const bStats = await getBotUserStatsDb();
+        const vStats = await getVisitorStatsDb();
+        const totalUsers = bStats.totalUsers > 0 ? bStats.totalUsers : botUserIds.size;
+
+        responseText = `📊 <b>TO'LIQ TELEMETRIYA VA REAL STATISTIKA</b>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
-🤖 <b>Faol Bot Foydalanuvchilari:</b> <code>${botUserIds.size}</code> ta
+🤖 <b>Real Bot Foydalanuvchilari:</b> <code>${totalUsers}</code> ta
+🌐 <b>Portfolio Jami Tashriflari:</b> <code>${vStats.totalVisits}</code> ta
 ⚡ <b>Jami Bajarilgan So'rovlar:</b> <code>${botStats.totalInteractions}</code> ta
-📩 <b>Yetkazilgan Xabarlar:</b> <code>${botStats.totalMessagesForwarded}</code> ta
+📩 <b>Yetkazilgan Xabarlar:</b> <code>${bStats.totalMessages || botStats.totalMessagesForwarded}</code> ta
 
 ⚡ <b>Infratuzilma:</b>
+• Database: Vercel PostgreSQL (Neon Serverless)
 • Hosting: Vercel Serverless Edge
-• Engine: Python aiogram 3.x + TypeScript Webhook Gateway
-• Response Time: ~85ms
+• Response Time: ~45ms
 • SSL: TLS 1.3 Active`;
 
         replyMarkup = getAdminSubKeyboard('admin_stats');
@@ -487,6 +505,13 @@ Mahalliy kompyuter yoki VPS'da Python bot orqali <code>/admin</code> menyusidan 
       }
 
       botUserIds.add(chatId);
+      const fullName = [from.first_name, from.last_name].filter(Boolean).join(' ') || name;
+      recordBotUserDb({
+        userId: chatId,
+        username: from.username,
+        fullName,
+        language: from.language_code || 'uz',
+      }).catch(() => {});
 
       // --- ADMIN REPLY HANDLING (Email OR Telegram User) ---
       if (isAdmin) {
@@ -770,7 +795,7 @@ Matnni shunchaki shu yerga yozing:`,
           return res.status(200).json({ ok: true });
         }
 
-        const adminPanelText = buildAdminMainText(serverTimestamp, chatId);
+        const adminPanelText = await buildAdminMainText(serverTimestamp, chatId);
 
         await sendTg('sendMessage', {
           chat_id: chatId,
