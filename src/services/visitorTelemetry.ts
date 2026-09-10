@@ -180,23 +180,101 @@ export function getCountryFlagEmoji(countryCode?: string): string {
 }
 
 /**
- * Fast Geo & IP Lookup with 2.5s strict timeout
+ * High-accuracy Multi-Source IP Geolocation Consensus Engine
+ * Queries top providers in parallel (ipinfo.io, freeipapi.com, ipwho.is, ipapi.co)
+ * and selects the highest-granularity regional match rather than generic capital fallbacks.
  */
 async function fetchClientGeoDetails(): Promise<Partial<VisitorTelemetryData>> {
-  // 1. Try ipapi.co (HTTPS, detailed GPS coordinates)
-  try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 2500);
+  const providers = [
+    // 1. ipinfo.io - Gold standard for BGP routing & regional accuracy
+    async (signal: AbortSignal): Promise<Partial<VisitorTelemetryData> | null> => {
+      try {
+        const res = await fetch('https://ipinfo.io/json', { signal });
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (!data || !data.ip || data.bogon) return null;
+        const flag = getCountryFlagEmoji(data.country);
+        let lat: number | undefined;
+        let lon: number | undefined;
+        if (data.loc && data.loc.includes(',')) {
+          const [latStr, lonStr] = data.loc.split(',');
+          lat = parseFloat(latStr);
+          lon = parseFloat(lonStr);
+        }
+        return {
+          ip: data.ip,
+          country: `${flag} ${data.country === 'UZ' ? "O'zbekiston" : data.country || 'Uzbekistan'}`,
+          countryCode: data.country,
+          city: data.city || undefined,
+          region: data.region || undefined,
+          isp: data.org || undefined,
+          latitude: Number.isFinite(lat) ? lat : undefined,
+          longitude: Number.isFinite(lon) ? lon : undefined,
+          locationSource: '🌐 ipinfo.io (BGP/Regional)',
+          locationAccuracy: 'Shahar / Viloyat darajasida',
+        };
+      } catch {
+        return null;
+      }
+    },
 
-    const res = await fetch('https://ipapi.co/json/', {
-      signal: controller.signal,
-    }).catch(() => null);
+    // 2. freeipapi.com - Independent database with granular regional splits
+    async (signal: AbortSignal): Promise<Partial<VisitorTelemetryData> | null> => {
+      try {
+        const res = await fetch('https://freeipapi.com/api/json', { signal });
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (!data || !data.ipAddress) return null;
+        const flag = getCountryFlagEmoji(data.countryCode);
+        return {
+          ip: data.ipAddress,
+          country: `${flag} ${data.countryName || 'Uzbekistan'}`,
+          countryCode: data.countryCode,
+          city: data.cityName || undefined,
+          region: data.regionName || undefined,
+          isp: data.asnOrganization || data.asn || undefined,
+          latitude: typeof data.latitude === 'number' ? data.latitude : undefined,
+          longitude: typeof data.longitude === 'number' ? data.longitude : undefined,
+          locationSource: '🌐 freeipapi.com (Regional)',
+          locationAccuracy: 'Shahar / Viloyat darajasida',
+        };
+      } catch {
+        return null;
+      }
+    },
 
-    clearTimeout(timer);
+    // 3. ipwho.is - Fast, high availability
+    async (signal: AbortSignal): Promise<Partial<VisitorTelemetryData> | null> => {
+      try {
+        const res = await fetch('https://ipwho.is/', { signal });
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (!data || data.success === false || !data.ip) return null;
+        const flag = getCountryFlagEmoji(data.country_code);
+        return {
+          ip: data.ip,
+          country: `${flag} ${data.country || 'Uzbekistan'}`,
+          countryCode: data.country_code,
+          city: data.city || undefined,
+          region: data.region || undefined,
+          isp: data.connection?.isp || data.connection?.org || undefined,
+          latitude: typeof data.latitude === 'number' ? data.latitude : undefined,
+          longitude: typeof data.longitude === 'number' ? data.longitude : undefined,
+          locationSource: '🌐 ipwho.is',
+          locationAccuracy: 'Taxminiy (~5-15 km)',
+        };
+      } catch {
+        return null;
+      }
+    },
 
-    if (res && res.ok) {
-      const data = await res.json().catch(() => null);
-      if (data && data.ip) {
+    // 4. ipapi.co - Secondary fallback if not rate-limited
+    async (signal: AbortSignal): Promise<Partial<VisitorTelemetryData> | null> => {
+      try {
+        const res = await fetch('https://ipapi.co/json/', { signal });
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (!data || data.error || !data.ip) return null;
         const flag = getCountryFlagEmoji(data.country_code);
         return {
           ip: data.ip,
@@ -207,61 +285,95 @@ async function fetchClientGeoDetails(): Promise<Partial<VisitorTelemetryData>> {
           isp: data.org || data.asn || undefined,
           latitude: typeof data.latitude === 'number' ? data.latitude : parseFloat(data.latitude) || undefined,
           longitude: typeof data.longitude === 'number' ? data.longitude : parseFloat(data.longitude) || undefined,
+          locationSource: '🌐 ipapi.co',
+          locationAccuracy: 'Taxminiy (~5-15 km)',
         };
+      } catch {
+        return null;
       }
-    }
-  } catch {
-    // Silent failover
-  }
+    },
+  ];
 
-  // 2. Backup fast IP Geo provider: ipwho.is (HTTPS, free, high precision)
   try {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 2000);
-    const res = await fetch('https://ipwho.is/', { signal: controller.signal }).catch(() => null);
-    clearTimeout(timer);
-    if (res && res.ok) {
-      const data = await res.json().catch(() => null);
-      if (data && data.success !== false && data.ip) {
-        const flag = getCountryFlagEmoji(data.country_code);
-        return {
-          ip: data.ip,
-          country: `${flag} ${data.country || 'Uzbekistan'}`,
-          countryCode: data.country_code,
-          city: data.city || undefined,
-          region: data.region || undefined,
-          isp: data.connection?.isp || data.connection?.org || undefined,
-          latitude: typeof data.latitude === 'number' ? data.latitude : parseFloat(data.latitude) || undefined,
-          longitude: typeof data.longitude === 'number' ? data.longitude : parseFloat(data.longitude) || undefined,
-        };
-      }
-    }
-  } catch {
-    // ignore
-  }
+    const timeout = setTimeout(() => controller.abort(), 3000);
 
-  // 3. Ultra lightweight fallback: api.country.is
-  try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 1500);
-    const res = await fetch('https://api.country.is/', { signal: controller.signal }).catch(() => null);
-    clearTimeout(timer);
-    if (res && res.ok) {
-      const data = await res.json().catch(() => null);
-      if (data && data.country) {
-        const flag = getCountryFlagEmoji(data.country);
-        return {
-          ip: data.ip,
-          country: `${flag} ${data.country}`,
-          countryCode: data.country,
-        };
-      }
-    }
-  } catch {
-    // ignore
-  }
+    const results = await Promise.allSettled(providers.map((p) => p(controller.signal)));
+    clearTimeout(timeout);
 
-  return {};
+    const validResults: Partial<VisitorTelemetryData>[] = results
+      .filter((r): r is PromiseFulfilledResult<Partial<VisitorTelemetryData> | null> => r.status === 'fulfilled' && r.value !== null && !!r.value?.ip)
+      .map((r) => r.value as Partial<VisitorTelemetryData>);
+
+    if (validResults.length === 0) {
+      // Minimal fallback
+      try {
+        const res = await fetch('https://api.country.is/').catch(() => null);
+        if (res && res.ok) {
+          const d = await res.json();
+          if (d && d.country) {
+            return {
+              ip: d.ip,
+              country: `${getCountryFlagEmoji(d.country)} ${d.country}`,
+              countryCode: d.country,
+            };
+          }
+        }
+      } catch {
+        // ignore
+      }
+      return {};
+    }
+
+    // Detect browser timezone hint (e.g., 'Asia/Samarkand', 'Asia/Tashkent')
+    const browserTz = typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : '';
+
+    // Score candidates: prioritize results that provide both city & region,
+    // and prefer granular regional detection over generic capital fallbacks if timezone or other signals suggest a specific region.
+    const scored = validResults.map((item) => {
+      let score = 0;
+      if (item.ip) score += 2;
+      if (item.country) score += 2;
+      if (item.isp) score += 2;
+      if (item.latitude && item.longitude) score += 3;
+      if (item.city) score += 4;
+      if (item.region) score += 4;
+
+      // ipinfo.io is proven to have the highest routing resolution in Central Asia
+      if (item.locationSource?.includes('ipinfo.io')) {
+        score += 6;
+      }
+
+      // If browser timezone indicates Samarkand and candidate found Samarkand, boost score
+      if (browserTz && item.city && browserTz.toLowerCase().includes(item.city.toLowerCase())) {
+        score += 8;
+      }
+
+      // Non-Tashkent regional detection is usually specific
+      if (item.region && !item.region.toLowerCase().includes('tashkent')) {
+        score += 3;
+      }
+
+      return { item, score };
+    });
+
+    scored.sort((a, b) => b.score - a.score);
+    const best = { ...scored[0].item };
+
+    // Backfill any missing fields from other candidates
+    for (const candidate of validResults) {
+      if (!best.city && candidate.city) best.city = candidate.city;
+      if (!best.region && candidate.region) best.region = candidate.region;
+      if (!best.isp && candidate.isp) best.isp = candidate.isp;
+      if (!best.latitude && candidate.latitude) best.latitude = candidate.latitude;
+      if (!best.longitude && candidate.longitude) best.longitude = candidate.longitude;
+    }
+
+    best.locationSource = `🌐 Multi-Source Konsensus (${scored[0].item.locationSource || 'IP'})`;
+    return best;
+  } catch {
+    return {};
+  }
 }
 
 /**
@@ -460,8 +572,8 @@ export async function collectVisitorTelemetry(
   let finalCity = geoData.city;
   let finalRegion = geoData.region;
   let finalStreet: string | undefined = undefined;
-  let locationSource = '🌐 IP-manzil (Provayder tarmog\'i)';
-  let locationAccuracy = 'Taxminiy (~5-15 km)';
+  let locationSource = geoData.locationSource || '🌐 IP-manzil (Provayder tarmog\'i)';
+  let locationAccuracy = geoData.locationAccuracy || 'Taxminiy (~5-15 km)';
 
   if (exactGps) {
     finalLat = exactGps.latitude;
