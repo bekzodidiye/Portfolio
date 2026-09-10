@@ -13,9 +13,9 @@ import {
   CheckCircle2,
   Terminal,
 } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
-import { collectVisitorTelemetry } from '../services/visitorTelemetry';
-import { sendVisitorNotification } from '../services/telegramService';
+import { useLanguage } from '../../context/LanguageContext';
+import { collectVisitorTelemetry } from '../../services/visitorTelemetry';
+import { sendVisitorNotification } from '../../services/telegramService';
 
 const VISITOR_NAME_KEY = 'portfolio_visitor_name';
 const VISITOR_ROLE_KEY = 'portfolio_visitor_role';

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Terminal } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
-import { useGsapReveal } from '../hooks/useGsapReveal';
+import { useLanguage } from '../../../context/LanguageContext';
+import { useGsapReveal } from '../../../hooks/useGsapReveal';
 import { ContactFormEditor } from './ContactFormEditor';
 import { ContactQuickCards } from './ContactQuickCards';
 

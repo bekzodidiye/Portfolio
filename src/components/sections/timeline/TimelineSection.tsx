@@ -1,9 +1,9 @@
 import React from 'react';
 import { Briefcase, GraduationCap, Clock } from 'lucide-react';
-import { usePortfolioData } from '../context/PortfolioDataContext';
-import { WorkExperienceItem, EducationItem } from '../types/portfolio';
-import { useLanguage } from '../context/LanguageContext';
-import { useGsapReveal } from '../hooks/useGsapReveal';
+import { usePortfolioData } from '../../../context/PortfolioDataContext';
+import { WorkExperienceItem, EducationItem } from '../../../types/portfolio';
+import { useLanguage } from '../../../context/LanguageContext';
+import { useGsapReveal } from '../../../hooks/useGsapReveal';
 import { WorkTimelineCard } from './WorkTimelineCard';
 import { EduTimelineCard } from './EduTimelineCard';
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Server, Database, Cpu, ShieldCheck, Code } from 'lucide-react';
-import { SkillCategory } from '../types/portfolio';
+import { SkillCategory } from '../../../types/portfolio';
 
 const ICON_MAP: Record<string, React.ReactNode> = {
   Server: <Server className="w-6 h-6 text-blue-600" />,

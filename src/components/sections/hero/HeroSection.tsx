@@ -1,11 +1,11 @@
 import React from 'react';
 import { ArrowRight, Terminal, Send, Bot } from 'lucide-react';
-import { usePortfolioData } from '../context/PortfolioDataContext';
+import { usePortfolioData } from '../../../context/PortfolioDataContext';
 import { HeroSystemVisualizer } from './HeroSystemVisualizer';
-import { useLanguage } from '../context/LanguageContext';
-import { MagneticButton } from './MagneticButton';
-import { AnimatedCounter } from './AnimatedCounter';
-import { useGsapReveal } from '../hooks/useGsapReveal';
+import { useLanguage } from '../../../context/LanguageContext';
+import { MagneticButton } from '../../ui/MagneticButton';
+import { AnimatedCounter } from '../../ui/AnimatedCounter';
+import { useGsapReveal } from '../../../hooks/useGsapReveal';
 
 export const HeroSection: React.FC = () => {
   const { t } = useLanguage();

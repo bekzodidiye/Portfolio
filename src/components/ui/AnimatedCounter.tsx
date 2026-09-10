@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useInView } from '../hooks/useInView';
+import { useInView } from '../../hooks/useInView';
 
 interface AnimatedCounterProps {
   target: number;

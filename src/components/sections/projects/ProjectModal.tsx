@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ExternalLink, Github, CheckCircle2, Cpu } from 'lucide-react';
-import { ProjectItem } from '../types/portfolio';
-import { useLanguage } from '../context/LanguageContext';
+import { ProjectItem } from '../../../types/portfolio';
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface ProjectModalProps {
   project: ProjectItem | null;

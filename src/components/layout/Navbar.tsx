@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Terminal, Send, Menu, X, Code2, Bot } from 'lucide-react';
-import { usePortfolioData } from '../context/PortfolioDataContext';
-import { useLanguage } from '../context/LanguageContext';
-import { LanguageSwitcher } from './LanguageSwitcher';
+import { usePortfolioData } from '../../context/PortfolioDataContext';
+import { useLanguage } from '../../context/LanguageContext';
+import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 
 interface NavbarProps {
   onOpenResume?: () => void;

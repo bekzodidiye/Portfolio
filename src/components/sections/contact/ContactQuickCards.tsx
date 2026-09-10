@@ -1,7 +1,7 @@
 import React from 'react';
 import { Phone, Mail, Send, Copy, Check, Clock, Bot, ArrowUpRight } from 'lucide-react';
-import { usePortfolioData } from '../context/PortfolioDataContext';
-import { SpotlightCard } from './SpotlightCard';
+import { usePortfolioData } from '../../../context/PortfolioDataContext';
+import { SpotlightCard } from '../../ui/SpotlightCard';
 
 interface ContactQuickCardsProps {
   bukharaTime: string;

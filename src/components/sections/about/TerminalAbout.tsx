@@ -1,7 +1,7 @@
 import React from 'react';
 import { Terminal as TerminalIcon } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
-import { useGsapReveal } from '../hooks/useGsapReveal';
+import { useLanguage } from '../../../context/LanguageContext';
+import { useGsapReveal } from '../../../hooks/useGsapReveal';
 import { TerminalCliWindow } from './TerminalCliWindow';
 
 export const TerminalAbout: React.FC = () => {
