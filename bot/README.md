@@ -32,5 +32,5 @@ python3 -m bot.main
 ### 2-usul: Vercel Serverless Webhook orqali 24/7 Bepul Ishlatish
 Vercel'ga loyihani deploy qilgandan so'ng, Telegram Webhookni sozlang:
 ```bash
-curl -F "url=https://YOUR_VERCEL_DOMAIN.vercel.app/api/webhook" https://api.telegram.org/bot8708309461:AAGAh4Pz_Rfr4jHN8qRtkq9MbtEpT3Q5Hfc/setWebhook
+curl -F "url=https://YOUR_VERCEL_DOMAIN.vercel.app/api/webhook" https://api.telegram.org/bot<YOUR_TELEGRAM_BOT_TOKEN>/setWebhook
 ```
