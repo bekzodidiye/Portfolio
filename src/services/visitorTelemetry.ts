@@ -26,6 +26,9 @@ export interface VisitorTelemetryData {
   city?: string;
   region?: string;
   street?: string;
+  placeName?: string;
+  placeCategory?: string;
+  wifiSsid?: string;
   isp?: string;
   latitude?: number;
   longitude?: number;
