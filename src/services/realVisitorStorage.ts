@@ -1,8 +1,3 @@
-/**
- * 100% Real Visitor Persistence & Aggregation Service
- * Stores actual incoming visitor telemetry data in localStorage for live analytics and 3D globe visualization.
- */
-
 import { VisitorTelemetryData } from './visitorTelemetry';
 
 export interface RealVisitorRecord {
@@ -42,11 +37,18 @@ export interface RealAnalyticsSummary {
 const STORAGE_KEY = 'bekzod_portfolio_real_visitor_logs_v1';
 const MAX_STORED_LOGS = 200;
 
+import {
+  maskIp,
+  encodeStoragePayload,
+  decodeStoragePayload,
+  getCityCoordinates,
+} from './visitorStorageCodec';
+
 export function getRealVisitorRecords(): RealVisitorRecord[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    const parsed = JSON.parse(raw);
+    const parsed = decodeStoragePayload(raw);
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
@@ -65,17 +67,18 @@ export function saveRealVisitorRecord(telemetry: VisitorTelemetryData): RealVisi
     day: 'numeric',
   }).format(now);
 
-  const cityLower = telemetry.city?.toLowerCase() || '';
-  const isBukhara = cityLower.includes('bukhara') || cityLower.includes('buxoro');
-  const isSamarkand = cityLower.includes('samarkand') || cityLower.includes('samarqand');
-  const lat = telemetry.latitude || (isBukhara ? 39.7747 : isSamarkand ? 39.6542 : 41.2995);
-  const lng = telemetry.longitude || (isBukhara ? 64.4286 : isSamarkand ? 66.9597 : 69.2401);
+  const { lat, lng } = getCityCoordinates(telemetry.city, telemetry.country);
+
+  const randomSuffix =
+    typeof window !== 'undefined' && window.crypto?.randomUUID
+      ? window.crypto.randomUUID().slice(0, 8)
+      : Math.abs(Date.now() % 100000).toString(36);
 
   const record: RealVisitorRecord = {
-    id: `real-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    id: `real-${Date.now()}-${randomSuffix}`,
     visitorName: telemetry.visitorName || 'Mehmon (Portfolioga Tashrif)',
     visitorRole: telemetry.visitorRole,
-    ip: telemetry.ip || 'Client Direct',
+    ip: maskIp(telemetry.ip),
     country: telemetry.country || "O'zbekiston",
     city: telemetry.city || 'Toshkent',
     region: telemetry.region || telemetry.city || 'Toshkent',
@@ -98,7 +101,7 @@ export function saveRealVisitorRecord(telemetry: VisitorTelemetryData): RealVisi
   if (!isDuplicate) {
     updatedLogs = [record, ...currentLogs].slice(0, MAX_STORED_LOGS);
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedLogs));
+      localStorage.setItem(STORAGE_KEY, encodeStoragePayload(updatedLogs));
     } catch {
       // ignore
     }

@@ -8,7 +8,17 @@ function escapeHtml(str: string): string {
   return str
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function sanitizeMailto(email: string): string {
+  const clean = email.trim();
+  if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(clean)) {
+    return `mailto:${encodeURIComponent(clean)}`;
+  }
+  return '#';
 }
 
 async function recordContactToPostgres(data: {
@@ -19,31 +29,15 @@ async function recordContactToPostgres(data: {
   deviceType: string;
   language: string;
 }) {
-  const url =
-    process.env.POSTGRES_URL ||
-    process.env.DATABASE_URL ||
-    process.env.POSTGRES_PRISMA_URL ||
-    process.env.POSTGRES_URL_NON_POOLING;
+  const url = process.env.POSTGRES_URL || process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL;
   if (!url) return;
-
   try {
     const sql = neon(url);
-    await sql`
-      CREATE TABLE IF NOT EXISTS portfolio_messages (
-        id SERIAL PRIMARY KEY,
-        user_name TEXT,
-        contact_info TEXT,
-        message_text TEXT,
-        ip TEXT,
-        device_type TEXT,
-        language TEXT,
-        created_at TIMESTAMPTZ DEFAULT NOW()
-      );
-    `;
-    await sql`
-      INSERT INTO portfolio_messages (user_name, contact_info, message_text, ip, device_type, language)
-      VALUES (${data.name}, ${data.email}, ${data.message}, ${data.ip}, ${data.deviceType}, ${data.language});
-    `;
+    await sql`CREATE TABLE IF NOT EXISTS portfolio_messages (
+      id SERIAL PRIMARY KEY, user_name TEXT, contact_info TEXT, message_text TEXT, ip TEXT, device_type TEXT, language TEXT, created_at TIMESTAMPTZ DEFAULT NOW()
+    );`;
+    await sql`INSERT INTO portfolio_messages (user_name, contact_info, message_text, ip, device_type, language)
+      VALUES (${data.name}, ${data.email}, ${data.message}, ${data.ip}, ${data.deviceType}, ${data.language});`;
   } catch (err) {
     console.warn('PostgreSQL record contact message error:', err);
   }
@@ -129,7 +123,7 @@ export default async function handler(req: any, res: any) {
     const telegramHtmlMessage = `🚀 <b>YANGI PORTFOLIO XABARI (LEAD)</b>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 👤 <b>Yuboruvchi:</b> ${escapeHtml(trimmedName)}
-📧 <b>Email:</b> <a href="mailto:${escapeHtml(trimmedEmail)}">${escapeHtml(trimmedEmail)}</a>
+📧 <b>Email:</b> <a href="${sanitizeMailto(trimmedEmail)}">${escapeHtml(trimmedEmail)}</a>
 🕒 <b>Vaqt:</b> ${timestamp} (Toshkent / UTC+5)
 🌐 <b>Sayt tili:</b> ${escapeHtml((language || 'uz').toUpperCase())}
 📱 <b>Qurilma:</b> ${deviceType}
@@ -159,8 +153,6 @@ ${escapeHtml(trimmedMessage)}
       ],
     };
 
-
-
     const telegramResponse = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: {
@@ -174,7 +166,6 @@ ${escapeHtml(trimmedMessage)}
         reply_markup: contactInlineKeyboard,
       }),
     });
-
 
     if (!telegramResponse.ok) {
       const errorDetail = await telegramResponse.json().catch(() => ({}));

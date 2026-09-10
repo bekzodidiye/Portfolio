@@ -7,6 +7,15 @@ import {
 
 export type SandboxTab = 'ratelimit' | 'jwt' | 'redis' | 'webhook' | 'sql';
 
+function getSecureRandom(): number {
+  if (typeof window !== 'undefined' && window.crypto?.getRandomValues) {
+    const array = new Uint32Array(1);
+    window.crypto.getRandomValues(array);
+    return array[0] / (0xffffffff + 1);
+  }
+  return 0.5;
+}
+
 export function useBackendPlayground() {
   const [activeTab, setActiveTab] = useState<SandboxTab>('ratelimit');
   const [copied, setCopied] = useState(false);
@@ -36,7 +45,7 @@ export function useBackendPlayground() {
           status: 200,
           msg: `HTTP/1.1 200 OK — X-RateLimit-Remaining: ${tokens - 1}/5`,
           time: now,
-          latency: Math.floor(Math.random() * 8) + 4,
+          latency: Math.floor(getSecureRandom() * 8) + 4,
         },
         ...prev.slice(0, 5),
       ]);
@@ -89,8 +98,8 @@ export function useBackendPlayground() {
     setRedisLatency(null);
 
     setTimeout(() => {
-      setDbLatency(Math.floor(Math.random() * 15) + 38);
-      setRedisLatency(Number((Math.random() * 0.6 + 0.8).toFixed(2)));
+      setDbLatency(Math.floor(getSecureRandom() * 15) + 38);
+      setRedisLatency(Number((getSecureRandom() * 0.6 + 0.8).toFixed(2)));
       setIsBenchmarking(false);
     }, 600);
   };

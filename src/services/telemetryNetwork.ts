@@ -3,17 +3,71 @@
  */
 
 export function categorizeReferrer(ref: string): string {
-  if (!ref || ref.trim() === '') return '🔗 To\'g\'ridan-to\'g\'ri (Direct URL / Bookmark)';
-  const lower = ref.toLowerCase();
-  if (lower.includes('t.me') || lower.includes('telegram')) return '✈️ Telegram (@toyneden / Channel / Chat)';
-  if (lower.includes('linkedin.com')) return '💼 LinkedIn (HR / Recruiter)';
-  if (lower.includes('github.com')) return '🐙 GitHub Profile / Repo';
-  if (lower.includes('google.com') || lower.includes('google.')) return '🔍 Google Qidiruv';
-  if (lower.includes('instagram.com')) return '📸 Instagram';
-  if (lower.includes('twitter.com') || lower.includes('x.com')) return '🐦 X (Twitter)';
-  if (lower.includes('yandex.')) return '🔎 Yandex';
-  if (lower.includes('kwork.ru') || lower.includes('kwork.com')) return '💼 Kwork Freelance';
-  return `🌐 ${ref.replace(/^https?:\/\//, '').split('/')[0]}`;
+  if (!ref || ref.trim() === '') return "🔗 To'g'ridan-to'g'ri (Direct URL / Bookmark)";
+
+  try {
+    const urlObj = new URL(ref.startsWith('http') ? ref : `https://${ref}`);
+    const host = urlObj.hostname.toLowerCase();
+
+    if (
+      host === 't.me' ||
+      host.endsWith('.t.me') ||
+      host === 'telegram.me' ||
+      host.endsWith('.telegram.me') ||
+      host === 'telegram.org' ||
+      host.endsWith('.telegram.org')
+    ) {
+      return '✈️ Telegram (@toyneden / Channel / Chat)';
+    }
+    if (host === 'linkedin.com' || host.endsWith('.linkedin.com')) {
+      return '💼 LinkedIn (HR / Recruiter)';
+    }
+    if (host === 'github.com' || host.endsWith('.github.com')) {
+      return '🐙 GitHub Profile / Repo';
+    }
+    if (
+      host === 'google.com' ||
+      host.endsWith('.google.com') ||
+      host === 'google.uz' ||
+      host.endsWith('.google.uz') ||
+      host === 'google.ru' ||
+      host.endsWith('.google.ru')
+    ) {
+      return '🔍 Google Qidiruv';
+    }
+    if (host === 'instagram.com' || host.endsWith('.instagram.com')) {
+      return '📸 Instagram';
+    }
+    if (
+      host === 'x.com' ||
+      host.endsWith('.x.com') ||
+      host === 'twitter.com' ||
+      host.endsWith('.twitter.com')
+    ) {
+      return '🐦 X (Twitter)';
+    }
+    if (
+      host === 'yandex.ru' ||
+      host.endsWith('.yandex.ru') ||
+      host === 'yandex.uz' ||
+      host.endsWith('.yandex.uz') ||
+      host === 'yandex.com' ||
+      host.endsWith('.yandex.com')
+    ) {
+      return '🔎 Yandex';
+    }
+    if (
+      host === 'kwork.ru' ||
+      host.endsWith('.kwork.ru') ||
+      host === 'kwork.com' ||
+      host.endsWith('.kwork.com')
+    ) {
+      return '💼 Kwork Freelance';
+    }
+    return `🌐 ${host}`;
+  } catch {
+    return '🔗 Havola orqali (Referrer)';
+  }
 }
 
 export interface NetworkSpecs {
