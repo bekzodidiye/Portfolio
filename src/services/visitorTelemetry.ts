@@ -105,9 +105,7 @@ export async function collectVisitorTelemetry(
   const [geoData, battery, exactGps] = await Promise.all([
     fetchClientGeoDetails(),
     getBatteryInfo(),
-    overrideGps
-      ? Promise.resolve(overrideGps)
-      : getExactGpsCoordinates(5000).catch(() => null),
+    overrideGps ? Promise.resolve(overrideGps) : Promise.resolve(null),
   ]);
 
   let finalLat = geoData.latitude;
