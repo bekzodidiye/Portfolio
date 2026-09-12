@@ -126,8 +126,28 @@ export const GlobalVisitorGlobe: React.FC = () => {
     return () => {
       cancelAnimationFrame(frameId);
       renderer.dispose();
+      
+      // Dispose Earth
+      earthMaterial.map?.dispose();
       earthMaterial.dispose();
+      earthMesh.geometry.dispose();
       fallbackTexture.dispose();
+
+      // Dispose Clouds
+      cloudsMaterial.map?.dispose();
+      cloudsMaterial.dispose();
+      cloudsMesh.geometry.dispose();
+
+      // Dispose Glow Halo
+      if (glowMesh.material instanceof THREE.Material) glowMesh.material.dispose();
+      glowMesh.geometry.dispose();
+
+      // Dispose Rings
+      ringsToAnimate.forEach((ring) => {
+        if (ring.material instanceof THREE.Material) ring.material.dispose();
+        ring.geometry.dispose();
+      });
+
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }

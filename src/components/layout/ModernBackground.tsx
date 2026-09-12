@@ -4,13 +4,23 @@ import { initSubtleThreeScene } from './subtleThreeScene';
 export const ModernBackground: React.FC = () => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
 
+  const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false);
+
   useEffect(() => {
-    if (!canvasContainerRef.current) return;
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
+  useEffect(() => {
+    if (!canvasContainerRef.current || prefersReducedMotion) return;
     const controller = initSubtleThreeScene(canvasContainerRef.current);
     return () => {
       controller.destroy();
     };
-  }, []);
+  }, [prefersReducedMotion]);
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">

@@ -8,17 +8,21 @@ export const AdminAuthModal: React.FC = () => {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [isShaking, setIsShaking] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   if (!isAdminOpen || isAdminAuthenticated) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!pin.trim()) {
       setError('Iltimos, admin PIN-kodini kiriting.');
       return;
     }
 
-    const success = loginAdmin(pin);
+    setIsLoading(true);
+    const success = await loginAdmin(pin);
+    setIsLoading(false);
+    
     if (success) {
       setError('');
       setPin('');
@@ -106,8 +110,9 @@ export const AdminAuthModal: React.FC = () => {
                     setPin(e.target.value);
                     setError('');
                   }}
-                  placeholder="PIN-kodni kiriting (Standart: bekzod2026)"
+                  placeholder="Maxfiy PIN-kodni kiriting"
                   className="w-full pl-11 pr-4 py-3 bg-slate-950/80 border border-slate-700/80 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-2xl text-white placeholder-slate-500 text-sm font-mono tracking-widest outline-none transition-all"
+                  disabled={isLoading}
                 />
               </div>
 
@@ -134,7 +139,9 @@ export const AdminAuthModal: React.FC = () => {
                     else if (k === '⌫') handleBackspace();
                     else handleQuickKey(k);
                   }}
-                  className="py-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-700/80 border border-slate-700/40 text-sm font-semibold text-slate-200 hover:text-white transition-all active:scale-95"
+                  className="py-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-700/80 border border-slate-700/40 text-sm font-semibold text-slate-200 hover:text-white transition-all active:scale-95 disabled:opacity-50"
+                  aria-label={k === '⌫' ? "O'chirish" : k === 'C' ? "Tozalash" : k}
+                  disabled={isLoading}
                 >
                   {k}
                 </button>
@@ -143,20 +150,13 @@ export const AdminAuthModal: React.FC = () => {
 
             <button
               type="submit"
-              className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 active:scale-[0.98] text-white font-semibold text-sm rounded-2xl shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 transition-all mt-2"
+              disabled={isLoading}
+              className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 active:scale-[0.98] text-white font-semibold text-sm rounded-2xl shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 transition-all mt-2 disabled:opacity-70"
             >
-              <span>Kirish</span>
-              <ArrowRight className="w-4 h-4" />
+              <span>{isLoading ? 'Tekshirilmoqda...' : 'Kirish'}</span>
+              {!isLoading && <ArrowRight className="w-4 h-4" />}
             </button>
           </form>
-
-          {/* Footer note */}
-          <div className="mt-5 text-center">
-            <p className="text-[11px] text-slate-500 flex items-center justify-center gap-1.5">
-              <Lock className="w-3 h-3 text-slate-400" />
-              <span>Standart PIN: <code className="text-blue-400 bg-blue-950/50 px-1.5 py-0.5 rounded">bekzod2026</code></span>
-            </p>
-          </div>
         </motion.div>
       </div>
     </AnimatePresence>
