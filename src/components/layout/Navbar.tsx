@@ -2,15 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Terminal } from 'lucide-react';
 import { usePortfolioData } from '../../context/PortfolioDataContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useUIContext } from '../../context/UIContext';
 import { NavbarMobileMenu } from './NavbarMobileMenu';
 import { NavbarActions } from './NavbarActions';
 
-interface NavbarProps {
-  onOpenResume?: () => void;
-  onOpenVisitorModal?: () => void;
-}
-
-export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, onOpenVisitorModal }) => {
+export const Navbar: React.FC = () => {
+  const { setIsResumeOpen, setIsVisitorModalOpen } = useUIContext();
   const { t } = useLanguage();
   const { candidateProfile, setIsAdminOpen } = usePortfolioData();
   const [scrolled, setScrolled] = useState(false);
@@ -130,8 +127,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, onOpenVisitorModal
 
           {/* Action Controls, Switcher & Toggles */}
           <NavbarActions
-            onOpenResume={onOpenResume}
-            onOpenVisitorModal={onOpenVisitorModal}
+            onOpenResume={() => setIsResumeOpen(true)}
+            onOpenVisitorModal={() => setIsVisitorModalOpen(true)}
             mobileMenuOpen={mobileMenuOpen}
             setMobileMenuOpen={setMobileMenuOpen}
             candidateProfile={candidateProfile}
@@ -145,8 +142,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, onOpenVisitorModal
           onClose={() => setMobileMenuOpen(false)}
           navLinks={navLinks}
           activeSection={activeSection}
-          onOpenVisitorModal={onOpenVisitorModal}
-          onOpenResume={onOpenResume}
+          onOpenVisitorModal={() => setIsVisitorModalOpen(true)}
+          onOpenResume={() => setIsResumeOpen(true)}
           candidateProfile={candidateProfile}
           t={t}
         />

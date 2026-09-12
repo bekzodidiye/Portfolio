@@ -3,20 +3,19 @@ import { createPortal } from 'react-dom';
 import { X, Download, FileText } from 'lucide-react';
 import { usePortfolioData } from '../../context/PortfolioDataContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useUIContext } from '../../context/UIContext';
 import { ResumeDocumentContent } from './ResumeDocumentContent';
 
-interface ResumeModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => {
+export const ResumeModal: React.FC = () => {
   const { t } = useLanguage();
+  const { isResumeOpen, setIsResumeOpen } = useUIContext();
   const { candidateProfile, workExperience, educationList, skillCategories } = usePortfolioData();
   const modalRef = useRef<HTMLDivElement>(null);
 
+  const onClose = () => setIsResumeOpen(false);
+
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isResumeOpen) return;
 
     // Handle ESC and Tab Focus Trap
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -64,9 +63,9 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
       window.removeEventListener('keydown', handleKeyDown);
       clearTimeout(timer);
     };
-  }, [isOpen, onClose]);
+  }, [isResumeOpen]);
 
-  if (!isOpen || typeof document === 'undefined') return null;
+  if (!isResumeOpen || typeof document === 'undefined') return null;
 
   const handlePrint = () => {
     window.print();

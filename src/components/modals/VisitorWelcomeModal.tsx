@@ -2,17 +2,11 @@ import React from 'react';
 import { User, Sparkles, ArrowRight, ShieldCheck, X, Terminal } from 'lucide-react';
 import { VisitorToast } from './VisitorToast';
 import { VisitorRoleSelector } from './VisitorRoleSelector';
+import { useUIContext } from '../../context/UIContext';
 import { useVisitorModal } from './useVisitorModal';
 
-interface VisitorWelcomeModalProps {
-  isOpenOverride?: boolean;
-  onCloseOverride?: () => void;
-}
-
-export function VisitorWelcomeModal({
-  isOpenOverride,
-  onCloseOverride,
-}: VisitorWelcomeModalProps) {
+export function VisitorWelcomeModal() {
+  const { isVisitorModalOpen, setIsVisitorModalOpen } = useUIContext();
   const {
     isOpen,
     name,
@@ -25,7 +19,10 @@ export function VisitorWelcomeModal({
     handleSubmit,
     handleSkip,
     t,
-  } = useVisitorModal({ isOpenOverride, onCloseOverride });
+  } = useVisitorModal({
+    isOpenOverride: isVisitorModalOpen,
+    onCloseOverride: () => setIsVisitorModalOpen(false)
+  });
 
   return (
     <>
