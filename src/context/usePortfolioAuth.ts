@@ -40,16 +40,24 @@ export function usePortfolioAuth() {
     };
   }, []);
 
-  const loginAdmin = (pin: string): boolean => {
-    const currentPin = localStorage.getItem(STORAGE_AUTH_PIN_KEY) || DEFAULT_ADMIN_PIN;
-    if (
-      pin.trim() === currentPin.trim() ||
-      pin.trim() === '5678281376' ||
-      pin.trim() === 'admin123'
-    ) {
-      setIsAdminAuthenticated(true);
-      sessionStorage.setItem('bekzod_admin_auth_session', 'true');
-      return true;
+  const loginAdmin = async (pin: string): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setIsAdminAuthenticated(true);
+          sessionStorage.setItem('bekzod_admin_auth_session', 'true');
+          return true;
+        }
+      }
+    } catch (e) {
+      console.error('Authentication error:', e);
     }
     return false;
   };
