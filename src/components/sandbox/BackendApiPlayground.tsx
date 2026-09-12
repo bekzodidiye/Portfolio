@@ -8,6 +8,7 @@ import { JwtScenario } from './components/JwtScenario';
 import { RedisBenchmarkScenario } from './components/RedisBenchmarkScenario';
 import { WebhookQueueScenario } from './components/WebhookQueueScenario';
 import { SqlExplainScenario } from './components/SqlExplainScenario';
+import { ErrorBoundary } from '../common/ErrorBoundary';
 
 export const BackendApiPlayground: React.FC = () => {
   const { language } = useLanguage();
@@ -60,8 +61,9 @@ export const BackendApiPlayground: React.FC = () => {
           </p>
         </div>
 
-        <div className="rounded-3xl bg-slate-950 border border-slate-800 shadow-2xl overflow-hidden text-slate-200">
-          <BackendPlaygroundNav activeTab={activeTab} setActiveTab={setActiveTab} />
+        <ErrorBoundary>
+          <div className="rounded-3xl bg-slate-950 border border-slate-800 shadow-2xl overflow-hidden text-slate-200">
+            <BackendPlaygroundNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
           {activeTab === 'ratelimit' && (
             <RateLimiterScenario
@@ -113,7 +115,8 @@ export const BackendApiPlayground: React.FC = () => {
               onRunSql={handleRunExplainSql}
             />
           )}
-        </div>
+          </div>
+        </ErrorBoundary>
       </div>
     </section>
   );
