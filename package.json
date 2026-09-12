@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
-    "check:bot": "python3 bot/check_bot.py"
+    "check:bot": "python3 -m bot.check_bot"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
