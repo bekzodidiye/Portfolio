@@ -43,6 +43,8 @@ async function recordContactToPostgres(data: {
   }
 }
 
+const rateLimit = new Map<string, { count: number; lastAttempt: number }>();
+
 export default async function handler(req: any, res: any) {
   // Only allow POST method
   if (req.method !== 'POST') {
@@ -53,6 +55,30 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
+    const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket?.remoteAddress || 'Unknown IP';
+    const now = Date.now();
+    const rateLimitWindowMs = 10 * 60 * 1000; // 10 minutes
+    const maxRequests = 3;
+
+    const userRateData = rateLimit.get(clientIp);
+    if (userRateData) {
+      if (now - userRateData.lastAttempt < rateLimitWindowMs) {
+        if (userRateData.count >= maxRequests) {
+          console.warn(`Rate limit exceeded for IP: ${clientIp} on /api/contact`);
+          return res.status(429).json({
+            ok: false,
+            error: 'Too many requests. Please try again later.',
+          });
+        }
+        userRateData.count += 1;
+        userRateData.lastAttempt = now;
+      } else {
+        rateLimit.set(clientIp, { count: 1, lastAttempt: now });
+      }
+    } else {
+      rateLimit.set(clientIp, { count: 1, lastAttempt: now });
+    }
+
     const { name, email, message, honeypot, language } = req.body || {};
 
     // 1. Anti-Spam Honeypot Check (Silent drop for bots)
@@ -102,7 +128,6 @@ export default async function handler(req: any, res: any) {
 
     // 4. Client Metadata
 
-    const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket?.remoteAddress || 'Unknown IP';
     const userAgent = (req.headers['user-agent'] as string) || 'Unknown Client';
     const deviceType = /android|iphone|ipad|ipod/i.test(userAgent) ? '📱 Mobile' : '💻 Desktop';
 

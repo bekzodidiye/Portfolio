@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { LanguageProvider } from './context/LanguageContext';
 import { PortfolioDataProvider, usePortfolioData } from './context/PortfolioDataContext';
 import { UIProvider } from './context/UIContext';
@@ -11,13 +11,15 @@ import {
   TimelineSection,
   ContactSection,
 } from './components/sections';
-import { SystemArchitectureVisualizer } from './components/architecture/SystemArchitectureVisualizer';
-import { BackendApiPlayground } from './components/sandbox/BackendApiPlayground';
-import { ResumeModal, VisitorWelcomeModal } from './components/modals';
-import { PortfolioAiAssistant } from './components/ai/PortfolioAiAssistant';
-import { AdminAuthModal } from './components/admin/AdminAuthModal';
-import { AdminDashboard } from './components/admin/AdminDashboard';
 import { useVisitorTelemetry } from './hooks/useVisitorTelemetry';
+
+const SystemArchitectureVisualizer = lazy(() => import('./components/architecture/SystemArchitectureVisualizer').then(module => ({ default: module.SystemArchitectureVisualizer })));
+const BackendApiPlayground = lazy(() => import('./components/sandbox/BackendApiPlayground').then(module => ({ default: module.BackendApiPlayground })));
+const ResumeModal = lazy(() => import('./components/modals').then(module => ({ default: module.ResumeModal })));
+const VisitorWelcomeModal = lazy(() => import('./components/modals').then(module => ({ default: module.VisitorWelcomeModal })));
+const PortfolioAiAssistant = lazy(() => import('./components/ai/PortfolioAiAssistant').then(module => ({ default: module.PortfolioAiAssistant })));
+const AdminAuthModal = lazy(() => import('./components/admin/AdminAuthModal').then(module => ({ default: module.AdminAuthModal })));
+const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard').then(module => ({ default: module.AdminDashboard })));
 
 function PortfolioApp() {
   const { isAdminOpen, isAdminAuthenticated } = usePortfolioData();
@@ -41,26 +43,32 @@ function PortfolioApp() {
           <TerminalAbout />
           <SkillsSection />
           <ProjectsSection />
-          <SystemArchitectureVisualizer />
-          <BackendApiPlayground />
+          
+          <Suspense fallback={<div className="h-20 flex items-center justify-center text-slate-500">Kutilmoqda...</div>}>
+            <SystemArchitectureVisualizer />
+            <BackendApiPlayground />
+          </Suspense>
+
           <TimelineSection />
           <ContactSection />
         </main>
         <Footer />
       </div>
 
-      {/* 24/7 Interactive AI Hiring & Architecture Assistant */}
-      <PortfolioAiAssistant />
+      <Suspense fallback={null}>
+        {/* 24/7 Interactive AI Hiring & Architecture Assistant */}
+        <PortfolioAiAssistant />
 
-      {/* Resume / CV Modal */}
-      <ResumeModal />
+        {/* Resume / CV Modal */}
+        <ResumeModal />
 
-      {/* Visitor Identification & Welcome Protocol Modal */}
-      <VisitorWelcomeModal />
+        {/* Visitor Identification & Welcome Protocol Modal */}
+        <VisitorWelcomeModal />
 
-      {/* Admin Panel Authentication Modal & Full CMS Control Hub */}
-      <AdminAuthModal />
-      <AdminDashboard />
+        {/* Admin Panel Authentication Modal & Full CMS Control Hub */}
+        <AdminAuthModal />
+        <AdminDashboard />
+      </Suspense>
     </div>
   );
 }

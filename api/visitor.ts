@@ -84,6 +84,8 @@ async function recordVisitorToPostgres(data: {
   }
 }
 
+const visitorRateLimit = new Map<string, { count: number; lastAttempt: number }>();
+
 export default async function handler(req: any, res: any) {
   if (req.method === 'GET') {
     const url =
@@ -127,6 +129,30 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
+    const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket?.remoteAddress || 'Unknown IP';
+    const now = Date.now();
+    const rateLimitWindowMs = 5 * 60 * 1000; // 5 minutes
+    const maxRequests = 10;
+
+    const userRateData = visitorRateLimit.get(clientIp);
+    if (userRateData) {
+      if (now - userRateData.lastAttempt < rateLimitWindowMs) {
+        if (userRateData.count >= maxRequests) {
+          console.warn(`Rate limit exceeded for IP: ${clientIp} on /api/visitor`);
+          return res.status(429).json({
+            ok: false,
+            error: 'Too many requests. Please try again later.',
+          });
+        }
+        userRateData.count += 1;
+        userRateData.lastAttempt = now;
+      } else {
+        visitorRateLimit.set(clientIp, { count: 1, lastAttempt: now });
+      }
+    } else {
+      visitorRateLimit.set(clientIp, { count: 1, lastAttempt: now });
+    }
+
     const data = req.body || {};
     const {
       visitorName,
