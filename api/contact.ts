@@ -55,7 +55,14 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket?.remoteAddress || 'Unknown IP';
+    // Secure IP extraction (Vercel specific headers first)
+    const forwardedFor = (req.headers['x-forwarded-for'] as string) || '';
+    const clientIp = req.headers['x-vercel-forwarded-for'] 
+            || req.headers['x-real-ip'] 
+            || (forwardedFor ? forwardedFor.split(',')[0].trim() : null)
+            || req.socket?.remoteAddress 
+            || 'unknown';
+
     const rateLimitWindowMs = 10 * 60 * 1000; // 10 minutes
     const maxRequests = 3;
 

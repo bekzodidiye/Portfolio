@@ -10,7 +10,13 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown';
+  // Secure IP extraction (Vercel specific headers first)
+  const forwardedFor = (req.headers['x-forwarded-for'] as string) || '';
+  const ip = req.headers['x-vercel-forwarded-for'] 
+          || req.headers['x-real-ip'] 
+          || (forwardedFor ? forwardedFor.split(',')[0].trim() : null)
+          || req.socket?.remoteAddress 
+          || 'unknown';
   
   // Rate limiting check using DB
   const rateLimit = await checkRateLimitDb(ip as string, 'auth', 5, 5 * 60 * 1000);
