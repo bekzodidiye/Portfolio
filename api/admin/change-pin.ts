@@ -1,5 +1,5 @@
-import { getAdminPin, setAdminPin } from '../db/adminSettings';
-import { checkRateLimitDb } from '../db/rateLimit';
+import { getAdminPin, setAdminPin } from '../_db/adminSettings';
+import { checkRateLimitDb } from '../_db/rateLimit';
 
 export const config = {
   runtime: 'nodejs',

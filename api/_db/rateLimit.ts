@@ -1,4 +1,4 @@
-import { getPostgresSql } from '../bot/db';
+import { getPostgresSql } from '../_bot/db';
 
 export async function checkRateLimitDb(
   ip: string,

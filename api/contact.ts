@@ -43,7 +43,7 @@ async function recordContactToPostgres(data: {
   }
 }
 
-import { checkRateLimitDb } from './db/rateLimit';
+import { checkRateLimitDb } from './_db/rateLimit';
 
 export default async function handler(req: any, res: any) {
   // Only allow POST method

@@ -1,7 +1,7 @@
-import { recordBotUserDb } from './bot/db';
-import { sendTelegram } from './bot/telegramApi';
-import { handleAdminAndProjectCallbacks } from './bot/handlers/adminCallbacks';
-import { handleBotTextMessage } from './bot/handlers/messageHandler';
+import { recordBotUserDb } from './_bot/db';
+import { sendTelegram } from './_bot/telegramApi';
+import { handleAdminAndProjectCallbacks } from './_bot/handlers/adminCallbacks';
+import { handleBotTextMessage } from './_bot/handlers/messageHandler';
 
 export const config = {
   runtime: 'nodejs',
