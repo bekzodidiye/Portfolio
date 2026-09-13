@@ -67,11 +67,35 @@ export function usePortfolioAuth() {
     sessionStorage.removeItem('bekzod_admin_auth_session');
   };
 
+  const changeAdminPin = async (
+    oldPin: string,
+    newPin: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const response = await fetch('/api/admin/change-pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ oldPin, newPin }),
+      });
+
+      const data = await response.json();
+      if (response.ok && data.success) {
+        return { success: true };
+      } else {
+        return { success: false, error: data.error || 'Server xatosi' };
+      }
+    } catch (e) {
+      console.error('Change PIN error:', e);
+      return { success: false, error: "Tarmoq xatosi yoki server ishlamayapti." };
+    }
+  };
+
   return {
     isAdminOpen,
     setIsAdminOpen,
     isAdminAuthenticated,
     loginAdmin,
     logoutAdmin,
+    changeAdminPin,
   };
 }

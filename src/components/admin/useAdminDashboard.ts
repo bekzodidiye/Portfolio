@@ -23,6 +23,7 @@ export function useAdminDashboard() {
     exportDataJson,
     importDataJson,
     resetToDefaults,
+    changeAdminPin,
   } = usePortfolioData();
 
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
@@ -62,6 +63,7 @@ export function useAdminDashboard() {
 
   // PIN & Settings hook
   const settingsProps = useAdminSettings({
+    changeAdminPin,
     exportDataJson,
     importDataJson,
     resetToDefaults,
