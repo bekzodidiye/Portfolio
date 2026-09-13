@@ -9,42 +9,32 @@ const attempts = new Map<string, { count: number; lastAttempt: number }>();
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_TIME = 5 * 60 * 1000; // 5 minutes
 
-export default async function handler(req: Request) {
+export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const ip = req.headers.get('x-forwarded-for') || 'unknown';
+  const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown';
   
   // Rate limiting check
   const now = Date.now();
-  const userAttempts = attempts.get(ip);
+  const userAttempts = attempts.get(ip as string);
   if (userAttempts) {
     if (userAttempts.count >= MAX_ATTEMPTS && now - userAttempts.lastAttempt < LOCKOUT_TIME) {
       const remainingTime = Math.ceil((LOCKOUT_TIME - (now - userAttempts.lastAttempt)) / 1000);
-      return new Response(
-        JSON.stringify({ error: `Too many attempts. Try again in ${remainingTime} seconds.` }),
-        { status: 429, headers: { 'Content-Type': 'application/json' } }
-      );
+      return res.status(429).json({ error: `Too many attempts. Try again in ${remainingTime} seconds.` });
     }
     // Reset if lockout time has passed
     if (now - userAttempts.lastAttempt >= LOCKOUT_TIME) {
-      attempts.delete(ip);
+      attempts.delete(ip as string);
     }
   }
 
   try {
-    const body = await req.json();
-    const { pin } = body;
+    const { pin } = req.body || {};
 
     if (!pin || typeof pin !== 'string') {
-      return new Response(JSON.stringify({ success: false, error: 'PIN is required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return res.status(400).json({ success: false, error: 'PIN is required' });
     }
 
     // A small artificial delay to mitigate brute force timing attacks
@@ -53,34 +43,22 @@ export default async function handler(req: Request) {
     const expectedPin = process.env.ADMIN_PIN;
     if (!expectedPin) {
       console.error('ADMIN_PIN environment variable is not set.');
-      return new Response(
-        JSON.stringify({ success: false, error: 'Server configuration error' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      );
+      return res.status(500).json({ success: false, error: 'Server configuration error' });
     }
 
     if (pin.trim() === expectedPin.trim()) {
       // Success: reset attempts
-      attempts.delete(ip);
-      return new Response(JSON.stringify({ success: true }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      attempts.delete(ip as string);
+      return res.status(200).json({ success: true });
     } else {
       // Failure: increment attempts
-      const current = attempts.get(ip) || { count: 0, lastAttempt: now };
-      attempts.set(ip, { count: current.count + 1, lastAttempt: now });
+      const current = attempts.get(ip as string) || { count: 0, lastAttempt: now };
+      attempts.set(ip as string, { count: current.count + 1, lastAttempt: now });
 
-      return new Response(JSON.stringify({ success: false, error: 'Invalid PIN' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return res.status(401).json({ success: false, error: 'Invalid PIN' });
     }
   } catch (error) {
     console.error('Auth error:', error);
-    return new Response(JSON.stringify({ success: false, error: 'Internal server error' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(500).json({ success: false, error: 'Internal server error' });
   }
 }
