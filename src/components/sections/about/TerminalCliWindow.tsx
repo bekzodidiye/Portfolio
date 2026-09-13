@@ -89,7 +89,7 @@ export const TerminalCliWindow: React.FC = () => {
 
         <pre className="text-slate-300 leading-relaxed overflow-x-auto whitespace-pre font-mono">
           <code>
-            <span className="text-slate-500">{`"""\nbekzod_engineer_spec.py\n=============================================================================\nCandidate: Bekzod Idiyev\nStatus: AVAILABLE_FOR_HIRE = True\n=============================================================================\n"""`}</span>
+            <span className="text-slate-400">{`"""\nbekzod_engineer_spec.py\n=============================================================================\nCandidate: Bekzod Idiyev\nStatus: AVAILABLE_FOR_HIRE = True\n=============================================================================\n"""`}</span>
             {'\n\n'}
             <span className="text-purple-400">from</span> <span className="text-blue-300">dataclasses</span> <span className="text-purple-400">import</span> <span className="text-amber-300">dataclass</span>{'\n'}
             <span className="text-purple-400">from</span> <span className="text-blue-300">typing</span> <span className="text-purple-400">import</span> <span className="text-amber-300">List, Dict</span>{'\n\n'}
@@ -126,7 +126,7 @@ export const TerminalCliWindow: React.FC = () => {
               value={inputVal}
               onChange={(e) => setInputVal(e.target.value)}
               placeholder="Type 'help', 'skills', 'projects', 'contact' or 'clear'..."
-              className="flex-1 bg-transparent text-white border-none outline-none font-mono text-xs sm:text-sm placeholder:text-slate-500 focus:ring-0"
+              className="flex-1 bg-transparent text-white border-none outline-none font-mono text-xs sm:text-sm placeholder:text-slate-400 focus:ring-0"
             />
             <button
               type="submit"
