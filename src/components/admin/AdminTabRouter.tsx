@@ -30,12 +30,6 @@ interface AdminTabRouterProps {
   realSummary: RealAnalyticsSummary;
   refreshAnalyticsData: () => Promise<void>;
   handleClearLogs: () => void;
-  oldPin: string;
-  setOldPin: (pin: string) => void;
-  newPin: string;
-  setNewPin: (pin: string) => void;
-  pinError: string;
-  handlePinChangeSubmit: (e: React.FormEvent) => void;
   handleExport: () => void;
   importJsonText: string;
   setImportJsonText: (text: string) => void;
@@ -61,12 +55,6 @@ export const AdminTabRouter: React.FC<AdminTabRouterProps> = ({
   realSummary,
   refreshAnalyticsData,
   handleClearLogs,
-  oldPin,
-  setOldPin,
-  newPin,
-  setNewPin,
-  pinError,
-  handlePinChangeSubmit,
   handleExport,
   importJsonText,
   setImportJsonText,
@@ -170,12 +158,6 @@ export const AdminTabRouter: React.FC<AdminTabRouterProps> = ({
   if (activeTab === 'settings') {
     return (
       <AdminSettingsTab
-        oldPin={oldPin}
-        setOldPin={setOldPin}
-        newPin={newPin}
-        setNewPin={setNewPin}
-        pinError={pinError}
-        onPinChange={handlePinChangeSubmit}
         onExport={handleExport}
         importJsonText={importJsonText}
         setImportJsonText={setImportJsonText}

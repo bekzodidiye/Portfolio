@@ -23,7 +23,6 @@ export interface PortfolioDataContextType extends PortfolioDataState {
   isAdminAuthenticated: boolean;
   loginAdmin: (pin: string) => Promise<boolean>;
   logoutAdmin: () => void;
-  changeAdminPin: (oldPin: string, newPin: string) => { success: boolean; error?: string };
   // Profile
   updateProfile: (profile: Partial<CandidateProfile>) => void;
   // Projects

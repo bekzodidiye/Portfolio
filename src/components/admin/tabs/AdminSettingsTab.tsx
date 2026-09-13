@@ -2,12 +2,6 @@ import React from 'react';
 import { KeyRound, Download, Upload, AlertCircle, RotateCcw } from 'lucide-react';
 
 interface AdminSettingsTabProps {
-  oldPin: string;
-  setOldPin: (val: string) => void;
-  newPin: string;
-  setNewPin: (val: string) => void;
-  pinError: string;
-  onPinChange: (e: React.FormEvent) => void;
   onExport: () => void;
   importJsonText: string;
   setImportJsonText: (val: string) => void;
@@ -16,12 +10,6 @@ interface AdminSettingsTabProps {
 }
 
 export const AdminSettingsTab: React.FC<AdminSettingsTabProps> = ({
-  oldPin,
-  setOldPin,
-  newPin,
-  setNewPin,
-  pinError,
-  onPinChange,
   onExport,
   importJsonText,
   setImportJsonText,
@@ -39,48 +27,7 @@ export const AdminSettingsTab: React.FC<AdminSettingsTabProps> = ({
         </p>
       </div>
 
-      {/* PIN Code Change */}
-      <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
-        <h3 className="text-sm font-bold text-white flex items-center gap-2">
-          <KeyRound className="w-4 h-4 text-blue-400" />
-          <span>Admin PIN-kodini O'zgartirish</span>
-        </h3>
 
-        <form onSubmit={onPinChange} className="space-y-3 max-w-md">
-          <div>
-            <label className="block text-xs text-slate-300 mb-1">Hozirgi PIN-kod</label>
-            <input
-              type="password"
-              required
-              value={oldPin}
-              onChange={(e) => setOldPin(e.target.value)}
-              placeholder="Hozirgi PIN (Standart: bekzod2026)"
-              className="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs font-mono focus:outline-none focus:border-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs text-slate-300 mb-1">Yangi PIN-kod</label>
-            <input
-              type="password"
-              required
-              value={newPin}
-              onChange={(e) => setNewPin(e.target.value)}
-              placeholder="Kamida 4 ta belgi"
-              className="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs font-mono focus:outline-none focus:border-blue-500"
-            />
-          </div>
-
-          {pinError && <p className="text-xs text-rose-400 font-medium">{pinError}</p>}
-
-          <button
-            type="submit"
-            className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-colors cursor-pointer"
-          >
-            PIN-kodni Yangilash
-          </button>
-        </form>
-      </div>
 
       {/* Backup & Restore */}
       <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
