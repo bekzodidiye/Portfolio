@@ -23,6 +23,7 @@ export interface PortfolioDataContextType extends PortfolioDataState {
   isAdminAuthenticated: boolean;
   loginAdmin: (pin: string) => Promise<boolean>;
   logoutAdmin: () => void;
+  changeAdminPin: (oldPin: string, newPin: string) => Promise<{ success: boolean; error?: string }>;
   // Profile
   updateProfile: (profile: Partial<CandidateProfile>) => void;
   // Projects
@@ -76,6 +77,7 @@ export const PortfolioDataProvider: React.FC<{ children: React.ReactNode }> = ({
         ...data,
         ...auth,
         ...mutations,
+        changeAdminPin: auth.changeAdminPin,
       }}
     >
       {children}

@@ -1,4 +1,5 @@
 import { checkRateLimitDb } from './db/rateLimit';
+import { getAdminPin } from './db/adminSettings';
 
 export const config = {
   runtime: 'nodejs',
@@ -27,9 +28,9 @@ export default async function handler(req: any, res: any) {
     // A small artificial delay to mitigate brute force timing attacks
     await new Promise((resolve) => setTimeout(resolve, 500 + Math.random() * 500));
 
-    const expectedPin = process.env.ADMIN_PIN;
+    const expectedPin = await getAdminPin();
     if (!expectedPin) {
-      console.error('ADMIN_PIN environment variable is not set.');
+      console.error('ADMIN_PIN is not set in DB or env.');
       return res.status(500).json({ success: false, error: 'Server configuration error' });
     }
 
