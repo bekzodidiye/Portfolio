@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { STORAGE_AUTH_PIN_KEY, DEFAULT_ADMIN_PIN } from './portfolioDataDefaults';
+
 
 export function usePortfolioAuth() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
@@ -67,30 +67,11 @@ export function usePortfolioAuth() {
     sessionStorage.removeItem('bekzod_admin_auth_session');
   };
 
-  const changeAdminPin = (
-    oldPin: string,
-    newPin: string
-  ): { success: boolean; error?: string } => {
-    const currentPin = localStorage.getItem(STORAGE_AUTH_PIN_KEY) || DEFAULT_ADMIN_PIN;
-    if (oldPin.trim() !== currentPin.trim() && oldPin.trim() !== '5678281376') {
-      return { success: false, error: "Hozirgi PIN-kod noto'g'ri kiritildi." };
-    }
-    if (!newPin || newPin.trim().length < 4) {
-      return {
-        success: false,
-        error: "Yangi PIN-kod kamida 4 ta belgidan iborat bo'lishi kerak.",
-      };
-    }
-    localStorage.setItem(STORAGE_AUTH_PIN_KEY, newPin.trim());
-    return { success: true };
-  };
-
   return {
     isAdminOpen,
     setIsAdminOpen,
     isAdminAuthenticated,
     loginAdmin,
     logoutAdmin,
-    changeAdminPin,
   };
 }

@@ -20,7 +20,6 @@ export function useAdminDashboard() {
     updateWorkExperience,
     addEducation,
     updateEducation,
-    changeAdminPin,
     exportDataJson,
     importDataJson,
     resetToDefaults,
@@ -63,7 +62,6 @@ export function useAdminDashboard() {
 
   // PIN & Settings hook
   const settingsProps = useAdminSettings({
-    changeAdminPin,
     exportDataJson,
     importDataJson,
     resetToDefaults,

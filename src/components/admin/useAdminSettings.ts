@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
 interface UseAdminSettingsOptions {
-  changeAdminPin: (oldPin: string, newPin: string) => { success: boolean; error?: string };
   exportDataJson: () => string;
   importDataJson: (json: string) => { success: boolean; error?: string };
   resetToDefaults: () => void;
@@ -9,29 +8,12 @@ interface UseAdminSettingsOptions {
 }
 
 export function useAdminSettings({
-  changeAdminPin,
   exportDataJson,
   importDataJson,
   resetToDefaults,
   showToast,
 }: UseAdminSettingsOptions) {
-  const [oldPin, setOldPin] = useState('');
-  const [newPin, setNewPin] = useState('');
-  const [pinError, setPinError] = useState('');
   const [importJsonText, setImportJsonText] = useState('');
-
-  const handlePinChangeSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const res = changeAdminPin(oldPin, newPin);
-    if (res.success) {
-      showToast('✅ Admin PIN-kodi muvaffaqiyatli yangilandi!');
-      setOldPin('');
-      setNewPin('');
-      setPinError('');
-    } else {
-      setPinError(res.error || 'Xatolik yuz berdi');
-    }
-  };
 
   const handleExport = () => {
     const jsonStr = exportDataJson();
@@ -64,12 +46,6 @@ export function useAdminSettings({
   };
 
   return {
-    oldPin,
-    setOldPin,
-    newPin,
-    setNewPin,
-    pinError,
-    handlePinChangeSubmit,
     importJsonText,
     setImportJsonText,
     handleExport,

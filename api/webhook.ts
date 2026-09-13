@@ -18,6 +18,12 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({ ok: true, message: 'Telegram Webhook Gateway Active' });
   }
 
+  const secretToken = process.env.TELEGRAM_SECRET_TOKEN;
+  if (secretToken && req.headers['x-telegram-bot-api-secret-token'] !== secretToken) {
+    console.warn('Webhook unauthorized access attempt');
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   try {
     const botToken =
       process.env.TELEGRAM_BOT_TOKEN ||
