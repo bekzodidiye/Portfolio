@@ -1,11 +1,13 @@
 import { checkRateLimitDb } from './_db/rateLimit';
 import { getAdminPin } from './_db/adminSettings';
+import { verifyPin, createAdminSessionToken } from './_db/authUtil';
+import type { ApiRequest, ApiResponse } from './_bot/types';
 
 export const config = {
   runtime: 'nodejs',
 };
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -40,8 +42,9 @@ export default async function handler(req: any, res: any) {
       return res.status(500).json({ success: false, error: 'Server configuration error' });
     }
 
-    if (pin.trim() === expectedPin.trim()) {
-      return res.status(200).json({ success: true });
+    if (verifyPin(pin, expectedPin)) {
+      const token = createAdminSessionToken();
+      return res.status(200).json({ success: true, token });
     } else {
       return res.status(401).json({ success: false, error: 'Invalid PIN' });
     }

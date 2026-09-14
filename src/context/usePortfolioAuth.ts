@@ -53,6 +53,9 @@ export function usePortfolioAuth() {
         if (data.success) {
           setIsAdminAuthenticated(true);
           sessionStorage.setItem('bekzod_admin_auth_session', 'true');
+          if (data.token) {
+            sessionStorage.setItem('bekzod_admin_auth_token', data.token);
+          }
           return true;
         }
       }
@@ -65,6 +68,7 @@ export function usePortfolioAuth() {
   const logoutAdmin = () => {
     setIsAdminAuthenticated(false);
     sessionStorage.removeItem('bekzod_admin_auth_session');
+    sessionStorage.removeItem('bekzod_admin_auth_token');
   };
 
   const changeAdminPin = async (

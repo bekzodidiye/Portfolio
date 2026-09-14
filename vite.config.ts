@@ -63,14 +63,10 @@ function telegramContactDevPlugin(env: Record<string, string>) {
 
             const botToken =
               env.TELEGRAM_BOT_TOKEN ||
-              env.VITE_TELEGRAM_BOT_TOKEN ||
-              process.env.TELEGRAM_BOT_TOKEN ||
-              process.env.VITE_TELEGRAM_BOT_TOKEN;
+              process.env.TELEGRAM_BOT_TOKEN;
             const chatId =
               env.TELEGRAM_CHAT_ID ||
-              env.VITE_TELEGRAM_CHAT_ID ||
-              process.env.TELEGRAM_CHAT_ID ||
-              process.env.VITE_TELEGRAM_CHAT_ID;
+              process.env.TELEGRAM_CHAT_ID;
 
             if (!botToken || !chatId) {
               res.statusCode = 500;
@@ -178,8 +174,8 @@ function telegramContactDevPlugin(env: Record<string, string>) {
               return;
             }
 
-            const botToken = env.TELEGRAM_BOT_TOKEN || env.VITE_TELEGRAM_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN || process.env.VITE_TELEGRAM_BOT_TOKEN;
-            const chatId = env.TELEGRAM_CHAT_ID || env.VITE_TELEGRAM_CHAT_ID || process.env.TELEGRAM_CHAT_ID || process.env.VITE_TELEGRAM_CHAT_ID;
+            const botToken = env.TELEGRAM_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
+            const chatId = env.TELEGRAM_CHAT_ID || process.env.TELEGRAM_CHAT_ID;
 
             if (!botToken || !chatId) {
               res.statusCode = 500;
@@ -272,9 +268,7 @@ ${escapeHtml(message || '')}
           try {
             const botToken =
               env.TELEGRAM_BOT_TOKEN ||
-              env.VITE_TELEGRAM_BOT_TOKEN ||
-              process.env.TELEGRAM_BOT_TOKEN ||
-              process.env.VITE_TELEGRAM_BOT_TOKEN;
+              process.env.TELEGRAM_BOT_TOKEN;
 
             if (!botToken) {
               res.statusCode = 500;

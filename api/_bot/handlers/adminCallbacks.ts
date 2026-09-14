@@ -81,7 +81,8 @@ export async function handleAdminAndProjectCallbacks(
     const bStats = await getBotUserStatsDb();
     const vStats = await getVisitorStatsDb();
     const totalUsers = bStats.totalUsers > 0 ? bStats.totalUsers : botUserCount;
-    const text = `📊 <b>TO'LIQ TELEMETRIYA VA REAL STATISTIKA</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n🤖 <b>Real Bot Foydalanuvchilari:</b> <code>${totalUsers}</code> ta\n🌐 <b>Portfolio Jami Tashriflari:</b> <code>${vStats.totalVisits}</code> ta\n⚡ <b>Jami Bajarilgan So'rovlar:</b> <code>${totalInteractions}</code> ta\n📩 <b>Yetkazilgan Xabarlar:</b> <code>${bStats.totalMessages}</code> ta\n\n⚡ <b>Infratuzilma:</b>\n• Database: Vercel PostgreSQL (Neon Serverless)\n• Hosting: Vercel Serverless Edge\n• Response Time: ~45ms\n• SSL: TLS 1.3 Active`;
+    const totalQueries = (bStats.totalMessages || 0) + (vStats.totalVisits || 0);
+    const text = `📊 <b>TO'LIQ TELEMETRIYA VA REAL STATISTIKA</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n🤖 <b>Real Bot Foydalanuvchilari:</b> <code>${totalUsers}</code> ta\n🌐 <b>Portfolio Jami Tashriflari:</b> <code>${vStats.totalVisits}</code> ta\n⚡ <b>Jami Bajarilgan So'rovlar (DB):</b> <code>${totalQueries}</code> ta\n📩 <b>Yetkazilgan Xabarlar:</b> <code>${bStats.totalMessages}</code> ta\n\n⚡ <b>Infratuzilma:</b>\n• Database: Vercel PostgreSQL (Neon Serverless)\n• Hosting: Vercel Serverless Edge\n• Response Time: ~45ms\n• SSL: TLS 1.3 Active`;
     return { text, markup: getAdminSubKeyboard('admin_stats') };
   }
   if (data === 'admin_diag') {

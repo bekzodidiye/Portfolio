@@ -1,12 +1,5 @@
 import { getVisitorStatsDb, getBotUserStatsDb } from './db';
-
-export function escapeHtml(str: string): string {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
+export { escapeHtml } from './utils';
 
 export async function sendTelegram(botToken: string, method: string, payload: any) {
   if (!botToken) {

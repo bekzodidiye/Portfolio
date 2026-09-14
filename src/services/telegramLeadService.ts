@@ -1,4 +1,4 @@
-import { buildLeadTelegramMessage } from './telegramMessageTemplates';
+// Contact lead service — server-side only via /api/contact
 
 export interface ContactPayload {
   name: string;
@@ -112,67 +112,7 @@ export async function sendTelegramLead(payload: ContactPayload): Promise<Telegra
     console.warn('API endpoint unreachable, trying client fallback...', serverlessErr);
   }
 
-  // 4. Secondary Path: Direct Client-Side Fetch to Telegram API
-  const botToken = (import.meta as any).env?.VITE_TELEGRAM_BOT_TOKEN;
-  const chatId = (import.meta as any).env?.VITE_TELEGRAM_CHAT_ID;
-
-  if (botToken && chatId && botToken !== 'YOUR_TELEGRAM_BOT_TOKEN' && chatId !== 'YOUR_TELEGRAM_CHAT_ID') {
-    const timestamp = new Intl.DateTimeFormat('uz-UZ', {
-      timeZone: 'Asia/Samarkand',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    }).format(new Date());
-
-    const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown';
-    const deviceType = /android|iphone|ipad|ipod/i.test(userAgent) ? '📱 Mobile' : '💻 Desktop';
-    const telegramHtmlMessage = buildLeadTelegramMessage(payload, timestamp, deviceType);
-
-    try {
-      const clientController = new AbortController();
-      const clientTimeout = setTimeout(() => clientController.abort(), 8000);
-
-      const clientResponse = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: telegramHtmlMessage,
-          parse_mode: 'HTML',
-          disable_web_page_preview: true,
-        }),
-        signal: clientController.signal,
-      });
-
-      clearTimeout(clientTimeout);
-
-      if (clientResponse.ok) {
-        try {
-          localStorage.setItem(RATE_LIMIT_KEY, Date.now().toString());
-        } catch {
-          // ignore
-        }
-        return {
-          success: true,
-          message: 'Xabaringiz Telegram botga muvaffaqiyatli yetkazildi!',
-        };
-      } else {
-        const errJson = await clientResponse.json().catch(() => ({}));
-        return {
-          success: false,
-          error: `Telegram API xatoligi: ${errJson.description || 'Xabar yetkazilmadi'}`,
-          directTelegramUrl: directUrl,
-        };
-      }
-    } catch (clientErr) {
-      console.error('Client direct dispatch error:', clientErr);
-    }
-  }
-
-  // 5. Fallback to Telegram DM
+  // 4. If server API was unreachable, provide direct Telegram DM link
   return {
     success: false,
     error: 'Telegram Botga ulanib bo\'lmadi. To\'g\'ridan-to\'g\'ri Telegram profilingiz orqali yozishingiz mumkin.',

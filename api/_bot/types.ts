@@ -24,9 +24,24 @@ export interface GeoAndReferrerStats {
   referrers: Array<{ referrer: string; count: number }>;
 }
 
+import type { IncomingMessage, ServerResponse } from 'http';
+
 export interface EmailOptions {
   to: string;
   subject: string;
   text: string;
   clientName?: string;
+}
+
+export interface ApiRequest extends IncomingMessage {
+  body?: any;
+  query?: Record<string, string | string[]>;
+  cookies?: Record<string, string>;
+  socket: any;
+}
+
+export interface ApiResponse extends ServerResponse {
+  status(code: number): this;
+  json(data: any): this;
+  send(data: any): this;
 }

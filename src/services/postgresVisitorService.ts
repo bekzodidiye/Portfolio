@@ -14,7 +14,13 @@ export interface PostgresVisitorStats {
  */
 export async function fetchRealVisitorStatsFromPostgres(): Promise<PostgresVisitorStats | null> {
   try {
-    const res = await fetch('/api/visitor', { method: 'GET' });
+    const token = typeof window !== 'undefined' ? sessionStorage.getItem('bekzod_admin_auth_token') : null;
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const res = await fetch('/api/visitor', { method: 'GET', headers });
     if (!res.ok) return null;
     const data = await res.json();
     if (!data.ok || !Array.isArray(data.visitors)) return null;

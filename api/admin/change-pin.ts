@@ -1,11 +1,13 @@
 import { getAdminPin, setAdminPin } from '../_db/adminSettings';
 import { checkRateLimitDb } from '../_db/rateLimit';
+import { verifyPin } from '../_db/authUtil';
+import type { ApiRequest, ApiResponse } from '../_bot/types';
 
 export const config = {
   runtime: 'nodejs',
 };
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -43,7 +45,7 @@ export default async function handler(req: any, res: any) {
     }
 
     // Verify old PIN
-    if (oldPin.trim() === expectedPin.trim()) {
+    if (verifyPin(oldPin, expectedPin)) {
       const success = await setAdminPin(newPin.trim());
       if (success) {
         return res.status(200).json({ success: true });

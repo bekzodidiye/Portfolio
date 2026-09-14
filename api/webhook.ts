@@ -2,18 +2,17 @@ import { recordBotUserDb } from './_bot/db';
 import { sendTelegram } from './_bot/telegramApi';
 import { handleAdminAndProjectCallbacks } from './_bot/handlers/adminCallbacks';
 import { handleBotTextMessage } from './_bot/handlers/messageHandler';
+import { setAdminState } from './_db/botState';
+import { ensureAllTables } from './_db/migration';
+import type { ApiRequest, ApiResponse } from './_bot/types';
 
 export const config = {
   runtime: 'nodejs',
 };
 
-const ADMIN_CHAT_ID = '5678281376';
-const botUserIds = new Set<number | string>([ADMIN_CHAT_ID]);
-let totalInteractions = 1;
-let pendingAdminReplyTarget: string | number | null = null;
-let pendingAdminEmailTarget: string | null = null;
+const ADMIN_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '';
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== 'POST') {
     return res.status(200).json({ ok: true, message: 'Telegram Webhook Gateway Active' });
   }
@@ -25,18 +24,13 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const botToken =
-      process.env.TELEGRAM_BOT_TOKEN ||
-      process.env.VITE_TELEGRAM_BOT_TOKEN ||
-      '';
+    await ensureAllTables();
 
-    const adminId =
-      process.env.TELEGRAM_CHAT_ID ||
-      process.env.VITE_TELEGRAM_CHAT_ID ||
-      ADMIN_CHAT_ID;
+    const botToken = process.env.TELEGRAM_BOT_TOKEN || '';
+
+    const adminId = process.env.TELEGRAM_CHAT_ID || ADMIN_CHAT_ID;
 
     const update = req.body || {};
-    totalInteractions += 1;
 
     const serverTimestamp = new Intl.DateTimeFormat('uz-UZ', {
       timeZone: 'Asia/Samarkand',
@@ -57,7 +51,6 @@ export default async function handler(req: any, res: any) {
       const fromUser = cb.from || {};
 
       if (fromUser.id) {
-        botUserIds.add(fromUser.id);
         const fullName = [fromUser.first_name, fromUser.last_name].filter(Boolean).join(' ') || 'Foydalanuvchi';
         recordBotUserDb({
           userId: fromUser.id,
@@ -69,11 +62,11 @@ export default async function handler(req: any, res: any) {
 
       // Handle Direct Email/User reply triggers
       if (data.startsWith('reply_email_')) {
-        pendingAdminEmailTarget = data.replace('reply_email_', '');
-        pendingAdminReplyTarget = null;
+        const target = data.replace('reply_email_', '');
+        await setAdminState(chatId, 'email', target);
         await sendTelegram(botToken, 'sendMessage', {
           chat_id: chatId,
-          text: `📧 <b>Emailga (<code>${pendingAdminEmailTarget}</code>) javob yozish:</b>\n\nMarhamat, javob matnini shu yerga yozing:\n<i>(Bekor qilish: /cancel)</i>`,
+          text: `📧 <b>Emailga (<code>${target}</code>) javob yozish:</b>\n\nMarhamat, javob matnini shu yerga yozing:\n<i>(Bekor qilish: /cancel)</i>`,
           parse_mode: 'HTML',
         });
         await sendTelegram(botToken, 'answerCallbackQuery', { callback_query_id: cb.id });
@@ -81,11 +74,11 @@ export default async function handler(req: any, res: any) {
       }
 
       if (data.startsWith('reply_user_')) {
-        pendingAdminReplyTarget = data.replace('reply_user_', '');
-        pendingAdminEmailTarget = null;
+        const target = data.replace('reply_user_', '');
+        await setAdminState(chatId, 'user', target);
         await sendTelegram(botToken, 'sendMessage', {
           chat_id: chatId,
-          text: `✍️ <b>Foydalanuvchiga (ID: <code>${pendingAdminReplyTarget}</code>) javob yozish:</b>\n\nMarhamat, javobingizni yozing:\n<i>(Bekor qilish: /cancel)</i>`,
+          text: `✍️ <b>Foydalanuvchiga (ID: <code>${target}</code>) javob yozish:</b>\n\nMarhamat, javobingizni yozing:\n<i>(Bekor qilish: /cancel)</i>`,
           parse_mode: 'HTML',
         });
         await sendTelegram(botToken, 'answerCallbackQuery', { callback_query_id: cb.id });
@@ -97,8 +90,8 @@ export default async function handler(req: any, res: any) {
         serverTimestamp,
         chatId,
         botToken,
-        botUserIds.size,
-        totalInteractions
+        0,
+        0
       );
 
       if (result && chatId && messageId) {
@@ -126,7 +119,6 @@ export default async function handler(req: any, res: any) {
 
       if (!chatId) return res.status(200).json({ ok: true });
 
-      botUserIds.add(chatId);
       const fullName = [from.first_name, from.last_name].filter(Boolean).join(' ') || name;
       recordBotUserDb({
         userId: chatId,
@@ -143,11 +135,7 @@ export default async function handler(req: any, res: any) {
         isAdmin,
         adminId,
         botToken,
-        serverTimestamp,
-        pendingAdminEmailTarget,
-        pendingAdminReplyTarget,
-        setPendingEmail: (v) => { pendingAdminEmailTarget = v; },
-        setPendingReply: (v) => { pendingAdminReplyTarget = v; },
+        serverTimestamp
       });
 
       return res.status(200).json({ ok: true });
