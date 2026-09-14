@@ -1,16 +1,13 @@
 import { neon } from '@neondatabase/serverless';
+import { checkRateLimitDb } from './_db/rateLimit';
+import { escapeHtml } from './_bot/utils';
+import { ensureAllTables } from './_db/migration';
+import { isAuthenticatedAdmin } from './_db/authUtil';
+import type { ApiRequest, ApiResponse } from './_bot/types';
 
 export const config = {
   runtime: 'nodejs',
 };
-
-function escapeHtml(str: string): string {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
 
 async function recordVisitorToPostgres(data: {
   visitorName?: string;
@@ -36,28 +33,8 @@ async function recordVisitorToPostgres(data: {
   if (!url) return;
 
   try {
+    await ensureAllTables();
     const sql = neon(url);
-    await sql`
-      CREATE TABLE IF NOT EXISTS portfolio_visitors (
-        id SERIAL PRIMARY KEY,
-        visitor_name TEXT,
-        visitor_role TEXT,
-        ip TEXT,
-        country TEXT,
-        city TEXT,
-        region TEXT,
-        street TEXT,
-        device_type TEXT,
-        os TEXT,
-        browser TEXT,
-        gpu TEXT,
-        referrer TEXT,
-        latitude REAL,
-        longitude REAL,
-        visited_at TIMESTAMPTZ DEFAULT NOW()
-      );
-    `;
-
     await sql`
       INSERT INTO portfolio_visitors (
         visitor_name, visitor_role, ip, country, city, region, street,
@@ -84,10 +61,19 @@ async function recordVisitorToPostgres(data: {
   }
 }
 
-const visitorRateLimit = new Map<string, { count: number; lastAttempt: number }>();
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method === 'GET') {
+    if (!isAuthenticatedAdmin(req)) {
+      return res.status(401).json({
+        ok: false,
+        error: 'Unauthorized: Admin authentication token required to view visitor logs.',
+        total: 0,
+        today: 0,
+        visitors: [],
+      });
+    }
+
     const url =
       process.env.POSTGRES_URL ||
       process.env.DATABASE_URL ||
@@ -130,27 +116,16 @@ export default async function handler(req: any, res: any) {
 
   try {
     const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket?.remoteAddress || 'Unknown IP';
-    const now = Date.now();
     const rateLimitWindowMs = 5 * 60 * 1000; // 5 minutes
     const maxRequests = 10;
 
-    const userRateData = visitorRateLimit.get(clientIp);
-    if (userRateData) {
-      if (now - userRateData.lastAttempt < rateLimitWindowMs) {
-        if (userRateData.count >= maxRequests) {
-          console.warn(`Rate limit exceeded for IP: ${clientIp} on /api/visitor`);
-          return res.status(429).json({
-            ok: false,
-            error: 'Too many requests. Please try again later.',
-          });
-        }
-        userRateData.count += 1;
-        userRateData.lastAttempt = now;
-      } else {
-        visitorRateLimit.set(clientIp, { count: 1, lastAttempt: now });
-      }
-    } else {
-      visitorRateLimit.set(clientIp, { count: 1, lastAttempt: now });
+    const rateLimit = await checkRateLimitDb(clientIp, 'visitor', maxRequests, rateLimitWindowMs);
+    if (!rateLimit.allowed) {
+      console.warn(`Rate limit exceeded for IP: ${clientIp} on /api/visitor`);
+      return res.status(429).json({
+        ok: false,
+        error: 'Too many requests. Please try again later.',
+      });
     }
 
     const data = req.body || {};
@@ -190,37 +165,36 @@ export default async function handler(req: any, res: any) {
       timezone,
     } = data;
 
-    const botToken =
-      process.env.TELEGRAM_BOT_TOKEN ||
-      process.env.VITE_TELEGRAM_BOT_TOKEN ||
-      '';
-    const chatId =
-      process.env.TELEGRAM_CHAT_ID ||
-      process.env.VITE_TELEGRAM_CHAT_ID ||
-      '5678281376';
+    const botToken = process.env.TELEGRAM_BOT_TOKEN || '';
+    const chatId = process.env.TELEGRAM_CHAT_ID || '';
 
-    if (!botToken) {
-      console.warn('TELEGRAM_BOT_TOKEN is not configured for visitor notification.');
+    if (!botToken || !chatId) {
+      console.warn('TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is not configured for visitor notification.');
       return res.status(200).json({
         ok: true,
-        message: 'Visitor recorded, Telegram token not configured.',
+        message: 'Visitor recorded, Telegram notifications not configured.',
       });
     }
 
     // Extract Server-side IP and headers
+    const getHeaderStr = (h: string | string[] | undefined): string | undefined =>
+      Array.isArray(h) ? h[0] : h;
+
     const rawIpHeader =
-      (req.headers['x-forwarded-for'] as string) ||
-      (req.headers['x-real-ip'] as string) ||
+      getHeaderStr(req.headers['x-forwarded-for']) ||
+      getHeaderStr(req.headers['x-real-ip']) ||
       req.socket?.remoteAddress ||
       '';
     const serverIp = rawIpHeader.split(',')[0].trim();
     const finalIp = clientReportedIp || serverIp || 'Unknown IP';
 
     // Vercel Edge GeoIP fallback
-    const vercelLat = req.headers['x-vercel-ip-latitude'] ? parseFloat(req.headers['x-vercel-ip-latitude']) : undefined;
-    const vercelLon = req.headers['x-vercel-ip-longitude'] ? parseFloat(req.headers['x-vercel-ip-longitude']) : undefined;
-    const vercelCity = req.headers['x-vercel-ip-city'] as string | undefined;
-    const vercelCountry = req.headers['x-vercel-ip-country'] as string | undefined;
+    const latHeader = getHeaderStr(req.headers['x-vercel-ip-latitude']);
+    const lonHeader = getHeaderStr(req.headers['x-vercel-ip-longitude']);
+    const vercelLat = latHeader ? parseFloat(latHeader) : undefined;
+    const vercelLon = lonHeader ? parseFloat(lonHeader) : undefined;
+    const vercelCity = getHeaderStr(req.headers['x-vercel-ip-city']);
+    const vercelCountry = getHeaderStr(req.headers['x-vercel-ip-country']);
 
     const finalLat = typeof latitude === 'number' ? latitude : vercelLat;
     const finalLon = typeof longitude === 'number' ? longitude : vercelLon;

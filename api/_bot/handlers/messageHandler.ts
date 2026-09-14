@@ -1,6 +1,7 @@
 import { escapeHtml, sendTelegram, buildAdminMainText } from '../telegramApi';
 import { sendEmailFromBot } from '../email';
 import { getMainReplyKeyboard, getAdminMainKeyboard, PORTFOLIO_URL, GITHUB_URL } from '../keyboards';
+import { getAdminState, setAdminState } from '../../_db/botState';
 
 export interface MessageContext {
   chatId: number | string;
@@ -11,16 +12,11 @@ export interface MessageContext {
   adminId: string | number;
   botToken: string;
   serverTimestamp: string;
-  pendingAdminEmailTarget: string | null;
-  pendingAdminReplyTarget: string | number | null;
-  setPendingEmail: (val: string | null) => void;
-  setPendingReply: (val: string | number | null) => void;
 }
 
 export async function handleBotTextMessage(ctx: MessageContext): Promise<void> {
   const {
-    chatId, text, name, from, isAdmin, adminId, botToken, serverTimestamp,
-    pendingAdminEmailTarget, pendingAdminReplyTarget, setPendingEmail, setPendingReply
+    chatId, text, name, from, isAdmin, adminId, botToken, serverTimestamp
   } = ctx;
 
   const send = (method: string, payload: any) => sendTelegram(botToken, method, payload);
@@ -28,8 +24,7 @@ export async function handleBotTextMessage(ctx: MessageContext): Promise<void> {
   // Admin reply / email logic
   if (isAdmin) {
     if (text === '/cancel') {
-      setPendingReply(null);
-      setPendingEmail(null);
+      await setAdminState(chatId, null, null);
       await send('sendMessage', {
         chat_id: chatId,
         text: '❌ <b>Javob yozish bekor qilindi.</b>',
@@ -38,8 +33,11 @@ export async function handleBotTextMessage(ctx: MessageContext): Promise<void> {
       return;
     }
 
+    const state = await getAdminState(chatId);
+    let targetEmail: string | null = state.type === 'email' ? state.target : null;
+    let targetUser: string | number | null = state.type === 'user' ? state.target : null;
+
     // Check if replying to an email
-    let targetEmail: string | null = pendingAdminEmailTarget;
     if (ctx.from?.reply_to_message?.text) {
       const rep = ctx.from.reply_to_message.text;
       const match = rep.match(/#email_([^\s\n]+)/) || rep.match(/Email:\s*<a href="mailto:([^">]+)">/);
@@ -47,7 +45,7 @@ export async function handleBotTextMessage(ctx: MessageContext): Promise<void> {
     }
 
     if (targetEmail) {
-      setPendingEmail(null);
+      await setAdminState(chatId, null, null);
       const emailRes = await sendEmailFromBot({
         to: targetEmail,
         subject: 'Re: Bekzod Idiyev — Portfolio Murojaati Bo\'yicha Javob',
@@ -72,7 +70,6 @@ export async function handleBotTextMessage(ctx: MessageContext): Promise<void> {
     }
 
     // Check if replying to a Telegram user
-    let targetUser: string | number | null = pendingAdminReplyTarget;
     if (ctx.from?.reply_to_message?.text) {
       const rep = ctx.from.reply_to_message.text;
       const match = rep.match(/#user_(\d+)/) || rep.match(/User ID:\s*(\d+)/i);
@@ -80,7 +77,7 @@ export async function handleBotTextMessage(ctx: MessageContext): Promise<void> {
     }
 
     if (targetUser) {
-      setPendingReply(null);
+      await setAdminState(chatId, null, null);
       const userReceiveMsg = `👨‍💻 <b>BEKZOD IDIYEV SIZGA JAVOB YOZDI:</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n${escapeHtml(text)}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n💬 <i>Qo'shimcha savol yoki taklifingiz bo'lsa, yozishingiz mumkin.</i>`;
       const res = await send('sendMessage', { chat_id: targetUser, text: userReceiveMsg, parse_mode: 'HTML' });
       if (res?.ok) {

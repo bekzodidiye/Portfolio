@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, Lock, KeyRound, X, ArrowRight, AlertCircle } from 'lucide-react';
 import { usePortfolioData } from '../../context/PortfolioDataContext';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 export const AdminAuthModal: React.FC = () => {
   const { isAdminOpen, setIsAdminOpen, isAdminAuthenticated, loginAdmin } = usePortfolioData();
@@ -9,6 +10,11 @@ export const AdminAuthModal: React.FC = () => {
   const [error, setError] = useState('');
   const [isShaking, setIsShaking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const modalRef = useFocusTrap<HTMLDivElement>({
+    isOpen: isAdminOpen && !isAdminAuthenticated,
+    onClose: () => setIsAdminOpen(false),
+  });
 
   if (!isAdminOpen || isAdminAuthenticated) return null;
 
@@ -59,6 +65,10 @@ export const AdminAuthModal: React.FC = () => {
 
         {/* Modal Container */}
         <motion.div
+          ref={modalRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="admin-auth-title"
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{
             opacity: 1,
@@ -77,7 +87,8 @@ export const AdminAuthModal: React.FC = () => {
           {/* Close button */}
           <button
             onClick={() => setIsAdminOpen(false)}
-            className="absolute top-5 right-5 p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors"
+            aria-label="Yopish"
+            className="absolute top-5 right-5 p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>

@@ -1,25 +1,18 @@
 import nodemailer from 'nodemailer';
 import { EmailOptions } from './types';
-
-function escapeHtml(str: string): string {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
+import { escapeHtml } from './utils';
 
 export async function sendEmailFromBot(options: EmailOptions): Promise<{ success: boolean; error?: string }> {
   const { to, subject, text } = options;
-  const smtpUser = process.env.SMTP_USER || process.env.EMAIL_USER || 'bekzodidiyev89@gmail.com';
+  const smtpUser = process.env.SMTP_USER || process.env.EMAIL_USER || '';
   const smtpPass = process.env.SMTP_PASS || process.env.EMAIL_PASS || process.env.GMAIL_APP_PASSWORD;
   const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
   const smtpPort = Number(process.env.SMTP_PORT) || 465;
 
-  if (!smtpPass) {
+  if (!smtpUser || !smtpPass) {
     return {
       success: false,
-      error: 'SMTP_PASS (Gmail App Password) sozlanmagan. .env yoki Vercel sozlamalariga SMTP_PASS qo\'shing.',
+      error: 'SMTP_USER yoki SMTP_PASS sozlanmagan. .env yoki Vercel Environment Variables sozlamalarini tekshiring.',
     };
   }
 

@@ -4,6 +4,7 @@ import { VisitorToast } from './VisitorToast';
 import { VisitorRoleSelector } from './VisitorRoleSelector';
 import { useUIContext } from '../../context/UIContext';
 import { useVisitorModal } from './useVisitorModal';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 export function VisitorWelcomeModal() {
   const { isVisitorModalOpen, setIsVisitorModalOpen } = useUIContext();
@@ -24,6 +25,11 @@ export function VisitorWelcomeModal() {
     onCloseOverride: () => setIsVisitorModalOpen(false)
   });
 
+  const modalRef = useFocusTrap<HTMLDivElement>({
+    isOpen,
+    onClose: handleSkip,
+  });
+
   return (
     <>
       <VisitorToast message={toastMessage} onClose={() => setToastMessage(null)} />
@@ -36,6 +42,7 @@ export function VisitorWelcomeModal() {
           aria-labelledby="visitor-modal-title"
         >
           <div
+            ref={modalRef}
             className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 p-6 sm:p-8 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] border border-slate-200/80 dark:border-slate-800/80 text-slate-900 dark:text-slate-100 animate-in zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >

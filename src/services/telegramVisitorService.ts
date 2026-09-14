@@ -1,6 +1,5 @@
 import { VisitorTelemetryData } from './visitorTelemetry';
 import { TelegramSendResult } from './telegramLeadService';
-import { buildVisitorTelegramMessage } from './telegramMessageTemplates';
 
 const VISITOR_LOGGED_KEY = 'portfolio_visitor_telemetry_sent';
 
@@ -45,58 +44,6 @@ export async function sendVisitorNotification(
     }
   } catch (err) {
     console.warn('/api/visitor unreachable, attempting client direct dispatch...', err);
-  }
-
-  // 2. Secondary: Client Direct Dispatch
-  const botToken = (import.meta as any).env?.VITE_TELEGRAM_BOT_TOKEN;
-  const chatId = (import.meta as any).env?.VITE_TELEGRAM_CHAT_ID;
-
-  if (botToken && chatId && botToken !== 'YOUR_TELEGRAM_BOT_TOKEN' && chatId !== 'YOUR_TELEGRAM_CHAT_ID') {
-    const { text, inlineKeyboard } = buildVisitorTelegramMessage(telemetry);
-
-    try {
-      const clientController = new AbortController();
-      const clientTimeout = setTimeout(() => clientController.abort(), 8000);
-
-      const clientResponse = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text,
-          parse_mode: 'HTML',
-          disable_web_page_preview: false,
-          reply_markup: inlineKeyboard,
-        }),
-        signal: clientController.signal,
-      });
-
-      if (telemetry.latitude && telemetry.longitude) {
-        fetch(`https://api.telegram.org/bot${botToken}/sendLocation`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: chatId,
-            latitude: telemetry.latitude,
-            longitude: telemetry.longitude,
-            disable_notification: true,
-          }),
-        }).catch(() => {});
-      }
-
-      clearTimeout(clientTimeout);
-
-      if (clientResponse.ok) {
-        try {
-          localStorage.setItem(VISITOR_LOGGED_KEY, Date.now().toString());
-        } catch {
-          // ignore
-        }
-        return { success: true, message: 'Visitor logged successfully via client direct.' };
-      }
-    } catch (e) {
-      console.error('Client direct visitor dispatch failed:', e);
-    }
   }
 
   return { success: false, error: 'Unable to dispatch visitor notification.' };

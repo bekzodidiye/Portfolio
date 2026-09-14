@@ -1,4 +1,5 @@
 import { getPostgresSql } from '../_bot/db';
+import { ensureAllTables } from './migration';
 
 export async function checkRateLimitDb(
   ip: string,
@@ -15,58 +16,39 @@ export async function checkRateLimitDb(
   }
 
   try {
-    // 1. Ensure table exists (safe to run, will be a no-op if exists)
-    await sql`
-      CREATE TABLE IF NOT EXISTS rate_limits (
-        ip TEXT,
-        endpoint TEXT,
-        attempts INT DEFAULT 1,
-        last_attempt TIMESTAMPTZ DEFAULT NOW(),
-        PRIMARY KEY (ip, endpoint)
-      );
-    `;
+    await ensureAllTables();
 
-    // 2. Fetch existing limit record
+    // Atomic insert/update in a single query with row-level lock (eliminates TOCTOU race condition)
+    const cap = maxAttempts + 1;
     const [record] = await sql`
-      SELECT attempts, EXTRACT(EPOCH FROM (NOW() - last_attempt)) * 1000 AS ms_since_last
-      FROM rate_limits
-      WHERE ip = ${ip} AND endpoint = ${endpoint};
+      INSERT INTO rate_limits (ip, endpoint, attempts, last_attempt)
+      VALUES (${ip}, ${endpoint}, 1, NOW())
+      ON CONFLICT (ip, endpoint) DO UPDATE
+      SET 
+        attempts = CASE
+          WHEN EXTRACT(EPOCH FROM (NOW() - rate_limits.last_attempt)) * 1000 >= ${windowMs} THEN 1
+          ELSE LEAST(rate_limits.attempts + 1, ${cap})
+        END,
+        last_attempt = CASE
+          WHEN EXTRACT(EPOCH FROM (NOW() - rate_limits.last_attempt)) * 1000 >= ${windowMs} THEN NOW()
+          ELSE rate_limits.last_attempt
+        END
+      RETURNING attempts, EXTRACT(EPOCH FROM (NOW() - last_attempt)) * 1000 AS ms_since_last;
     `;
 
-    if (record) {
-      const msSinceLast = Number(record.ms_since_last);
-      
-      // If within window and over attempts limit -> BLOCK
-      if (record.attempts >= maxAttempts && msSinceLast < windowMs) {
-        const remainingTime = Math.ceil((windowMs - msSinceLast) / 1000);
-        return { allowed: false, remainingTime };
-      }
-
-      // If outside window -> RESET
-      if (msSinceLast >= windowMs) {
-        await sql`
-          UPDATE rate_limits
-          SET attempts = 1, last_attempt = NOW()
-          WHERE ip = ${ip} AND endpoint = ${endpoint};
-        `;
-        return { allowed: true };
-      } else {
-        // If within window but not over limit -> INCREMENT
-        await sql`
-          UPDATE rate_limits
-          SET attempts = attempts + 1, last_attempt = NOW()
-          WHERE ip = ${ip} AND endpoint = ${endpoint};
-        `;
-        return { allowed: true };
-      }
-    } else {
-      // 3. New record
-      await sql`
-        INSERT INTO rate_limits (ip, endpoint, attempts, last_attempt)
-        VALUES (${ip}, ${endpoint}, 1, NOW());
-      `;
+    if (!record) {
       return { allowed: true };
     }
+
+    const attempts = Number(record.attempts);
+    const msSinceLast = Number(record.ms_since_last);
+
+    if (attempts > maxAttempts && msSinceLast < windowMs) {
+      const remainingTime = Math.max(1, Math.ceil((windowMs - msSinceLast) / 1000));
+      return { allowed: false, remainingTime };
+    }
+
+    return { allowed: true };
   } catch (err) {
     console.error('Rate limit DB error:', err);
     // Fail open to avoid breaking production during transient DB issues

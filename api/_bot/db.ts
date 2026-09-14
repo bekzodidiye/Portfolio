@@ -21,16 +21,6 @@ export async function recordBotUserDb(user: BotUser) {
   try {
     const uid = String(user.userId);
     await sql`
-      CREATE TABLE IF NOT EXISTS bot_users (
-        user_id BIGINT PRIMARY KEY,
-        username TEXT,
-        full_name TEXT,
-        language TEXT DEFAULT 'uz',
-        joined_at TIMESTAMPTZ DEFAULT NOW(),
-        last_active TIMESTAMPTZ DEFAULT NOW()
-      );
-    `;
-    await sql`
       INSERT INTO bot_users (user_id, username, full_name, language, joined_at, last_active)
       VALUES (${uid}, ${user.username || null}, ${user.fullName}, ${user.language || 'uz'}, NOW(), NOW())
       ON CONFLICT (user_id) DO UPDATE SET

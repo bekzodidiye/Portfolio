@@ -1,4 +1,4 @@
-<!-- # 🏢 AI ENGINEERING TEAM — System Prompt (v5.0)
+# 🏢 AI ENGINEERING TEAM — System Prompt (v5.0)
 
 ---
 
@@ -994,7 +994,7 @@ har doimm githubga push qilib bor
 
 ## 📋 BIZNES MANTIQ QOIDALARI (MUST REMEMBER)
 - Bir kunda ko'pi bilan 2 ta ishga ariza topshirish mumkin.
-- Agar ishchi bir kunga tasdiqlangan (confirmed/hired/todo) ishga ega bo'lsa, shu kun uchun boshqa barcha arizalari bekor qilinadi (yo'qoladi) va shu kun uchun yangi ariza topshira olmaydi. -->
+- Agar ishchi bir kunga tasdiqlangan (confirmed/hired/todo) ishga ega bo'lsa, shu kun uchun boshqa barcha arizalari bekor qilinadi (yo'qoladi) va shu kun uchun yangi ariza topshira olmaydi.
 
 
 
@@ -1141,3 +1141,202 @@ If new evidence contradicts an earlier conclusion, update the conclusion. If you
 ## Core Requirement
 
 For every task, understand the objective, make evidence-based decisions, execute the work carefully, and validate the final result against verifiable criteria.
+
+
+# AGENTS.md — Universal Project Instructions for AI Agents
+
+This file governs how any AI coding agent (Claude, Gemini, Cursor, Antigravity, Copilot, etc.) operates in this repository. It works with `.agents/rules/software-engineer.md` (general engineering discipline). Every layer this project actually has must be built to a **senior/staff engineer standard** — correct, secure, tested, maintainable, not just "it works." If a rule here conflicts with a general rule, this file wins for structural/project decisions.
+
+## 1. Scope Detection — Do This First, Every Time
+
+This project may be **frontend-only, backend-only, bot-only, any two of those, or all three as a monorepo.** Don't assume — inspect the repo before applying anything below.
+
+**How to detect what exists:**
+- **Frontend present if:** `package.json` has react/vue/next/angular/vite, or there's `src/components`, `public/index.html`, or similar UI entry point.
+- **Backend present if:** `package.json` has express/fastify/nestjs/koa, or there's `api/`, `server/`, DB config, or a migrations folder.
+- **Bot present if:** `package.json` has telegraf/discord.js/grammy/slack-bolt (or equivalent), or there's a `bot/` folder with command handlers.
+
+**Then apply only what's relevant:**
+- Only ONE layer detected → single-purpose project. The repo root IS that app's root — use that layer's own folder structure (Section 3, 4, or 5) directly at root, NOT nested under `apps/<name>/`. Do not scaffold the other layers' folders.
+- TWO OR MORE layers detected → multi-app project. Use the monorepo layout in Section 2; each `apps/<name>/` internally follows the matching single-layer structure from Section 3/4/5.
+- **Re-check this on every new task**, not once — if a new layer appears later, start applying its section, and flag to the user that migrating toward the Section 2 monorepo layout is worth considering (don't silently force it in an unrelated change).
+- Never apply a layer's rules or folders to a project that doesn't have that layer.
+
+## 2. Monorepo Structure (Applies Only When 2+ Layers Coexist)
+
+```
+/
+├── AGENTS.md
+├── .agents/rules/
+├── apps/
+│   ├── web/          # Frontend — internal structure = Section 3's tree
+│   ├── api/          # Backend  — internal structure = Section 4's tree
+│   └── bot/          # Bot      — internal structure = Section 5's tree
+├── packages/
+│   ├── shared-types/  # Shared TS types (API contracts, DB models)
+│   ├── shared-utils/  # Pure functions reused across apps
+│   └── ui/            # Shared UI components
+├── infra/              # Docker, CI/CD, env templates
+└── docs/               # Architecture decisions, runbooks
+```
+
+**Rule:** `apps/web`, `apps/api`, `apps/bot` never import each other directly — shared code MUST live in `packages/`. If only one layer exists, skip this tree entirely and use the matching section below at repo root.
+
+## 3. Frontend Layer — Senior-Level Bar
+
+*Apply only if Section 1 detected a frontend. If none exists, skip this section — do not add frontend scaffolding uninvited.*
+
+- Stack: [FILL IN — React/Next.js/Vue/etc.]
+
+**Folder Structure (at repo root if frontend-only; under `apps/web/` if monorepo)**
+```
+├── public/                   # Static assets served as-is
+├── src/
+│   ├── app/ or pages/         # Route entrypoints (framework-dependent)
+│   ├── components/
+│   │   ├── ui/                 # Generic reusable primitives (Button, Input, Modal)
+│   │   └── <feature>/           # Feature-specific components grouped by domain
+│   ├── hooks/                   # Reusable custom hooks
+│   ├── lib/                     # API client, third-party SDK wrappers
+│   ├── stores/ or context/       # State management
+│   ├── types/                    # Shared TS types/interfaces
+│   ├── utils/                    # Pure helper functions
+│   ├── styles/                   # Global styles, theme tokens
+│   └── constants/                 # App-wide constants/enums
+├── tests/                    # Or co-locate *.test.tsx next to the component
+├── .env.example
+├── package.json
+└── tsconfig.json
+```
+
+**Architecture**
+- One component = one file = one responsibility; split anything doing more than one job.
+- All API calls go through `src/lib/api.ts` — never scatter raw `fetch`/`axios` in components. (Skip if there's no backend.)
+- Don't introduce a new state library without checking what's already used.
+
+**Correctness & UX**
+- Every data-fetching component handles loading, empty, error, and success states explicitly.
+- Client-side validation is UX only; if a backend exists, it re-validates — client validation is never the only defense.
+- A fast user (double-click, rapid nav) must not trigger duplicate requests or show stale data.
+
+**Performance**
+- Memoize where profiling/logic shows it matters, not reflexively. Code-split routes/heavy components. Size and lazy-load large assets.
+
+**Security**
+- Never inject raw/unsanitized HTML. No secrets or backend-only logic in frontend code.
+
+**Accessibility & Quality Bar**
+- Keyboard-navigable, semantic HTML, labeled inputs — required. Responsive at mobile + desktop. Error boundaries around major sections.
+
+**Testing**
+- Critical user flows (auth, forms, key actions) get at least one integration/component test.
+
+## 4. Backend / API Layer — Senior-Level Bar
+
+*Apply only if Section 1 detected a backend. If none exists, skip this section entirely.*
+
+- Stack: [FILL IN — Express/Fastify/NestJS/etc.]
+
+**Folder Structure (at repo root if backend-only; under `apps/api/` if monorepo)**
+```
+├── src/
+│   ├── routes/               # HTTP route definitions — thin, no business logic
+│   ├── controllers/            # Request/response handling, calls services
+│   ├── services/                # Business logic lives here
+│   ├── repositories/ or models/  # Data-access layer / ORM models — only place with raw queries
+│   ├── middleware/                # Auth, error handling, rate-limit, logging
+│   ├── schemas/ or validators/     # Input validation (zod/joi)
+│   ├── config/                      # Env parsing, app config
+│   ├── utils/                        # Pure helper functions
+│   ├── types/                         # Shared TS types
+│   └── jobs/ or workers/               # Background/queued jobs, if any
+├── migrations/                 # DB migrations, one file per schema change
+├── tests/                      # Unit + integration tests
+├── .env.example
+├── package.json
+└── tsconfig.json
+```
+
+**Architecture**
+- Every endpoint validates input against a schema before business logic runs.
+- All DB access goes through `repositories/` — no raw queries in routes/controllers.
+- Every endpoint explicitly declares its auth level (public / authenticated / admin).
+
+**Reliability**
+- Every external call has a timeout and explicit failure handling. Retries use backoff and are idempotent-safe — never double-charge, double-send, or double-write.
+- A health-check endpoint exists, or its absence is flagged.
+
+**Data Integrity**
+- Every schema change ships with a migration AND a rollback path. Multi-step writes that must succeed/fail together use transactions. Watch for N+1 queries.
+
+**Security**
+- Auth AND authorization checked on every mutation/admin action. All input sanitized/parametrized; webhooks verified by signature. Rate-limit public endpoints. Client-facing errors are generic; full detail logged server-side only.
+
+**Observability**
+- Structured logs with request/entity context at error boundaries — never log secrets/PII. Meaningful HTTP status codes.
+
+**Testing**
+- New endpoints get tests for the happy path, the main failure mode, and one auth-boundary case.
+
+## 5. Bot Layer — Senior-Level Bar
+
+*Apply only if Section 1 detected a bot. If none exists, skip this section entirely.*
+
+- Platform: [FILL IN — Telegram/Discord/Slack/etc.]
+
+**Folder Structure (at repo root if bot-only; under `apps/bot/` if monorepo)**
+```
+├── src/
+│   ├── commands/               # One file per command or command group
+│   ├── handlers/                # Event handlers (message, callback, join, etc.)
+│   ├── services/                 # Business logic the bot calls into
+│   ├── middleware/                 # Permission checks, rate-limit, logging
+│   ├── session/ or state/           # Conversation/session state management
+│   ├── config/                       # Bot token/config loading
+│   ├── utils/                         # Pure helper functions
+│   └── types/                          # Shared TS types
+├── tests/
+├── .env.example
+├── package.json
+└── tsconfig.json
+```
+
+**Architecture**
+- If a backend exists: the bot is a CLIENT of it — calls the same services other clients use, doesn't duplicate logic or hit the DB directly without a stated reason. If there's no separate backend, `services/` here follows the same discipline as Section 4 (validation, data-access separation, error handling).
+- Command/handler files stay thin; real logic lives in `services/`.
+
+**Reliability**
+- Long-running actions run async/queued — never block the event loop/webhook handler. Platform API calls use retry-with-backoff and respect the platform's rate limits. Webhook handlers acknowledge fast; real work happens after.
+
+**Correctness**
+- Commands are idempotent where it matters (a double-tapped "confirm" must not fire twice). Session state has explicit expiry/cleanup. Every command fails gracefully with a clear user-facing message.
+
+**Security**
+- Never log/echo full tokens or secrets in messages or logs. Verify sender identity/permissions before privileged commands. Treat all user input as untrusted.
+
+**Testing**
+- Core command handlers are testable in isolation from the platform SDK.
+
+## 6. Shared Packages (`packages/`) — Monorepo Only
+
+*Applies only when 2+ layers coexist. For a single-layer project, just use normal internal modules/folders — this section doesn't apply.*
+
+- Anything used by 2+ apps belongs here, not duplicated. `shared-types` is the single source of truth for API request/response shapes. Zero dependency on any specific app. Grep every usage across `apps/*` before changing an exported signature.
+
+## 7. Cross-Cutting Rules (Apply Regardless of Scope)
+
+- `.env.example` with placeholder values per layer — real secrets never committed.
+- CI/CD assumes each existing layer lints, type-checks, and tests independently.
+- Naming, formatting, and commit/branch conventions follow `.agents/rules/git_workflow.md`.
+
+## 8. Guidance for Adding New Things Later
+
+- **New layer added to a single-purpose project** → re-run Section 1 detection; start applying that layer's section and folder structure, and flag that migrating to the Section 2 monorepo layout is now worth considering.
+- **New app/service in an existing monorepo** → create under `apps/<name>/` using the matching folder pattern from Section 3/4/5 (or a new one shaped the same way: Architecture, Reliability/Correctness, Security, Testing), add it to Section 2's tree.
+- **New shared logic** → `packages/<name>/`, one-line description in Section 6.
+- **New third-party integration** → document in `docs/`, one-line mention in the relevant layer's section.
+- Keep sections RULE-FOCUSED. If one outgrows ~25 lines, move detail to `docs/` and link it. Extend existing sections rather than deleting them.
+
+## 9. When Unsure
+
+If it's unclear which layer a task belongs to, whether a layer exists at all, or a change would require breaking the "apps never import each other directly" rule, **stop and ask** rather than guessing.

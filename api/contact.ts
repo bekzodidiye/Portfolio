@@ -1,17 +1,12 @@
 import { neon } from '@neondatabase/serverless';
+import { checkRateLimitDb } from './_db/rateLimit';
+import { escapeHtml } from './_bot/utils';
+import { ensureAllTables } from './_db/migration';
+import type { ApiRequest, ApiResponse } from './_bot/types';
 
 export const config = {
   runtime: 'nodejs',
 };
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
 
 function sanitizeMailto(email: string): string {
   const clean = email.trim();
@@ -32,10 +27,8 @@ async function recordContactToPostgres(data: {
   const url = process.env.POSTGRES_URL || process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL;
   if (!url) return;
   try {
+    await ensureAllTables();
     const sql = neon(url);
-    await sql`CREATE TABLE IF NOT EXISTS portfolio_messages (
-      id SERIAL PRIMARY KEY, user_name TEXT, contact_info TEXT, message_text TEXT, ip TEXT, device_type TEXT, language TEXT, created_at TIMESTAMPTZ DEFAULT NOW()
-    );`;
     await sql`INSERT INTO portfolio_messages (user_name, contact_info, message_text, ip, device_type, language)
       VALUES (${data.name}, ${data.email}, ${data.message}, ${data.ip}, ${data.deviceType}, ${data.language});`;
   } catch (err) {
@@ -43,9 +36,9 @@ async function recordContactToPostgres(data: {
   }
 }
 
-import { checkRateLimitDb } from './_db/rateLimit';
 
-export default async function handler(req: any, res: any) {
+
+export default async function handler(req: ApiRequest, res: ApiResponse) {
   // Only allow POST method
   if (req.method !== 'POST') {
     return res.status(405).json({
@@ -104,18 +97,11 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    // 3. Server-side Secret Tokens (loaded strictly from environment)
-    const botToken =
-      process.env.TELEGRAM_BOT_TOKEN ||
-      process.env.VITE_TELEGRAM_BOT_TOKEN ||
-      '';
-    const chatId =
-      process.env.TELEGRAM_CHAT_ID ||
-      process.env.VITE_TELEGRAM_CHAT_ID ||
-      '5678281376';
+    const botToken = process.env.TELEGRAM_BOT_TOKEN || '';
+    const chatId = process.env.TELEGRAM_CHAT_ID || '';
 
-    if (!botToken) {
-      console.warn('TELEGRAM_BOT_TOKEN is not configured.');
+    if (!botToken || !chatId) {
+      console.warn('TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is not configured.');
       return res.status(500).json({
         ok: false,
         error: 'Telegram bildirishnoma xizmati sozlanmagan.',

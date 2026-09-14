@@ -114,7 +114,24 @@ export function useContactForm() {
       setIsSubmitted(true);
       setCooldown(45);
     } else {
-      setErrorMessage(result.error || 'Xatolik yuz berdi.');
+      let localizedError = result.error;
+      if (!localizedError || localizedError.includes('xatolik') || localizedError.includes('xizmati sozlanmagan')) {
+        localizedError =
+          language === 'uz'
+            ? 'Xabar yuborishda xatolik yuz berdi. To\'g\'ridan-to\'g\'ri Telegram orqali bog\'lanishingiz mumkin.'
+            : language === 'ru'
+            ? 'Произошла ошибка при отправке. Вы можете связаться напрямую через Telegram.'
+            : 'Error sending message. You can reach out directly via Telegram.';
+      } else if (localizedError.includes('ko\'p so\'rov') || localizedError.includes('429')) {
+        localizedError =
+          language === 'uz'
+            ? 'Juda ko\'p so\'rov yuborildi. Iltimos, birozdan so\'ng qayta urinib ko\'ring.'
+            : language === 'ru'
+            ? 'Слишком много запросов. Пожалуйста, повторите позже.'
+            : 'Too many requests. Please try again later.';
+      }
+
+      setErrorMessage(localizedError);
       if (result.directTelegramUrl) {
         setDirectFallbackUrl(result.directTelegramUrl);
       } else {
