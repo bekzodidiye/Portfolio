@@ -1,7 +1,7 @@
-import { checkRateLimitDb } from './_db/rateLimit';
-import { getAdminPin } from './_db/adminSettings';
-import { verifyPin, createAdminSessionToken } from './_db/authUtil';
-import type { ApiRequest, ApiResponse } from './_bot/types';
+import { checkRateLimitDb } from './_db/rateLimit.js';
+import { getAdminPin } from './_db/adminSettings.js';
+import { verifyPin, createAdminSessionToken } from './_db/authUtil.js';
+import type { ApiRequest, ApiResponse } from './_bot/types.js';
 
 export const config = {
   runtime: 'nodejs',

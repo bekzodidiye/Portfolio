@@ -1,4 +1,4 @@
-import { getPostgresSql } from '../_bot/db';
+import { getPostgresSql } from '../_bot/db.js';
 
 let tablesEnsured = false;
 

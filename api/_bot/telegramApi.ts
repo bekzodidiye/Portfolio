@@ -1,5 +1,5 @@
-import { getVisitorStatsDb, getBotUserStatsDb } from './db';
-export { escapeHtml } from './utils';
+import { getVisitorStatsDb, getBotUserStatsDb } from './db.js';
+export { escapeHtml } from './utils.js';
 
 export async function sendTelegram(botToken: string, method: string, payload: any) {
   if (!botToken) {

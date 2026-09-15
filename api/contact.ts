@@ -1,8 +1,8 @@
 import { neon } from '@neondatabase/serverless';
-import { checkRateLimitDb } from './_db/rateLimit';
-import { escapeHtml } from './_bot/utils';
-import { ensureAllTables } from './_db/migration';
-import type { ApiRequest, ApiResponse } from './_bot/types';
+import { checkRateLimitDb } from './_db/rateLimit.js';
+import { escapeHtml } from './_bot/utils.js';
+import { ensureAllTables } from './_db/migration.js';
+import type { ApiRequest, ApiResponse } from './_bot/types.js';
 
 export const config = {
   runtime: 'nodejs',

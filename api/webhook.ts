@@ -1,10 +1,10 @@
-import { recordBotUserDb } from './_bot/db';
-import { sendTelegram } from './_bot/telegramApi';
-import { handleAdminAndProjectCallbacks } from './_bot/handlers/adminCallbacks';
-import { handleBotTextMessage } from './_bot/handlers/messageHandler';
-import { setAdminState } from './_db/botState';
-import { ensureAllTables } from './_db/migration';
-import type { ApiRequest, ApiResponse } from './_bot/types';
+import { recordBotUserDb } from './_bot/db.js';
+import { sendTelegram } from './_bot/telegramApi.js';
+import { handleAdminAndProjectCallbacks } from './_bot/handlers/adminCallbacks.js';
+import { handleBotTextMessage } from './_bot/handlers/messageHandler.js';
+import { setAdminState } from './_db/botState.js';
+import { ensureAllTables } from './_db/migration.js';
+import type { ApiRequest, ApiResponse } from './_bot/types.js';
 
 export const config = {
   runtime: 'nodejs',

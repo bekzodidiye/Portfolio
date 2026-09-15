@@ -1,4 +1,4 @@
-import { escapeHtml, buildAdminMainText } from '../telegramApi';
+import { escapeHtml, buildAdminMainText } from '../telegramApi.js';
 import {
   getVisitorStatsDb,
   getRecentVisitorsDb,
@@ -6,14 +6,14 @@ import {
   getGeoAndReferrerStatsDb,
   getRecentBotUsersDb,
   getRecentMessagesDb,
-} from '../db';
+} from '../db.js';
 import {
   getAdminMainKeyboard,
   getAdminSubKeyboard,
   getProjectDetailKeyboard,
   getProjectListKeyboard,
   PORTFOLIO_URL,
-} from '../keyboards';
+} from '../keyboards.js';
 
 export async function handleAdminAndProjectCallbacks(
   data: string,
