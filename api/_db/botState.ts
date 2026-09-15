@@ -1,5 +1,5 @@
-import { getPostgresSql } from '../_bot/db';
-import { ensureAllTables } from './migration';
+import { getPostgresSql } from '../_bot/db.js';
+import { ensureAllTables } from './migration.js';
 
 export async function setAdminState(
   chatId: string | number,

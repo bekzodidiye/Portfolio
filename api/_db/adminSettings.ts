@@ -1,6 +1,6 @@
-import { getPostgresSql } from '../_bot/db';
-import { ensureAllTables } from './migration';
-import { hashPin } from './authUtil';
+import { getPostgresSql } from '../_bot/db.js';
+import { ensureAllTables } from './migration.js';
+import { hashPin } from './authUtil.js';
 
 export async function getAdminPin(): Promise<string> {
   const sql = getPostgresSql();

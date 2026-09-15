@@ -1,5 +1,5 @@
 import { neon } from '@neondatabase/serverless';
-import { BotUser, VisitorStats, BotStats, GeoAndReferrerStats } from './types';
+import { BotUser, VisitorStats, BotStats, GeoAndReferrerStats } from './types.js';
 
 export function getPostgresSql() {
   const url =

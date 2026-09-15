@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
-import { EmailOptions } from './types';
-import { escapeHtml } from './utils';
+import { EmailOptions } from './types.js';
+import { escapeHtml } from './utils.js';
 
 export async function sendEmailFromBot(options: EmailOptions): Promise<{ success: boolean; error?: string }> {
   const { to, subject, text } = options;

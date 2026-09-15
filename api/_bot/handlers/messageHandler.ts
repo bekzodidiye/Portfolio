@@ -1,7 +1,7 @@
-import { escapeHtml, sendTelegram, buildAdminMainText } from '../telegramApi';
-import { sendEmailFromBot } from '../email';
-import { getMainReplyKeyboard, getAdminMainKeyboard, PORTFOLIO_URL, GITHUB_URL } from '../keyboards';
-import { getAdminState, setAdminState } from '../../_db/botState';
+import { escapeHtml, sendTelegram, buildAdminMainText } from '../telegramApi.js';
+import { sendEmailFromBot } from '../email.js';
+import { getMainReplyKeyboard, getAdminMainKeyboard, PORTFOLIO_URL, GITHUB_URL } from '../keyboards.js';
+import { getAdminState, setAdminState } from '../../_db/botState.js';
 
 export interface MessageContext {
   chatId: number | string;
