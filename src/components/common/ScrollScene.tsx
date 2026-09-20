@@ -22,7 +22,7 @@ export const ScrollScene: React.FC<ScrollSceneProps> = ({
   const onProgressRef = useRef(onProgress);
   const topRef = useRef(0);
   const heightRef = useRef(0);
-  const totalTravelRef = useRef(1);
+  const travelRef = useRef(1);
 
   useEffect(() => {
     onProgressRef.current = onProgress;
@@ -35,7 +35,7 @@ export const ScrollScene: React.FC<ScrollSceneProps> = ({
     const scrollY = window.scrollY || window.pageYOffset;
     topRef.current = rect.top + scrollY;
     heightRef.current = el.offsetHeight;
-    totalTravelRef.current = Math.max(1, heightRef.current - window.innerHeight);
+    travelRef.current = Math.max(1, heightRef.current - window.innerHeight);
   };
 
   useEffect(() => {
@@ -50,16 +50,13 @@ export const ScrollScene: React.FC<ScrollSceneProps> = ({
         const windowHeight = window.innerHeight;
         const top = topRef.current;
         const totalHeight = heightRef.current;
-        const travel = totalTravelRef.current;
+        const travel = travelRef.current;
 
-        // Check if viewport intersects with the scene
-        if (scrollY + windowHeight < top || scrollY > top + totalHeight) {
-          isTickingRef.current = false;
-          return;
+        // Check if in viewport range
+        if (scrollY + windowHeight >= top && scrollY <= top + totalHeight) {
+          const progress = Math.min(1, Math.max(0, (scrollY - top) / travel));
+          onProgressRef.current(progress);
         }
-
-        const progress = Math.min(1, Math.max(0, (scrollY - top) / travel));
-        onProgressRef.current(progress);
         isTickingRef.current = false;
       });
     };
@@ -90,7 +87,7 @@ export const ScrollScene: React.FC<ScrollSceneProps> = ({
     >
       <div
         className="sticky top-0 h-screen w-full overflow-hidden"
-        style={{ willChange: 'transform', transform: 'translate3d(0,0,0)' }}
+        style={{ willChange: 'transform', transform: 'translate3d(0,0,0)', ...style }}
       >
         {children}
       </div>
