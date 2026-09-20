@@ -1,10 +1,15 @@
 import React, { useEffect, useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { initSubtleThreeScene } from './subtleThreeScene';
 
 export const ModernBackground: React.FC = () => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
-
   const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false);
+
+  const { scrollY } = useScroll();
+  const y1 = useTransform(scrollY, [0, 2000], [0, -300]);
+  const y2 = useTransform(scrollY, [0, 2000], [0, 250]);
+  const y3 = useTransform(scrollY, [0, 2000], [0, -150]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -31,10 +36,10 @@ export const ModernBackground: React.FC = () => {
       />
 
       {/* Dynamic Ambient Luminous Gradients */}
-      <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[72rem] h-[36rem] bg-gradient-to-b from-blue-500/10 via-indigo-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/3 -left-32 w-[32rem] h-[32rem] bg-blue-400/8 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-2/3 -right-32 w-[36rem] h-[36rem] bg-indigo-400/8 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-20 left-1/3 w-[40rem] h-[28rem] bg-cyan-400/8 rounded-full blur-3xl pointer-events-none" />
+      <motion.div style={{ y: y1 }} className="absolute -top-40 left-1/2 -translate-x-1/2 w-[72rem] h-[36rem] bg-gradient-to-b from-blue-500/10 via-indigo-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+      <motion.div style={{ y: y2 }} className="absolute top-1/3 -left-32 w-[32rem] h-[32rem] bg-blue-400/8 rounded-full blur-3xl pointer-events-none" />
+      <motion.div style={{ y: y3 }} className="absolute top-2/3 -right-32 w-[36rem] h-[36rem] bg-indigo-400/8 rounded-full blur-3xl pointer-events-none" />
+      <motion.div style={{ y: y1 }} className="absolute -bottom-20 left-1/3 w-[40rem] h-[28rem] bg-cyan-400/8 rounded-full blur-3xl pointer-events-none" />
 
       {/* Modern Engineering Radial Masked Grid */}
       <div

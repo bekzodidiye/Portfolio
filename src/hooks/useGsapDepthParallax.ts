@@ -1,4 +1,10 @@
 import { useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 interface DepthParallaxOptions {
   liftDistance?: number;
@@ -17,38 +23,38 @@ export function useGsapDepthParallax<T extends HTMLElement>(
 
   useEffect(() => {
     const el = containerRef.current;
-    if (!el) return;
+    if (!el || typeof window === 'undefined') return;
 
-    let animId: number;
-    let lastScrollY = window.scrollY;
-
-    const handleScroll = () => {
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-
-      // Progress from 0 (entering bottom) to 1 (center)
-      const progress = Math.max(0, Math.min(1, (windowHeight - rect.top) / (windowHeight + rect.height * 0.5)));
-
+    const ctx = gsap.context(() => {
       const cards = el.querySelectorAll<HTMLElement>('.parallax-card');
+      
       cards.forEach((card, idx) => {
-        const staggerOffset = idx * 0.08;
-        const cardProgress = Math.max(0, Math.min(1, (progress - staggerOffset) / (1 - staggerOffset)));
-        
-        const y = 35 * (1 - cardProgress) + liftDistance * cardProgress;
-        const z = -30 * (1 - cardProgress) + 12 * cardProgress;
-        const rotX = tiltAngle * (1 - cardProgress) - tiltAngle * 0.4 * cardProgress;
+        // Initial state
+        gsap.set(card, {
+          y: 35,
+          z: -30,
+          rotationX: tiltAngle,
+          transformPerspective: 1000,
+        });
 
-        card.style.transform = `perspective(1000px) translateY(${y}px) translateZ(${z}px) rotateX(${rotX}deg)`;
-        card.style.transition = 'transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1)';
+        // Scroll animation
+        gsap.to(card, {
+          y: liftDistance,
+          z: 12,
+          rotationX: tiltAngle * 0.6,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: card,
+            start: 'top bottom',
+            end: 'center center',
+            scrub: 1, // Smooth scrubbing
+          }
+        });
       });
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
+    }, containerRef);
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      ctx.revert();
     };
   }, [liftDistance, tiltAngle]);
 
