@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 
 interface ScrollSceneProps {
   height?: string;
-  onProgress: (progress: number) => void;
+  onProgress: (progress: number, rect?: any) => void;
   children: React.ReactNode;
   className?: string;
   id?: string;
@@ -18,58 +18,62 @@ export const ScrollScene: React.FC<ScrollSceneProps> = ({
   style,
 }) => {
   const sectionRef = useRef<HTMLElement>(null);
-  const isTickingRef = useRef(false);
+  const tickingRef = useRef(false);
   const onProgressRef = useRef(onProgress);
+
+  // Cached layout metrics to prevent layout thrashing (reflows) during scroll
   const topRef = useRef(0);
-  const heightRef = useRef(0);
-  const travelRef = useRef(1);
+  const totalHRef = useRef(0);
+  const scrollableRef = useRef(1);
 
   useEffect(() => {
     onProgressRef.current = onProgress;
   }, [onProgress]);
 
-  const recalculateBounds = () => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
+  const updateMetrics = () => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const rect = section.getBoundingClientRect();
     const scrollY = window.scrollY || window.pageYOffset;
     topRef.current = rect.top + scrollY;
-    heightRef.current = el.offsetHeight;
-    travelRef.current = Math.max(1, heightRef.current - window.innerHeight);
+    totalHRef.current = section.offsetHeight;
+    scrollableRef.current = Math.max(1, totalHRef.current);
   };
 
   useEffect(() => {
-    recalculateBounds();
+    updateMetrics();
 
     const handleScroll = () => {
-      if (isTickingRef.current) return;
-      isTickingRef.current = true;
+      if (tickingRef.current) return;
+      tickingRef.current = true;
 
       requestAnimationFrame(() => {
         const scrollY = window.scrollY || window.pageYOffset;
-        const windowHeight = window.innerHeight;
+        const vh = window.innerHeight;
         const top = topRef.current;
-        const totalHeight = heightRef.current;
-        const travel = travelRef.current;
+        const totalH = totalHRef.current;
 
-        // Check if in viewport range
-        if (scrollY + windowHeight >= top && scrollY <= top + totalHeight) {
-          const progress = Math.min(1, Math.max(0, (scrollY - top) / travel));
-          onProgressRef.current(progress);
+        const isInsideSection = scrollY + vh >= top && scrollY <= top + totalH;
+        if (!isInsideSection) {
+          tickingRef.current = false;
+          return;
         }
-        isTickingRef.current = false;
+
+        const relativeScroll = Math.max(0, scrollY - top);
+        const progress = Math.min(1, Math.max(0, relativeScroll / scrollableRef.current));
+
+        onProgressRef.current(progress);
+        tickingRef.current = false;
       });
     };
 
     const handleResize = () => {
-      recalculateBounds();
+      updateMetrics();
       handleScroll();
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('resize', handleResize, { passive: true });
-
-    // Initial check
     handleScroll();
 
     return () => {
@@ -79,12 +83,7 @@ export const ScrollScene: React.FC<ScrollSceneProps> = ({
   }, []);
 
   return (
-    <section
-      ref={sectionRef}
-      id={id}
-      className={`relative ${className}`}
-      style={{ height, ...style }}
-    >
+    <section ref={sectionRef} id={id} className={`relative ${className}`} style={{ height }}>
       <div
         className="sticky top-0 h-screen w-full overflow-hidden"
         style={{ willChange: 'transform', transform: 'translate3d(0,0,0)', ...style }}
