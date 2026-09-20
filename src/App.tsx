@@ -73,14 +73,18 @@ function PortfolioApp() {
   );
 }
 
+import { SmoothScrollProvider } from './context/SmoothScrollProvider';
+
 export default function App() {
   return (
-    <PortfolioDataProvider>
-      <LanguageProvider>
-        <UIProvider>
-          <PortfolioApp />
-        </UIProvider>
-      </LanguageProvider>
-    </PortfolioDataProvider>
+    <SmoothScrollProvider>
+      <PortfolioDataProvider>
+        <LanguageProvider>
+          <UIProvider>
+            <PortfolioApp />
+          </UIProvider>
+        </LanguageProvider>
+      </PortfolioDataProvider>
+    </SmoothScrollProvider>
   );
 }
