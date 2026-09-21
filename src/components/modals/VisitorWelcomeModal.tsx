@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Sparkles, ArrowRight, ShieldCheck, X, Terminal } from 'lucide-react';
+import { User, ArrowRight, ShieldCheck, X, Terminal } from 'lucide-react';
 import { VisitorToast } from './VisitorToast';
 import { VisitorRoleSelector } from './VisitorRoleSelector';
 import { useUIContext } from '../../context/UIContext';
@@ -73,7 +73,6 @@ export function VisitorWelcomeModal() {
                 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2"
               >
                 <span>{t.visitorModal.title}</span>
-                <Sparkles className="w-5 h-5 text-amber-500 flex-shrink-0" />
               </h2>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                 {t.visitorModal.subtitle}

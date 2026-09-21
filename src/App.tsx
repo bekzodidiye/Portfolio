@@ -17,7 +17,6 @@ const SystemArchitectureVisualizer = lazy(() => import('./components/architectur
 const BackendApiPlayground = lazy(() => import('./components/sandbox/BackendApiPlayground').then(module => ({ default: module.BackendApiPlayground })));
 const ResumeModal = lazy(() => import('./components/modals').then(module => ({ default: module.ResumeModal })));
 const VisitorWelcomeModal = lazy(() => import('./components/modals').then(module => ({ default: module.VisitorWelcomeModal })));
-const PortfolioAiAssistant = lazy(() => import('./components/ai/PortfolioAiAssistant').then(module => ({ default: module.PortfolioAiAssistant })));
 const AdminAuthModal = lazy(() => import('./components/admin/AdminAuthModal').then(module => ({ default: module.AdminAuthModal })));
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard').then(module => ({ default: module.AdminDashboard })));
 
@@ -56,9 +55,6 @@ function PortfolioApp() {
       </div>
 
       <Suspense fallback={null}>
-        {/* 24/7 Interactive AI Hiring & Architecture Assistant */}
-        <PortfolioAiAssistant />
-
         {/* Resume / CV Modal */}
         <ResumeModal />
 
