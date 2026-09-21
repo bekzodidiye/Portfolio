@@ -5,13 +5,8 @@ import { useLanguage } from '../../../context/LanguageContext';
 import { MagneticButton } from '../../ui/MagneticButton';
 import { AnimatedCounter } from '../../ui/AnimatedCounter';
 import { ScrollScene } from '../../common/ScrollScene';
-import { FrameSequenceCanvas, FrameSequenceCanvasRef } from '../../common/FrameSequenceCanvas';
 import { FloatingSceneCard } from '../../common/FloatingSceneCard';
 import { interpolateKeyframes, Keyframe3D } from '../../../utils/keyframes3d';
-
-const FRAME_START = 1;
-const FRAME_END = 300;
-const FRAME_COUNT = FRAME_END - FRAME_START + 1;
 
 // Exact 3D Keyframe Choreography from xalimov.vercel.app architecture
 const card1Timeline: Keyframe3D[] = [
@@ -39,7 +34,6 @@ export const HeroSection: React.FC = () => {
   const { t } = useLanguage();
   const { candidateProfile } = usePortfolioData();
 
-  const canvasRef = useRef<FrameSequenceCanvasRef>(null);
   const introTextRef = useRef<HTMLDivElement>(null);
   const card1Ref = useRef<HTMLDivElement>(null);
   const card2Ref = useRef<HTMLDivElement>(null);
@@ -62,11 +56,6 @@ export const HeroSection: React.FC = () => {
   }, []);
 
   const handleProgress = useCallback((progress: number) => {
-    // 1. Scrub 3D Head Canvas sequence
-    if (!reducedRef.current && canvasRef.current) {
-      canvasRef.current.drawProgress(progress);
-    }
-
     // 2. Initial Hero Intro Fade Out (progress 0.0 -> 0.15)
     if (introTextRef.current) {
       const op = progress < 0.15 ? 1 - progress / 0.15 : 0;
@@ -121,28 +110,7 @@ export const HeroSection: React.FC = () => {
           {/* Clean White Background */}
           <div className="absolute inset-0 bg-white z-0" />
 
-          {/* 300-FRAME 3D WIREFRAME CYBER HEAD CANVAS (xalimov.vercel.app exact animation) */}
-          {!isReduced ? (
-            <FrameSequenceCanvas
-              ref={canvasRef}
-              frameCount={FRAME_COUNT}
-              framePath={(i) => {
-                const frameNumber = Math.min(FRAME_END, Math.max(FRAME_START, i));
-                return `https://xalimov.vercel.app/frames/frame_${String(frameNumber).padStart(4, '0')}.jpg`;
-              }}
-              className="opacity-[0.08] z-0"
-              style={{ filter: 'invert(1) contrast(1.2) brightness(1.1)' }}
-            />
-          ) : (
-            <div className="absolute inset-0 bg-white flex items-center justify-center">
-              <img
-                src="https://xalimov.vercel.app/frames/frame_0001.jpg"
-                alt="Hero Static"
-                className="w-full h-full object-cover opacity-[0.06]"
-                style={{ filter: 'invert(1) contrast(1.2)' }}
-              />
-            </div>
-          )}
+          {/* 3D Wireframe Canvas removed. The scroll animation is now driven purely by the 3D cards and text fading. */}
 
           {/* Radial Ambient Glow — soft blue tint on white */}
           <div
